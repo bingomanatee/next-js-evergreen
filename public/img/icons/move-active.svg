@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 33 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-210,-338)">
+        <g transform="matrix(0.888889,0,0,0.909583,287.692,97.3953)">
+            <rect id="move-active" x="-86.5" y="264.819" width="36" height="35.181" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect id="move-active1" serif:id="move-active" x="-86.5" y="264.819" width="36" height="35.181"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1.16129,0,0,1.13487,-109.726,-128.981)">
+                    <g id="log-in-circle">
+                        <circle id="log-in-circle1" serif:id="log-in-circle" cx="35.5" cy="362.5" r="15.5" style="fill:url(#_Radial2);"/>
+                    </g>
+                </g>
+                <g transform="matrix(0.884066,-0.45673,0.478244,0.884066,-143.132,0.941174)">
+                    <g transform="matrix(1.125,0,0,1.0994,-284.5,-67.2013)">
+                        <path d="M200,322L191,305L182,322L200,322Z" style="fill:rgb(100,0,125);"/>
+                    </g>
+                    <g transform="matrix(1.125,0,0,1.0994,-284.5,-67.2013)">
+                        <rect x="189" y="321" width="5" height="10" style="fill:rgb(100,0,125);"/>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <radialGradient id="_Radial2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(12.5938,12.5938,-12.5938,12.5938,33.7529,360.563)"><stop offset="0" style="stop-color:white;stop-opacity:1"/><stop offset="0.36" style="stop-color:white;stop-opacity:1"/><stop offset="1" style="stop-color:rgb(255,162,44);stop-opacity:1"/></radialGradient>
+    </defs>
+</svg>

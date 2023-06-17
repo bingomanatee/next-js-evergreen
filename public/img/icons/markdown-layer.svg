@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 36 27" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-358,-67)">
+        <g transform="matrix(0.76087,0,0,0.530612,247.252,85.9276)">
+            <rect id="markdown-layer" x="146" y="-35" width="46" height="49" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect id="markdown-layer1" serif:id="markdown-layer" x="146" y="-35" width="46" height="49"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1.25714,0,0,1.30769,-46.7429,8.88462)">
+                    <g transform="matrix(1.04545,0,0,1.53725,-3.5,-26.8333)">
+                        <path d="M185,5L180,20L150,20L155,5L185,5Z" style="fill:rgb(62,62,62);"/>
+                    </g>
+                    <g transform="matrix(2.09091,0,0,0.514706,-177.045,-16.0588)">
+                        <rect x="171" y="-34" width="1" height="28" style="fill:rgb(96,96,96);"/>
+                    </g>
+                </g>
+                <g transform="matrix(1.31429,0,0,2.01026,-51.1429,-26.2051)">
+                    <path d="M185,5L180,20L150,20L155,5L185,5Z" style="fill:rgb(62,62,62);"/>
+                    <clipPath id="_clip2">
+                        <path d="M185,5L180,20L150,20L155,5L185,5Z"/>
+                    </clipPath>
+                    <g clip-path="url(#_clip2)">
+                        <g transform="matrix(1,0,0,0.9375,19.5158,-291.778)">
+                            <g id="text-markdown">
+                                <g transform="matrix(24,0,0,24,162.492,336.755)">
+                                </g>
+                                <text x="133.476px" y="336.755px" style="font-family:'OctoberCondensedTLBold', 'October Condensed Tamil';font-weight:700;font-stretch:condensed;font-size:24px;fill:rgb(0,213,231);">M<tspan x="149.868px " y="336.755px ">d</tspan></text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

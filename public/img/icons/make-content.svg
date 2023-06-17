@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-300,-300)">
+        <rect id="make-content" x="300" y="300" width="80" height="80" style="fill:none;"/>
+        <clipPath id="_clip1">
+            <rect id="make-content1" serif:id="make-content" x="300" y="300" width="80" height="80"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g transform="matrix(1,0,0,1,-60,-37)">
+                <g transform="matrix(1.21212,0,0,1.21212,-88.4848,-75.1212)">
+                    <path d="M403,340C421.213,340 436,354.787 436,373C436,391.213 421.213,406 403,406C384.787,406 370,391.213 370,373C370,354.787 384.787,340 403,340ZM403,340.825C385.242,340.825 370.825,355.242 370.825,373C370.825,390.758 385.242,405.175 403,405.175C420.758,405.175 435.175,390.758 435.175,373C435.175,355.242 420.758,340.825 403,340.825Z" style="fill:rgb(4,25,167);"/>
+                    <circle cx="403" cy="373" r="33" style="fill:rgb(62,62,62);"/>
+                </g>
+                <g transform="matrix(0.453515,0,0,0.402633,227.574,281.313)">
+                    <rect x="376" y="255" width="14" height="41" style="fill:rgb(0,165,32);"/>
+                </g>
+                <g transform="matrix(0.634921,0,0,0.634921,163.175,216.365)">
+                    <path d="M340.214,240C340.073,238.687 340,237.352 340,236C340,216.131 355.683,200 375,200C394.317,200 410,216.131 410,236C410,255.869 394.317,272 375,272C373.303,272 371.633,271.875 370,271.635L370,261.499C371.616,261.828 373.288,262 375,262C388.798,262 400,250.798 400,237C400,223.202 388.798,212 375,212C361.202,212 350,223.202 350,237C350,238.015 350.061,239.016 350.178,240L340.214,240Z" style="fill:rgb(0,165,32);"/>
+                </g>
+                <g transform="matrix(0.634921,0,0,0.634921,163.175,207.476)">
+                    <rect x="370" y="314" width="10" height="10" style="fill:rgb(0,165,32);"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

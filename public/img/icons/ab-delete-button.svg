@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 25 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-236,-450)">
+        <g transform="matrix(0.25,0,0,1.26316,190.928,-118.421)">
+            <rect id="ab-delete-button" x="181" y="450" width="96" height="19" style="fill:none;"/>
+            <g id="ab-delete-button1" serif:id="ab-delete-button">
+                <g transform="matrix(3.96053,-0.298686,1.42429,0.739779,-1411.5,191.947)">
+                    <rect x="237.678" y="460" width="21.5" height="2" style="fill:rgb(255,68,0);"/>
+                </g>
+                <g transform="matrix(-3.96053,-0.298686,-1.42429,0.739779,1869.5,191.947)">
+                    <rect x="237.678" y="460" width="21.5" height="2" style="fill:rgb(255,68,0);"/>
+                </g>
+                <g transform="matrix(4,0,0,0.791667,-763.71,93.75)">
+                    <path d="M258.178,468L257.178,470L248.178,466L239.178,470L238.178,468L248.178,464L258.178,468Z" style="fill:rgb(255,68,0);fill-opacity:0.5;"/>
+                </g>
+                <g transform="matrix(4,0,0,-0.791667,-763.71,823.667)">
+                    <path d="M258.178,468L257.178,470L248.178,466L239.178,470L238.178,468L248.178,464L258.178,468Z" style="fill:rgb(255,68,0);fill-opacity:0.5;"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

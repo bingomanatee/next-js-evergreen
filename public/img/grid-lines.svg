@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN">
+<svg width="100%" height="100%" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect id="grid-lines" x="0" y="0" width="200" height="200" style="fill:none;"/>
+    <clipPath id="_rect-clip">
+        <rect id="grid-lines1" x="0" y="0" width="200" height="200"/>
+    </clipPath>
+    <g clip-path="url(#_rect-clip)">
+        <path d="M300,0L300,300L0,300L0,0L300,0ZM299,1L1,1L1,299L299,299L299,1Z" style="fill:rgb(255,0,0);"/>
+    </g>
+</svg>

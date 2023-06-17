@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+        "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="25px" height="25px" viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect id="move-button-down" x="0.348" y="0" width="24" height="24" style="fill:none;"/>
+    <clipPath id="_clip1">
+        <rect id="move-button-down1" x="0.348" y="0" width="24" height="24"/>
+    </clipPath>
+    <g clip-path="url(#_clip1)">
+        <circle cx="12.348" cy="12" r="12" style="fill:#eaeaea;"/>
+        <path d="M0.348,12C0.348,11.271 0.413,10.557 0.538,9.863L12.348,16.585L24.158,9.863C24.283,10.557 24.348,11.271 24.348,12C24.348,12.406 24.328,12.808 24.288,13.204L12.348,20L0.408,13.204C0.368,12.808 0.348,12.406 0.348,12Z" style="fill:#105f66;"/>
+        <path d="M1.002,8.087C1.329,7.139 1.772,6.244 2.314,5.419L12.348,11.13L22.382,5.419C22.924,6.244 23.367,7.139 23.695,8.087L12.348,14.545L1.002,8.087Z" style="fill:#105f66;fill-opacity:0.6;"/>
+        <path d="M3.406,4.001C4.108,3.217 4.912,2.525 5.797,1.947L12.348,5.676L18.9,1.947C19.784,2.525 20.588,3.217 21.291,4.001L12.348,9.091L3.406,4.001Z" style="fill:#105f66;fill-opacity:0.3;"/>
+        <path id="top-line" d="M21.289,20C19.092,22.454 15.899,24 12.348,24C8.797,24 5.605,22.454 3.407,20L21.289,20Z" style="fill:#105f66;"/>
+    </g>
+</svg>

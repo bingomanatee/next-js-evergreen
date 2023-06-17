@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 32 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-211,-304)">
+        <g transform="matrix(0.888889,0,0,0.909583,287.889,63.3953)">
+            <rect id="drag-active" x="-86.5" y="264.819" width="36" height="35.181" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect id="drag-active1" serif:id="drag-active" x="-86.5" y="264.819" width="36" height="35.181"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1.16129,0,0,1.13487,-109.726,-128.981)">
+                    <g id="active-circle">
+                        <circle id="log-in-circle" cx="35.5" cy="362.5" r="15.5" style="fill:url(#_Radial2);"/>
+                    </g>
+                </g>
+                <g transform="matrix(0.604167,-0.590421,0.604167,0.590421,-356.083,227.5)">
+                    <path d="M186.202,271C182.458,272.472 179.472,275.458 178,279.202L178,271L186.202,271ZM205,279.202C203.528,275.458 200.542,272.472 196.798,271L205,271L205,279.202ZM196.798,298C200.542,296.528 203.528,293.542 205,289.798L205,298L196.798,298ZM178,289.798C179.472,293.542 182.458,296.528 186.202,298L178,298L178,289.798Z" style="fill:rgb(100,0,125);"/>
+                </g>
+                <g transform="matrix(1.125,0,0,1.0994,-284.5,-29.8215)">
+                    <path d="M188.126,285L180,285L180,283L188.126,283C188.044,283.32 188,283.655 188,284C188,284.345 188.044,284.68 188.126,285ZM191,280.126L191,272L193,272L193,280.126C192.68,280.044 192.345,280 192,280C191.655,280 191.32,280.044 191,280.126ZM195.874,283L204,283L204,285L195.874,285C195.956,284.68 196,284.345 196,284C196,283.655 195.956,283.32 195.874,283ZM193,287.874L193,296L191,296L191,287.874C191.32,287.956 191.655,288 192,288C192.345,288 192.68,287.956 193,287.874Z" style="fill:rgb(100,0,125);"/>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <radialGradient id="_Radial2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(12.5938,12.5938,-12.5938,12.5938,33.7529,360.563)"><stop offset="0" style="stop-color:white;stop-opacity:1"/><stop offset="0.36" style="stop-color:white;stop-opacity:1"/><stop offset="1" style="stop-color:rgb(255,162,44);stop-opacity:1"/></radialGradient>
+    </defs>
+</svg>

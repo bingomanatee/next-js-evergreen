@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 32 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-176,-338)">
+        <g transform="matrix(0.888889,0,0,0.909583,252.889,97.3953)">
+            <rect id="move" x="-86.5" y="264.819" width="36" height="35.181" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect id="move1" serif:id="move" x="-86.5" y="264.819" width="36" height="35.181"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1.16129,0,0,1.13487,-109.726,-128.981)">
+                    <g id="draw-mode-circle-inactive">
+                        <g id="draw-mode-circle-inactive1" serif:id="draw-mode-circle-inactive">
+                            <circle cx="35.5" cy="362.5" r="15.5" style="fill:rgb(153,153,153);"/>
+                            <path d="M35.5,347C44.055,347 51,353.945 51,362.5C51,371.055 44.055,378 35.5,378C26.945,378 20,371.055 20,362.5C20,353.945 26.945,347 35.5,347ZM35.5,347.969C27.48,347.969 20.969,354.48 20.969,362.5C20.969,370.52 27.48,377.031 35.5,377.031C43.52,377.031 50.031,370.52 50.031,362.5C50.031,354.48 43.52,347.969 35.5,347.969Z" style="fill:white;"/>
+                        </g>
+                    </g>
+                </g>
+                <g transform="matrix(0.884066,-0.45673,0.478244,0.884066,-143.132,0.941174)">
+                    <g transform="matrix(1.125,0,0,1.0994,-284.5,-67.2013)">
+                        <path d="M200,322L191,305L182,322L200,322Z"/>
+                    </g>
+                    <g transform="matrix(1.125,0,0,1.0994,-284.5,-67.2013)">
+                        <rect x="189" y="321" width="5" height="10"/>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

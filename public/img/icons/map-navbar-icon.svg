@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-188,-95)">
+        <g transform="matrix(0.689655,0,0,0.740741,130.319,75.7367)">
+            <rect id="map-navbar-icon" x="85" y="27" width="29" height="27" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect id="map-navbar-icon1" serif:id="map-navbar-icon" x="85" y="27" width="29" height="27"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1.45,-0,-0,1.35,83.6378,26.0055)">
+                    <use xlink:href="#_Image2" x="0.939" y="0.737" width="20px" height="20px"/>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <image id="_Image2" width="20px" height="20px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAy0lEQVQ4ja2UOw7CMBBEH59LII7giyDR0yV34SQgoRQRLSdBwiV0UKSkpHAKj4WEQrL5PGkVx55M1vFmwYZTdLI0Gu6AANyM+k78lGaOmF3AsO2FwXADfIgZvoHrmOwmZw0UwEtRaG4QK6Di+/1SVFoz4YBM42ODWYqDNDkNB+WAPbE0AlBq/tFieJem1L2Xh5trIQmH8vf5vlvOMP6SMNGh/JLK5qkYVTaDmBk0ObDV+AKcxr60V3OwYm5f1gZ7xlinlvYFsVS8rq3UyoNJ/+N9WS0AAAAASUVORK5CYII="/>
+    </defs>
+</svg>

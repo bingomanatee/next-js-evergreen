@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-169,-492)">
+        <g transform="matrix(0.25,0,0,1.26316,123.75,-76.4211)">
+            <rect id="move-button-up" x="181" y="450" width="96" height="19" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect id="move-button-up1" serif:id="move-button-up" x="181" y="450" width="96" height="19"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(4.36364,0,0,0.863636,-560.818,24.2273)">
+                    <circle cx="181" cy="504" r="11" style="fill:rgb(234,234,234);"/>
+                    <clipPath id="_clip2">
+                        <circle cx="181" cy="504" r="11"/>
+                    </clipPath>
+                    <g clip-path="url(#_clip2)">
+                        <g transform="matrix(6.38946e-17,-1.04348,1,6.12323e-17,-281,809.71)">
+                            <path d="M291,451L297,462L291,473L294,473L300,462L294,451L291,451Z" style="fill:rgb(16,95,102);"/>
+                        </g>
+                        <g transform="matrix(6.38946e-17,-1.04348,1,6.12323e-17,-281,814.71)">
+                            <path d="M291,451L297,462L291,473L294,473L300,462L294,451L291,451Z" style="fill:rgb(16,95,102);fill-opacity:0.6;"/>
+                        </g>
+                        <g transform="matrix(6.38946e-17,-1.04348,1,6.12323e-17,-281,819.71)">
+                            <path d="M291,451L297,462L291,473L294,473L300,462L294,451L291,451Z" style="fill:rgb(16,95,102);fill-opacity:0.3;"/>
+                        </g>
+                        <g id="top-line" transform="matrix(1,0,0,1.22222,-0.716961,-109.917)">
+                            <rect x="170.717" y="493.296" width="22" height="3" style="fill:rgb(16,95,102);"/>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

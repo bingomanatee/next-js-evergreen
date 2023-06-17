@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-211,-65)">
+        <g transform="matrix(0.689655,0,0,0.740741,152.695,45.5217)">
+            <rect id="lock" x="85" y="27" width="29" height="27" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect id="lock1" serif:id="lock" x="85" y="27" width="29" height="27"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1.45,0,0,1.35,-221.408,-18.8941)">
+                    <rect x="214.316" y="40.996" width="2" height="10"/>
+                </g>
+                <g transform="matrix(1.45,0,0,1.35,-221.408,-18.8941)">
+                    <rect x="226.316" y="40.996" width="2" height="10.004"/>
+                </g>
+                <g transform="matrix(1.63125,0,0,2.02797,-261.521,-53.4675)">
+                    <path d="M229.316,51.996C229.316,52.548 228.717,52.996 227.98,52.996L214.651,52.996C213.914,52.996 213.316,52.548 213.316,51.996C213.316,51.444 213.914,50.996 214.651,50.996L227.98,50.996C228.717,50.996 229.316,51.444 229.316,51.996Z"/>
+                </g>
+                <g transform="matrix(1.36048,0,0,1.11176,-200.362,-9.12746)">
+                    <rect x="210.816" y="32.496" width="19.184" height="8.5" style="fill:none;"/>
+                    <clipPath id="_clip2">
+                        <rect x="210.816" y="32.496" width="19.184" height="8.5"/>
+                    </clipPath>
+                    <g clip-path="url(#_clip2)">
+                        <g transform="matrix(1.24304,0,0,1.41622,-56.7968,-17.0606)">
+                            <path d="M223,34.996C226.311,34.996 229,37.684 229,40.996C229,44.307 226.311,46.996 223,46.996C219.689,46.996 217,44.307 217,40.996C217,37.684 219.689,34.996 223,34.996ZM223,36.71C220.635,36.71 218.715,38.631 218.715,40.996C218.715,43.361 220.635,45.281 223,45.281C225.365,45.281 227.285,43.361 227.285,40.996C227.285,38.631 225.365,36.71 223,36.71Z"/>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

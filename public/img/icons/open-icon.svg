@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
+    style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect id="open-icon" x="0" y="0" width="24" height="24" style="fill:none;"/>
+    <clipPath id="_clip1">
+        <rect id="open-icon1" x="0" y="0" width="24" height="24"/>
+    </clipPath>
+    <g clip-path="url(#_clip1)">
+        <path d="M12,0L12,24L24,12L12,0Z" style="fill:none;"/>
+        <clipPath id="_clip2">
+            <path d="M12,0L12,24L24,12L12,0Z"/>
+        </clipPath>
+        <g clip-path="url(#_clip2)">
+            <rect x="15" y="2" width="2" height="21" style="fill:rgb(4,25,167);fill-opacity:0.5;"/>
+            <rect x="11.996" y="0" width="2" height="24" style="fill:rgb(4,25,167);fill-opacity:0.2;"/>
+            <rect x="18" y="2" width="2" height="18" style="fill:rgb(4,25,167);fill-opacity:0.7;"/>
+            <rect x="21" y="2" width="3" height="18" style="fill:rgb(4,25,167);"/>
+        </g>
+        <rect x="0.75" y="4" width="11.5" height="12" style="fill:white;"/>
+        <path d="M13.25,4L13.25,16C13.25,16.552 12.802,17 12.25,17L0.75,17C0.198,17 -0.25,16.552 -0.25,16L-0.25,4C-0.25,3.448 0.198,3 0.75,3L12.25,3C12.802,3 13.25,3.448 13.25,4ZM12.25,4L0.75,4L0.75,16L12.25,16L12.25,4Z" style="fill:rgb(100,0,125);"/>
+        <rect x="9" y="12" width="6.999" height="7" style="fill:white;"/>
+        <path d="M16.999,12L16.999,19C16.999,19.552 16.551,20 15.999,20L9,20C8.448,20 8,19.552 8,19L8,12C8,11.448 8.448,11 9,11L15.999,11C16.551,11 16.999,11.448 16.999,12ZM15.999,12L9,12L9,19L15.999,19L15.999,12Z" style="fill:rgb(100,0,125);"/>
+    </g>
+</svg>

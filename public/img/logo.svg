@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="49px" height="49px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect id="logo" x="0.151" y="0.868" width="48" height="48" style="fill:none;"/>
+    <clipPath id="_clip1">
+        <rect id="logo1" serif:id="logo" x="0.151" y="0.868" width="48" height="48"/>
+    </clipPath>
+    <g clip-path="url(#_clip1)">
+        <rect x="1.151" y="2.118" width="38.5" height="37.75" style="fill:white;"/>
+        <path d="M40.651,2.118L40.651,39.868C40.651,40.42 40.204,40.868 39.651,40.868L1.151,40.868C0.599,40.868 0.151,40.42 0.151,39.868L0.151,2.118C0.151,1.566 0.599,1.118 1.151,1.118L39.651,1.118C40.204,1.118 40.651,1.566 40.651,2.118ZM39.651,2.118L1.151,2.118L1.151,39.868L39.651,39.868L39.651,2.118Z"/>
+        <rect x="22.651" y="26.368" width="24.82" height="21.135" style="fill:white;"/>
+        <path d="M48.471,26.368L48.471,47.503C48.471,48.055 48.023,48.503 47.471,48.503L22.651,48.503C22.099,48.503 21.651,48.055 21.651,47.503L21.651,26.368C21.651,25.816 22.099,25.368 22.651,25.368L47.471,25.368C48.023,25.368 48.471,25.816 48.471,26.368ZM47.471,26.368L22.651,26.368L22.651,47.503L47.471,47.503L47.471,26.368Z"/>
+    </g>
+</svg>

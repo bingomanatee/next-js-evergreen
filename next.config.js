@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['dexie', 'lodash-es'],
+  transpilePackages: ['dexie', 'lodash-es', 'rxdb'],
   compiler: {
   }
 }

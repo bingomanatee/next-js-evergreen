@@ -1,0 +1,13 @@
+
+.container {
+  position: absolute;
+  overflow: visible;
+  left: 0;
+  top: 0;
+
+  & .container__fullscreen {
+    width: 100%;
+    height: 100%;
+  }
+}
+

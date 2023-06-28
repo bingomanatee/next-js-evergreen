@@ -1,32 +1,27 @@
+"use client"
 import Link from 'next/link'
 import { ChevronDownIcon } from '@chakra-ui/icons'
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
-
-// import { GlobalStateContext } from '~/components/GlobalState/GlobalState'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import Image from 'next/image'
-import { Button, HStack, Menu, MenuButton, MenuItem, MenuList, Text } from '@chakra-ui/react'
+import { HStack, Menu, MenuButton, MenuItem, MenuList, Text } from '@chakra-ui/react'
 import { useCallback, useContext } from 'react'
-import { useRouter } from 'next/navigation'
-import ManagerContext from '~/components/managers/ManagerContext'
-import Manager from '~/components/managers/Manager'
+import ManagerContext from '~/lib/managers/ManagerContext'
+import Manager from '~/lib/managers/Manager'
 
 export default function UserMenuItem({ user = null }) {
-  const supabaseClient = useSupabaseClient();
-  const router = useRouter()
-
   const manager = useContext<Manager>(ManagerContext);
 
   const signOut = useCallback(async () => {
-    const userManager = await manager.manager('user');
+    const userManager = await manager.withManager('user');
     userManager.do.signOut();
-  }, [supabaseClient])
+  }, [manager])
 
   if (user) {
     return (
       <HStack spacing="4">
         <Menu>
-          <MenuButton rightIcon={<ChevronDownIcon/>}>
-            <Text fontSize="sm">{user.email}</Text>
+          <MenuButton rightIcon={<ChevronDownIcon />}>
+            {user.email}
           </MenuButton>
           <MenuList>
             <MenuItem onClick={signOut}>Sign Out</MenuItem>

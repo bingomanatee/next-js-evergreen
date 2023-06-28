@@ -1,13 +1,19 @@
 "use client"
 import '~/app/globals.css'
 import { Inter } from 'next/font/google'
-import { Providers } from '~/app/provider'
-import { useEffect, useState } from 'react'
+import { ChakraProviders } from '~/app/ChakraProviders'
+import { useState } from 'react'
 import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
 import { SessionContextProvider } from '@supabase/auth-helpers-react'
-import { usePathname, useRouter } from 'next/navigation'
-import ManagerProvider from '~/components/managers/ManagerProvider'
-// import { useRouter } from 'next/router'
+import ManagerProvider from '~/lib/managers/ManagerProvider'
+import Messages from '~/components/Messages'
+import { Noto_Serif } from 'next/font/google'
+const ns = Noto_Serif({
+  weight: '500',
+  subsets: ['latin'],
+  variable: '--font-noto-serif',
+  display: 'swap',
+})
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,24 +26,20 @@ export default function Layout(
     initialSession: any
   }) {
   const [supabaseClient] = useState(() => createPagesBrowserClient())
-  const router = useRouter();
-
-  useEffect(() => {
-    window.addEventListener("message", (event) => {
-      console.log('window message:', event);
-    });
-  }, []);
 
   return (
-    <html lang="en">
+    <html lang="en" className={ns.variable}>
     <body className={inter.className}>
     <SessionContextProvider
       supabaseClient={supabaseClient}
       initialSession={initialSession}
     >
-      <ManagerProvider>
-      <Providers>{children}</Providers>
-      </ManagerProvider>
+      <ChakraProviders>
+        <ManagerProvider>
+          {children}
+          <Messages />
+        </ManagerProvider>
+      </ChakraProviders>
     </SessionContextProvider>
     </body>
     </html>

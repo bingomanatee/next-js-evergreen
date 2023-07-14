@@ -8,20 +8,20 @@ import { useContext, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import userManaager from '~/lib/managers/userManager'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
-import Manager from '~/lib/managers/Manager'
+import { CanDI } from '@wonderlandlabs/can-di-land'
 
 const Home: NextPageWithLayout = () => {
   const user = useUser();
   const supabaseClient = useSupabaseClient();
   const router = useRouter()
 
-  const manager: Manager | null = useContext(ManagerContext);
+  const manager: CanDI | null = useContext(ManagerContext);
   useEffect(() => {
-    if (manager && !manager.managerMap.has('user')) {
-      manager.addManager('user', userManaager, user, supabaseClient, router);
+    if (manager && !manager.has('user')) {
+      manager.set('user', userManaager, {type: 'comp', args: [user, supabaseClient, router]});
     }
   }, [manager, user])
-  return <NavLayout user={user}><HomePage user={user}/></NavLayout>
+  return <NavLayout user={user}><HomePage /></NavLayout>
 }
 
 export default Home

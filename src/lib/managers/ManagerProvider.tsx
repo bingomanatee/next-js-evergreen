@@ -1,5 +1,5 @@
 "use client"
-import Manager from '~/lib/managers/Manager'
+
 import { useEffect, useState } from 'react'
 import ManagerContext from '~/lib/managers/ManagerContext'
 import { CanDI } from '@wonderlandlabs/can-di-land'
@@ -14,7 +14,7 @@ export default function ManagerProvider({ children }) {
     if (!manager) {
       setManager(new CanDI([
         {
-          name: 'data', value: dataManager, type: 'comp'
+          name: 'data', value: dataManager, config: { async: true, type: 'comp' }
         },
         {
           name: 'messages', value: messageManager, type: 'comp'

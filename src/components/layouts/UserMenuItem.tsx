@@ -6,13 +6,14 @@ import Image from 'next/image'
 import { HStack, Menu, MenuButton, MenuItem, MenuList, Text } from '@chakra-ui/react'
 import { useCallback, useContext } from 'react'
 import ManagerContext from '~/lib/managers/ManagerContext'
-import Manager from '~/lib/managers/Manager'
+import { leafI } from '@wonderlandlabs/forest/lib/types'
+import { firstValueFrom } from 'rxjs'
 
 export default function UserMenuItem({ user = null }) {
-  const manager = useContext<Manager>(ManagerContext);
+  const manager = useContext(ManagerContext)!;
 
   const signOut = useCallback(async () => {
-    const userManager = await manager.withManager('user');
+    const userManager = await firstValueFrom( manager.when('user'));
     userManager.do.signOut();
   }, [manager])
 
@@ -20,7 +21,7 @@ export default function UserMenuItem({ user = null }) {
     return (
       <HStack spacing="4">
         <Menu>
-          <MenuButton rightIcon={<ChevronDownIcon />}>
+          <MenuButton rightIcon={<ChevronDownIcon/>}>
             {user.email}
           </MenuButton>
           <MenuList>

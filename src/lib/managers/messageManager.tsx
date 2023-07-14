@@ -1,10 +1,9 @@
 import { Subject, SubjectLike } from 'rxjs'
 import { ToastMessage } from '@chakra-ui/react'
 import { ToastStatus } from '@chakra-ui/toast/dist/toast.types'
-import Manager from '~/lib/managers/Manager'
 
 export type MessageManager = {
-  subject: SubjectLike<ToastMessage>,
+  notifySubject: SubjectLike<ToastMessage>,
   send(title: string, description: string, status: ToastStatus, duration?: number, isClosable?: boolean): void,
 }
 

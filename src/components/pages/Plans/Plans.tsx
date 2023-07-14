@@ -1,8 +1,8 @@
 "use client"
+
 import { useContext, useEffect, useMemo, useState } from 'react'
 import ManagerContext from '~/lib/managers/ManagerContext'
-import Manager from '~/lib/managers/Manager'
-import { Box, Flex, Heading, HStack, useBreakpoint, useBreakpointValue, VStack } from '@chakra-ui/react'
+import { Box, Flex, Heading, useBreakpointValue, VStack } from '@chakra-ui/react'
 import { P } from '~/components/helpers/P'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
 import useForestFiltered from '~/lib/useForestFiltered'
@@ -11,12 +11,12 @@ import PlanList from '~/components/pages/Plans/PlanList'
 import { HORIZ, VERT } from '~/constants'
 
 function Plans() {
-  const manager = useContext<Manager | null>(ManagerContext);
+  const manager = useContext(ManagerContext)!;
 
   const orientation = useBreakpointValue({ base: VERT, md: HORIZ },
     { ssr: false, fallback: HORIZ })
-  const dataManager = manager?.managerMap.get('data');
-  const userManager: leafI = manager?.managerMap.get('user');
+  const dataManager = manager.value('data');
+  const userManager: leafI = manager.value('user');
 
   const { user } = useForestFiltered(userManager, 'user');
 

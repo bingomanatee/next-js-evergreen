@@ -1671,6 +1671,11 @@
     "@supabase/auth-helpers-shared" "0.4.1"
     set-cookie-parser "^2.6.0"
 
+"@supabase/auth-helpers-react@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.npmjs.org/@supabase/auth-helpers-react/-/auth-helpers-react-0.4.0.tgz"
+  integrity sha512-EPsLi6r2NSZ4pyK9PTjImx9FFM+2rJoNN/I0kF3rqj2HGcFstopu9ZELKQ5Lc1humlCG4pxIdHn3564gJqIqlQ==
+
 "@supabase/auth-helpers-shared@0.4.1":
   version "0.4.1"
   resolved "https://registry.npmjs.org/@supabase/auth-helpers-shared/-/auth-helpers-shared-0.4.1.tgz"
@@ -1993,11 +1998,12 @@
     "@typescript-eslint/types" "5.59.11"
     eslint-visitor-keys "^3.3.0"
 
-"@wonderlandlabs/can-di-land@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@wonderlandlabs/can-di-land/-/can-di-land-0.0.3.tgz#11ed25e2769e158b83e9f4d5f6e72ff19c756000"
-  integrity sha512-epxmMyFxEuNme9ouaIk0PIin/AU+CK07HBJzBTJqMEDtmnLCt/OPlLG2UZl/j2uzUwMvOOtpzCJlJY7V+4foFQ==
+"@wonderlandlabs/can-di-land@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@wonderlandlabs/can-di-land/-/can-di-land-0.1.1.tgz#a9a3d910490eaba24a0c85e288931999ed399ccf"
+  integrity sha512-ljWDal6LS0/Vp3HBDlctm/wP/hJv/57Y9JgVob9qBLsgnJb+qN+GKUCARF0ET/grUBEE7gaXUnYdpKERAasHHQ==
   dependencies:
+    lodash.isequal "^4.5.0"
     rxjs "^7.8.1"
 
 "@wonderlandlabs/collect@^1.0.2":

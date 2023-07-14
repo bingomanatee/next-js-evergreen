@@ -19,7 +19,8 @@ function Messages({managers}) {
     if (!messages) {
       return;
     }
-    let sub = (messages as MessageManager).subject.subscribe(toast);
+    console.log('message manager:', messages);
+    let sub = (messages as MessageManager).notifySubject.subscribe(toast);
     return () => sub?.unsubscribe()
   }, [messages])
 

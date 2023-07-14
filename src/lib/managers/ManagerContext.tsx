@@ -1,6 +1,13 @@
 "use client"
+
 import { createContext } from 'react'
-import Manager from '~/lib/managers/Manager'
-import { CanDI } from '@wonderlandlabs/can-di-land'
-const ManagerContext = createContext<CanDI | null>(null);
+const can = require('@wonderlandlabs/can-di-land/lib/index.js');
+console.log('can is ', can);
+const {CanDI} = can;
+// import {
+//   CanDI
+// } from '@wonderlandlabs/can-di-land';
+
+const mock = new CanDI();
+const ManagerContext = createContext<CanDI>(mock);
 export default ManagerContext;

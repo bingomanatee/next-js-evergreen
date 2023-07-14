@@ -1,6 +1,4 @@
-import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import layers from './managers/layers';
-import Manager from '~/lib/managers/Manager'
+import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { ManagerMap } from '~/lib/managers/types'
 import { DataManager } from '~/lib/managers/dataManager'
 

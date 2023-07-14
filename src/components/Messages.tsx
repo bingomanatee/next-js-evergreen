@@ -1,11 +1,9 @@
 "use client"
-import { MessageManager } from '~/lib/managers/messageManager'
+import messages, { MessageManager } from '~/lib/managers/messageManager'
 import {  useEffect } from 'react'
 import { useToast } from '@chakra-ui/react'
-import withManagers from '~/lib/managers/withManagersHOC'
 
-function Messages({managers}) {
-  console.log('withManagers:', managers);
+function Messages() {
   const toast = useToast({
     containerStyle: {
       width: '500px',
@@ -13,18 +11,13 @@ function Messages({managers}) {
     },
     position: 'bottom-right'
   })
-  const messages = managers.get('messages');
 
   useEffect(() => {
-    if (!messages) {
-      return;
-    }
-    console.log('message manager:', messages);
-    let sub = (messages as MessageManager).notifySubject.subscribe(toast);
+    let sub = messages.notifySubject.subscribe(toast);
     return () => sub?.unsubscribe()
-  }, [messages])
+  }, [toast])
 
   return null;
 }
 
-export default withManagers<{}>(['messages'], Messages);
+export default Messages

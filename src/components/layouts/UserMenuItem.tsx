@@ -1,21 +1,16 @@
 "use client"
 import Link from 'next/link'
 import { ChevronDownIcon } from '@chakra-ui/icons'
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import Image from 'next/image'
 import { HStack, Menu, MenuButton, MenuItem, MenuList, Text } from '@chakra-ui/react'
-import { useCallback, useContext } from 'react'
-import ManagerContext from '~/lib/managers/ManagerContext'
-import { leafI } from '@wonderlandlabs/forest/lib/types'
-import { firstValueFrom } from 'rxjs'
+import { useCallback } from 'react'
+import { userManager } from '~/lib/managers/userManager'
 
 export default function UserMenuItem({ user = null }) {
-  const manager = useContext(ManagerContext)!;
 
   const signOut = useCallback(async () => {
-    const userManager = await firstValueFrom( manager.when('user'));
-    userManager.do.signOut();
-  }, [manager])
+    userManager.do.signOut()
+  }, [])
 
   if (user) {
     return (

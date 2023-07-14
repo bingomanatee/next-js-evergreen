@@ -14,14 +14,13 @@ import {
 import useInputState from '~/lib/useInputState'
 import { HORIZ } from '~/constants'
 import { useCallback, useMemo } from 'react'
-import { orient } from '@chakra-ui/theme-tools'
 import useForestFiltered from '~/lib/useForestFiltered'
-import { leafI } from '@wonderlandlabs/forest/lib/types'
 import { Orientation } from '~/types'
+import dataManager from '~/lib/managers/dataManager'
+import { userManager } from '~/lib/managers/userManager'
 
-
-export default function NewPlan(props:{dataManager: any, userManager: leafI, orientation: Orientation }) {
-  const { dataManager, userManager, orientation } = props;
+export default function NewPlan(props: { orientation: Orientation }) {
+  const { orientation } = props;
   const [name, setName] = useInputState('', '');
   const boxProps = useMemo(() => orientation === HORIZ ? {
     width: '80em',
@@ -31,9 +30,10 @@ export default function NewPlan(props:{dataManager: any, userManager: leafI, ori
 
   const { user } = useForestFiltered(userManager, ['user'])
   console.log('newPlan has user ', user, 'from', userManager);
-  const createPlan = useCallback(() => {
-    dataManager.db.plans.newPlan(name, user?.id);
-  }, [user, name, dataManager])
+  const createPlan = useCallback(async () => {
+    const { plans } = await dataManager.db();
+    plans.newPlan(name, user?.id);
+  }, [user, name])
 
   return (
     <Box {...boxProps}>

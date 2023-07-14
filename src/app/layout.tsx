@@ -5,9 +5,9 @@ import { ChakraProviders } from '~/app/ChakraProviders'
 import { useState } from 'react'
 import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
 import { SessionContextProvider } from '@supabase/auth-helpers-react'
-import ManagerProvider from '~/lib/managers/ManagerProvider'
 import Messages from '~/components/Messages'
 import { Noto_Serif } from 'next/font/google'
+
 const ns = Noto_Serif({
   weight: '500',
   subsets: ['latin'],
@@ -35,10 +35,8 @@ export default function Layout(
       initialSession={initialSession}
     >
       <ChakraProviders>
-        <ManagerProvider>
-          {children}
-          <Messages />
-        </ManagerProvider>
+        {children}
+        <Messages/>
       </ChakraProviders>
     </SessionContextProvider>
     </body>

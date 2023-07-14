@@ -4,13 +4,12 @@ import { Box, Button, Heading, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 import { P } from '~/components/helpers/P'
 import LogoIcon from '~/components/icons/LogoIcon'
-import withManagers from '~/lib/managers/withManagersHOC'
+import { userManager } from '~/lib/managers/userManager'
+import useForestFiltered from '~/lib/useForestFiltered'
 
 // @todo: change text for logged in user
- function HomePage({managers}) {
-  const userManager = managers.get('user');
-  const {user} = userManager.value;
-
+ function HomePage({}) {
+  const {user} = useForestFiltered(userManager, ['user']);
   return (
     <Box layerStyle="text-document">
       <Heading variant="textTitle">Welcome to Planboard</Heading>
@@ -27,4 +26,4 @@ import withManagers from '~/lib/managers/withManagersHOC'
   )
 }
 
- export default withManagers(['user'], HomePage)
+ export default HomePage

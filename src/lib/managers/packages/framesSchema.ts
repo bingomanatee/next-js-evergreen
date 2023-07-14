@@ -2,7 +2,9 @@ import { v4 } from 'uuid'
 import { BehaviorSubject, switchMap } from 'rxjs'
 import { ID_PROP, LINK_POINT, sampleId, STYLE } from '~/lib/utils/schemaUtils'
 
-export default function framesSchema(dataManager, userStore) {
+const userStore = {value: {}, observable: {subscribe(ub: any) {}}};
+
+export default function framesSchema(dataManager) {
   return ({
     plans: {
       statics: {

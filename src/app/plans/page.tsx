@@ -19,16 +19,15 @@ const Home: NextPageWithLayout = () => {
 
   const manager = useContext(ManagerContext);
   useEffect(() => {
-    if (manager && !manager.has('user')) {
-      manager.set('user', userManager, {type: 'comp', args: [user, supabaseClient, router]});
-    }
-  }, [manager, user])
+    userManager.do.set_user(user);
+    userManager.do.set_router(router);
+    userManager.do.set_supabaseClient(supabaseClient);
+  }, [user, router, supabaseClient])
+
   useEffect(() => {
-    if (manager) {
-      framesPackage(manager, 'list').then(() => setLoaded.on())
-    }
-  }, [manager])
-  return loaded ?  <NavLayout user={user}><Plans /></NavLayout> : <Spinner size="xl" pad={8} />
+    framesPackage().then(() => setLoaded.on())
+  }, [])
+  return loaded ? <NavLayout><Plans/></NavLayout> : <Spinner size="xl" pad={8}/>
 }
 
 export default Home

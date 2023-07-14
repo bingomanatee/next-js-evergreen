@@ -7,8 +7,6 @@ export type MessageManager = {
   send(title: string, description: string, status: ToastStatus, duration?: number, isClosable?: boolean): void,
 }
 
-export default function messageManager() {
-
   const stream = {
     notifySubject: new Subject(),
     notify(title,
@@ -31,5 +29,4 @@ export default function messageManager() {
     stream.notify('Test Message', 'Test Description')
   }, 500);
 
-  return stream;
-}
+export default stream;

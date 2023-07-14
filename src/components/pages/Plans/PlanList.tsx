@@ -13,10 +13,9 @@ import PlanListItem from '~/components/pages/Plans/PlanListItem'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Orientation } from '~/types'
 import { RxDocument } from 'rxdb'
-import { DataManager } from '~/lib/managers/dataManager'
 
-export default function PlanList({ plans, dataManager, orientation }:
-                                   { plans: RxDocument[], dataManager: DataManager, orientation: Orientation }) {
+export default function PlanList({ plans, orientation }:
+                                   { plans: RxDocument[], orientation: Orientation }) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = useRef(null);
 

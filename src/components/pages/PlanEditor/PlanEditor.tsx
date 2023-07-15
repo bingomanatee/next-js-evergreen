@@ -17,8 +17,10 @@ import { Box } from '@chakra-ui/react'
 type PlanEditorProps = { id: string, managers: ManagerMap }
 
 function NewFrame(props: { box: Box2 | null }) {
-  const {box} = props;
-  if (!box) return null
+  const { box } = props;
+  if (!box) {
+    return null
+  }
 
   return <Box position="absolute"
               background="black" color="white"
@@ -41,16 +43,16 @@ function PlanEditor(props: PlanEditorProps) {
       console.log('create - local state loaded')
     }, 'PLAN EDITOR ');
 
-  const {newFrame} = value;
+  const { newFrame, frames } = value;
 
   console.log('newFrame:', newFrame);
   return (<div className={styles.container} ref={planContainerRef}>
     <EditorView/>
     <FrameAnchorView>
       <GridView/>
-      <FramesView/>
+      <FramesView frames={frames}/>
     </FrameAnchorView>
-    <NewFrame box={newFrame} />
+    <NewFrame box={newFrame}/>
   </div>);
 }
 

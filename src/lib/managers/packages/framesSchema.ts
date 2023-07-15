@@ -23,10 +23,10 @@ export default function framesSchema(dataManager) {
             userManager.observable.subscribe(ub);
             const db = await dataManager.db();
             return ub.pipe(
-              switchMap( ({ user }) => {
+              switchMap(({ user }) => {
                 const userId = user.id ?? dataManager.anonUserId;
                 console.log('looking for user id', userId, 'for user', user);
-               return db.plans.find()
+                return db.plans.find()
                   .where('userId').eq(userId).$
               })
             )
@@ -60,7 +60,7 @@ export default function framesSchema(dataManager) {
     },
     frames: {
       schema: {
-        version: 0,
+        version: 3,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -68,15 +68,19 @@ export default function framesSchema(dataManager) {
           name: {
             type: 'string'
           },
-          projectId: {
+          project_id: {
             type: 'string'
           },
           created: {
-            type: 'date-time'
+            type: 'integer'
           },
           linkMode: {
             type: 'string',
             default: 'corner or side'
+          },
+          order: {
+            type: 'integer',
+            min: 0
           },
           top: {
             type: 'integer',
@@ -94,12 +98,32 @@ export default function framesSchema(dataManager) {
           },
           styles: STYLE
         },
-        required: ['id', 'projectId', 'linkMode', 'top', 'left', 'width', 'height']
+        required: ['id', 'project_id', 'linkMode', 'top', 'left', 'width', 'order', 'height']
       },
+      migrationStrategies: {
+        1: (oldDoc) => {
+          console.log('cloning f 1', oldDoc);
+          if (!(oldDoc.created && (typeof oldDoc.created === 'number'))) {
+            oldDoc.created = Date.now();
+          }
+          return oldDoc;
+        },
+        2: (oldDoc) => {
+          console.log('cloning  f 2', oldDoc);
+          if (oldDoc.projectId) {
+            oldDoc.project_id = oldDoc.projectId;
+            delete oldDoc.projectId;
+          }
+          return oldDoc;
+        },
+        3: (oldDoc) => {
+          return oldDoc;
+        }
+      }
     },
     links: {
       schema: {
-        version: 0,
+        version: 1,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -107,13 +131,25 @@ export default function framesSchema(dataManager) {
           name: {
             type: 'string',
           },
+          project_id: ID_PROP,
           start_frame: ID_PROP,
           end_frame: ID_PROP,
           start_point: LINK_POINT,
           end_point: LINK_POINT,
           style: STYLE,
         },
-        required: ['id', 'project_id', 'start_frame', 'end_frame']
+        required: ['id', 'project_id', 'start_frame', 'end_frame'],
+
+      },
+      migrationStrategies: {
+        1: (oldDoc) => {
+          console.log('cloning l 1', oldDoc);
+          if (!('project_id' in oldDoc)) {
+            oldDoc.projectId = v4();
+            delete oldDoc.project_id;
+          }
+          return oldDoc;
+        }
       }
     }
   });

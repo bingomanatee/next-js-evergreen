@@ -11,25 +11,34 @@ enum planEditorMode {
   ADDING_FRAME
 }
 
-export type PlanEditorStateValue = { loaded: boolean, mode: planEditorMode, newFrame: Box2 | null };
+export type PlanEditorStateValue = {
+  loaded: boolean,
+  mode: planEditorMode,
+  newFrame: Box2 | null,
+  frames: [],
+  links: []
+};
 
 type leafType = typedLeaf<PlanEditorStateValue>;
 
 const PlanEditorState = (id, planContainerRef) => {
-  const $value: PlanEditorStateValue = { loaded: false, mode: planEditorMode.NONE, newFrame: null };
+  const $value: PlanEditorStateValue = {
+    frames: [],
+    links: [],
+    loaded: false,
+    mode: planEditorMode.NONE,
+    newFrame: null
+  };
   return {
     name: "PlanEditor",
     $value,
 
     selectors: {
-      offsetBox(state: leafType, box: Box2) {
+      offsetBox(state: leafType, start: Vector2, end: Vector2) {
+        const box = new Box2(start.clone(), end.clone())
         const rect = planContainerRef.current.getBoundingClientRect();
-        console.log('rect is ', rect);
         const offset = new Vector2(rect.x, rect.y).multiplyScalar(-1);
-        console.log('offset is ', offset);
-        console.log('start box is ', box);
         box.translate(offset)
-        console.log('end box is ', box);
         return box;
       },
       initContainer(state: leafType) {
@@ -58,11 +67,16 @@ const PlanEditorState = (id, planContainerRef) => {
 
       drawPendingFrame(state: leafType, start: Vector2, end: Vector2) {
         console.log('drawPendingFrame: ', start.toArray(), end.toArray());
-        state.do.set_newFrame(state.$.offsetBox(new Box2(start, end)));
+        if (start && end) {
+          state.do.set_newFrame(state.$.offsetBox(start, end));
+        }
       },
 
       createFrame(state: leafType, start: Vector2, end: Vector2) {
-
+        if (start && end) {
+          const frame = state.$.offsetBox(start, end);
+          dataManager.addFrame(id, frame);
+        }
       },
 
       onRightMouseDown(state: leafType, e: MouseEvent) {
@@ -75,26 +89,30 @@ const PlanEditorState = (id, planContainerRef) => {
         const start = new Vector2(e.x, e.y);
         console.log('----- start is ', start.toArray());
         const onMove = (e: MouseEvent) => {
-           end = new Vector2(e.x, e.y);
-           state.do.drawPendingFrame(start.clone(), end.clone());
+          end = new Vector2(e.x, e.y);
+          state.do.drawPendingFrame(start, end);
         };
 
         const finish = () => {
           planContainerRef.current.removeEventListener('mousemove', onMove);
-         // state.do.set_newFrame(null);
+          state.do.set_newFrame(null);
         }
         planContainerRef.current?.addEventListener('mousemove', onMove);
         planContainerRef.current?.addEventListener('mouseup', () => {
           subject.complete();
           finish();
-          state.do.createFrame(new Box2(start, end));
-        } , { once: true })
+          state.do.createFrame(start, end);
+        }, { once: true })
         state.setMeta('rightDownSub', subject);
         state.do.set_mode(planEditorMode.ADDING_FRAME)
       },
       async load(state: leafType) {
         state.$.initContainer();
         await dataManager.initProject(id);
+        dataManager.projectStream.subscribe(({ frames, links }) => {
+          state.do.set_frames(frames);
+          state.do.set_links(links);
+        })
         state.do.set_loaded(true);
       }
     }

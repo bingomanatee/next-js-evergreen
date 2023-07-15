@@ -21,7 +21,7 @@ import { userManager } from '~/lib/managers/userManager'
 
 export default function NewPlan(props: { orientation: Orientation }) {
   const { orientation } = props;
-  const [name, setName] = useInputState('', '');
+  const [name, setName, setNameString] = useInputState('', '');
   const boxProps = useMemo(() => orientation === HORIZ ? {
     width: '80em',
     flex: 0,
@@ -33,6 +33,7 @@ export default function NewPlan(props: { orientation: Orientation }) {
   const createPlan = useCallback(async () => {
     const { plans } = await dataManager.db();
     plans.newPlan(name, user?.id);
+    setNameString('');
   }, [user, name])
 
   return (
@@ -57,7 +58,6 @@ export default function NewPlan(props: { orientation: Orientation }) {
         <CardFooter>
           <Button variant="submit"
                   onClick={createPlan}
-                  width={orientation === HORIZ ? undefined : '100%'}
                   disabled={!name}>Create Plan</Button>
         </CardFooter>
       </Card>

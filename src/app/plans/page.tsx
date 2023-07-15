@@ -6,10 +6,10 @@ import { NextPageWithLayout } from '~/app/types'
 import ManagerContext from '~/lib/managers/ManagerContext'
 import { useContext, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import userManager from '~/lib/managers/userManager'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
 import Plans from '~/components/pages/Plans/Plans'
 import framesPackage from '~/lib/managers/packages/framesPackage'
+import { userManager } from '~/lib/managers/userManager'
 
 const Home: NextPageWithLayout = () => {
   const user = useUser();

@@ -24,16 +24,16 @@ class BlockManager {
     }
     this.blocker = blocker;
     this.blockerName = blockerName;
-    const subject = this;
+    const self = this;
     this._obsSub = blocker.subscribe({
       error(err) {
         console.warn('error in interruptManager:', err);
-        subject.clear();
-        subject._obsSub = null;
+        self.clear();
       },
       complete() {
-        subject.clear();
-        subject._obsSub = null;
+        console.log('blocker clearing');
+        self.clear();
+        console.log('end blocker clearing');
       }
     })
     return blocker;
@@ -52,6 +52,5 @@ class BlockManager {
   private blocker: SubjectLike<any> | null = null;
 }
 
-export default function blockManager() {
-  return new BlockManager()
-}
+const blockManager = new BlockManager();
+export default blockManager;

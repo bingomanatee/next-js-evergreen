@@ -1,8 +1,7 @@
 import { v4 } from 'uuid'
 import { BehaviorSubject, switchMap } from 'rxjs'
 import { ID_PROP, LINK_POINT, sampleId, STYLE } from '~/lib/utils/schemaUtils'
-
-const userStore = {value: {}, observable: {subscribe(ub: any) {}}};
+import { userManager } from '~/lib/managers/userManager'
 
 export default function framesSchema(dataManager) {
   return ({
@@ -13,20 +12,21 @@ export default function framesSchema(dataManager) {
           return this.incrementalUpsert({
             id: v4(),
             name,
-            createdAt: new Date().toISOString(),
+            created: Date.now(),
             userId: userId || dataManager.anonUserId
           });
           //@TODO: open new record
         },
         async currentUserPlans$() {
           try {
-            const ub = new BehaviorSubject(userStore.value);
-            userStore.observable.subscribe(ub);
+            const ub = new BehaviorSubject(userManager.value);
+            userManager.observable.subscribe(ub);
+            const db = await dataManager.db();
             return ub.pipe(
-              switchMap(({ user }) => {
+              switchMap( ({ user }) => {
                 const userId = user.id ?? dataManager.anonUserId;
                 console.log('looking for user id', userId, 'for user', user);
-                return dataManager.db.plans.find()
+               return db.plans.find()
                   .where('userId').eq(userId).$
               })
             )
@@ -51,7 +51,7 @@ export default function framesSchema(dataManager) {
             type: 'string'
           },
           created: {
-            type: 'date-time'
+            type: 'integer'
           }
         },
         required: ['id', 'name', 'userId']

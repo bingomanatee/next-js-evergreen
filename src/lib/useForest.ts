@@ -14,9 +14,6 @@
   )
     : [value: valueType, state: leafI] {
 
-    if (debug) {
-      console.log('--- useForest --- running', debug);
-    }
     const onComplete = useRef<any>(null);
     const state = useConst(() => {
       if (debug) {
@@ -36,6 +33,10 @@
           onComplete.current.then((result) => {
             onComplete.current = result
           });
+        }
+      } else {
+        if (debug) {
+          console.log('--- usesForest --- ', debug,  'no on create');
         }
       }
       return localState

@@ -3,6 +3,21 @@ import { BehaviorSubject, switchMap } from 'rxjs'
 import { ID_PROP, LINK_POINT, sampleId, STYLE } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
 
+function projectIdToPanId(oldDoc) {
+    if ('project_id' in oldDoc) {
+      oldDoc.plan_id = oldDoc.project_id;
+      delete oldDoc.project_id;
+    }
+    return oldDoc;
+}
+function projectIdToProject_id (oldDoc) {
+  if (!('project_id' in oldDoc)) {
+    oldDoc.projectId = v4();
+    delete oldDoc.project_id;
+  }
+  return oldDoc;
+}
+
 export default function framesSchema(dataManager) {
   return ({
     plans: {
@@ -27,7 +42,7 @@ export default function framesSchema(dataManager) {
                 const userId = user.id ?? dataManager.anonUserId;
                 console.log('looking for user id', userId, 'for user', user);
                 return db.plans.find()
-                  .where('userId').eq(userId).$
+                  .where('user_id').eq(userId).$
               })
             )
           } catch (err) {
@@ -36,7 +51,7 @@ export default function framesSchema(dataManager) {
         }
       },
       schema: {
-        version: 0,
+        version: 1,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -47,20 +62,29 @@ export default function framesSchema(dataManager) {
           name: {
             type: 'string'
           },
-          userId: {
+          user_id: {
             type: 'string'
           },
           created: {
             type: 'integer'
           }
         },
-        required: ['id', 'name', 'userId']
+        required: ['id', 'name', 'user_id']
       },
-
+      migrationStrategies: {
+        1: (oldDoc) => {
+          console.log('cloning pl 1', oldDoc);
+          if ('userId' in oldDoc) {
+            oldDoc.user_id = oldDoc.userId;
+            delete oldDoc.userId;
+          }
+          return oldDoc;
+        },
+      }
     },
     frames: {
       schema: {
-        version: 3,
+        version: 4,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -68,7 +92,7 @@ export default function framesSchema(dataManager) {
           name: {
             type: 'string'
           },
-          project_id: {
+          plan_id: {
             type: 'string'
           },
           created: {
@@ -98,7 +122,7 @@ export default function framesSchema(dataManager) {
           },
           styles: STYLE
         },
-        required: ['id', 'project_id', 'linkMode', 'top', 'left', 'width', 'order', 'height']
+        required: ['id', 'plan_id', 'linkMode', 'top', 'left', 'width', 'order', 'height']
       },
       migrationStrategies: {
         1: (oldDoc) => {
@@ -108,22 +132,16 @@ export default function framesSchema(dataManager) {
           }
           return oldDoc;
         },
-        2: (oldDoc) => {
-          console.log('cloning  f 2', oldDoc);
-          if (oldDoc.projectId) {
-            oldDoc.project_id = oldDoc.projectId;
-            delete oldDoc.projectId;
-          }
-          return oldDoc;
-        },
+        2: projectIdToProject_id,
         3: (oldDoc) => {
           return oldDoc;
-        }
+        },
+        4: projectIdToPanId
       }
     },
     links: {
       schema: {
-        version: 1,
+        version: 2,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -131,25 +149,19 @@ export default function framesSchema(dataManager) {
           name: {
             type: 'string',
           },
-          project_id: ID_PROP,
+          plan_id: ID_PROP,
           start_frame: ID_PROP,
           end_frame: ID_PROP,
           start_point: LINK_POINT,
           end_point: LINK_POINT,
           style: STYLE,
         },
-        required: ['id', 'project_id', 'start_frame', 'end_frame'],
+        required: ['id', 'plan_id', 'start_frame', 'end_frame'],
 
       },
       migrationStrategies: {
-        1: (oldDoc) => {
-          console.log('cloning l 1', oldDoc);
-          if (!('project_id' in oldDoc)) {
-            oldDoc.projectId = v4();
-            delete oldDoc.project_id;
-          }
-          return oldDoc;
-        }
+        1: projectIdToProject_id,
+        2: projectIdToPanId
       }
     }
   });

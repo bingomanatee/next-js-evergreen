@@ -2,6 +2,7 @@ import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
 import blockManager from '~/lib/managers/blockManager'
 import { Box2, Vector2 } from 'three'
+import { userManager } from '~/lib/managers/userManager'
 
 const ADDING_FRAME = 'adding-frame';
 const NONE = 'none';
@@ -108,12 +109,21 @@ const PlanEditorState = (id, planContainerRef) => {
       },
       async load(state: leafType) {
         state.$.initContainer();
-        await dataManager.initProject(id);
-        dataManager.projectStream.subscribe(({ frames, links }) => {
-          state.do.set_frames(frames);
-          state.do.set_links(links);
-        })
-        state.do.set_loaded(true);
+        let sub;
+        dataManager.initPlan(id)
+          .then(() => {
+            state.do.set_loaded(true);
+           sub = dataManager.planStream.subscribe(({plan, frames, links}) => {
+              state.do.set_frames(frames);
+              state.do.set_links(links);
+            })
+          })
+          .catch(err => {
+            console.error('cannot init project', id, err);
+            userManager.getMeta('router')?.push('/');
+          })
+
+        return sub;
       }
     }
   };

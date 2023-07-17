@@ -37,13 +37,15 @@ function PlanEditor(props: PlanEditorProps) {
   const planContainerRef = useRef(null);
 
   const [value, state] = useForest([stateFactory, id, planContainerRef],
-    (localState) => {
+    async (localState) => {
       console.log('create - local state')
-      localState.do.load();
+     const sub = await localState.do.load();
       console.log('create - local state loaded')
+      return () => sub?.unsubscribe();
     }, 'PLAN EDITOR ');
 
   const { newFrame, frames } = value;
+  console.log('PlanEditor: frames =', frames);
 
   console.log('newFrame:', newFrame);
   return (<div className={styles.container} ref={planContainerRef}>

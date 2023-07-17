@@ -23,8 +23,8 @@ const PlanEditorPage: NextPageWithLayout = (props: { params: { planId: string } 
 
   useEffect(() => {
     userManager.do.set_user(user);
-    userManager.do.set_router(router);
-    userManager.do.set_supabaseClient(supabaseClient);
+    userManager.setMeta('router', router, true);
+    userManager.setMeta('supabaseClient', supabaseClient, true);
   }, [user, router, supabaseClient])
 
   useEffect(() => {
@@ -32,11 +32,18 @@ const PlanEditorPage: NextPageWithLayout = (props: { params: { planId: string } 
       navManager.do.set_subTitle(`plan "${planId}"`)
     }
     if (schemaLoaded) {
-      dataManager.initProject(planId)
+      dataManager.initPlan(planId)
+        .catch(err => {
+          console.error('cannot init project', planId, err);
+          router.push('/');
+        })
     } else {
       framesPackage().then(async () => {
         setSchemaLoaded.on();
-        await dataManager.initProject(planId)
+        await dataManager.initPlan(planId).catch(err => {
+          console.error('cannot init project', planId, err);
+          router.push('/');
+        })
         setLoaded.on();
       })
     }

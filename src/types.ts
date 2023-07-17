@@ -11,3 +11,9 @@ export type Frame = {
   order: number,
   projectId: number,
 }
+
+export type Plan = {
+  id: string,
+  user_id: string,
+  created?: number
+}

@@ -17,8 +17,8 @@ const Home: NextPageWithLayout = () => {
 
   useEffect(() => {
   userManager.do.set_user(user);
-  userManager.do.set_router(router);
-  userManager.do.set_supabaseClient(supabaseClient);
+  userManager.setMeta('router', router, true);
+    userManager.setMeta('supabaseClient', supabaseClient, true);
   }, [user, router, supabaseClient])
 
   return <NavLayout><HomePage /></NavLayout>

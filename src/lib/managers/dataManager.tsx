@@ -1,31 +1,23 @@
 "use client"
-import { addRxPlugin, RxDatabase, RxDocument } from 'rxdb';
+import { addRxPlugin, createRxDatabase, RxDatabase } from 'rxdb';
 import { wrappedValidateZSchemaStorage } from 'rxdb/plugins/validate-z-schema';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-import { createRxDatabase } from 'rxdb';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration';
-import { BehaviorSubject, combineLatest, map, Observable, Subscription } from 'rxjs'
+import { BehaviorSubject, combineLatest, map, Subscription, tap } from 'rxjs'
 import { Box2 } from 'three'
 import { v4 } from 'uuid';
+import { asJson } from '~/lib/utils/schemaUtils'
+import { userManager } from '~/lib/managers/userManager'
+import { anonUserId } from '~/constants'
+import { Frame, Plan } from '~/types'
 
 addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBQueryBuilderPlugin);
 addRxPlugin(RxDBMigrationPlugin);
 
-function asJson(items: RxDocument[]) {
-  if (!Array.isArray(items)) return [];
-  return items.map((doc) => {
-    try {
-      return doc.toJSON();
-    } catch(err) {
-      return null;
-    }
-  }).filter((a) => !!a);
-}
-
-const anonUserId = process.env.NEXT_PUBLIC_ANON_USER
+type PlanData = { plan: Plan | null, links: any[], frames: Frame[] }
 
 const dbPromise: Promise<RxDatabase<any>> = createRxDatabase(
   {
@@ -33,35 +25,79 @@ const dbPromise: Promise<RxDatabase<any>> = createRxDatabase(
     storage: wrappedValidateZSchemaStorage({ storage: getRxStorageDexie() })
   });
 
-const dataManager: {
+type DataManager = {
   addCollections(colls: Record<string, any>): Promise<void>;
-  initProject(id): Promise<any>;
-  addCollection(name: string,
-                    colls: Record<string, any>): Promise<any>;
-  anonUserId: any;
-  poll(id): void;
-  addFrame(id: string, bounds: Box2): Promise<void>;
-  _productSub: Subscription | null;
-  projectStream: BehaviorSubject<{ frames: any[]; links: any[] }>;
-  db(): Promise<RxDatabase<any>>
+  initPlan(id): Promise<void>;
+  addCollection(name: string, colls: Record<string, any>): Promise<any>;
+  plan: null;
+  anonUserId: string;
+  addFrame(planId: string, bounds: Box2): Promise<void>;
+  _productSub?: Subscription;
+  poll(id: string, userId): Promise<void>;
+  planStream: BehaviorSubject<PlanData>;
+  plan: Plan | null;
+  db(): Promise<RxDatabase<any>>;
+  userOwnsPlan(planId: string): boolean;
 }
-  = {
-  _productSub: null,
-  async initProject(id) {
-    if (dataManager._productSub) {
-      dataManager._productSub.unsubscribe()
+
+const dataManager: { initPlan(id: string): Promise<void>; anonUserId: any; _productSub: undefined; endPoll(): void; poll(id: string): Promise<void>; loadPlan(id): Promise<void>; userOwnsPlan(id): Promise<boolean>; addCollections(colls: Record<string, any>): Promise<void>; planStream: BehaviorSubject<{ frames: any[]; links: any[]; plan: null }>; addCollection(name: string, colls: Record<string, any>): Promise<any>; addFrame(planId: string, bounds: Box2): Promise<void>; plan: null; db(): Promise<RxDatabase<any>> } = {
+  _productSub: undefined,
+  async initPlan(id: string) {
+    if (!id) {
+      throw new Error('initPlan: id must be nonempty string')
     }
+    const isOwned = await dataManager.userOwnsPlan(id);
+    if (!isOwned) throw new Error(`current user does not own plan ${id}`)
     await dataManager.poll(id);
   },
-  async poll(id: string) {
-    const db = await dbPromise;
-
-    const frames = await db.frames.find().where('project_id').eq(id).exec();
-    const links = await db.links.find().where('project_id').eq(id).exec();
-    //@ts-ignore
-    dataManager.projectStream.next({ frames: asJson(frames), links: asJson(links) });
+  plan: null,
+  endPoll() {
+    dataManager._productSub?.unsubscribe();
+    console.log('ending poll');
   },
-  projectStream: new BehaviorSubject({ frames: [], links: [] }),
+  async userOwnsPlan(id) {
+    const db = await dataManager.db();
+    const plans = await db.plans.findByIds([id]).exec();
+    console.log('userOwnsPlan.plans are ', plans);
+    const plan = plans.get(id);
+    if (!plan) throw (`cannot find plan ${id}`)
+    const userId = userManager.$.currentUserId();
+    if (plan.user_id === userId) return true;
+    console.error(plan?.toJSON(), 'plan is not owned by user:', userManager.value.user);
+    return false;
+  },
+  async poll(id: string) {
+    await dataManager.endPoll();
+    const db = await dataManager.db();
+    const frames = await db.frames.find().where('plan_id').eq(id).$;
+    const links = await db.links.find().where('plan_id').eq(id).$;
+    console.log('db plans = ', db.plans);
+    const plans = await db.plans.findByIds([id]).$;
+    dataManager._productSub = combineLatest([
+      frames,
+      links,
+      plans
+    ])
+      .pipe(
+        // convert documents to POJO
+        map(([frames, links, plan]) => {
+          const planJson = plan.has(id) ? plan.get(id).toJSON() : null;
+          //@ts-ignore
+          return ({ plan: planJson, frames: asJson(frames), links: asJson(links) })
+        }),
+      )
+      .subscribe(async (data) => {
+        console.log('--- poll data plan = ', data.plan, data, 'comp user id = ', userManager.$.currentUserId());
+        if (data.plan?.user_id === userManager.$.currentUserId()) {
+          console.log('sending data', data);
+          dataManager.planStream.next(data);
+        } else {
+          console.log('ending poll');
+          dataManager.endPoll();
+        }
+      });
+  },
+  planStream: new BehaviorSubject({ plan: null, frames: [], links: [] }),
   async db() {
     return dbPromise;
   },
@@ -80,13 +116,13 @@ const dataManager: {
     const db = await dataManager.db();
     return db.addCollections({ [name]: colls })
   },
-  async addFrame(projectId: string, bounds: Box2) {
+  async addFrame(planId: string, bounds: Box2) {
     try {
       const db = await dataManager.db();
 
       let order = 0;
-      if (Array.isArray(dataManager.projectStream.value.frames)) {
-        dataManager.projectStream.value.frames.forEach((frame) => {
+      if (Array.isArray(dataManager.planStream.value.frames)) {
+        dataManager.planStream.value.frames.forEach((frame) => {
           if (frame.order > order) {
             order = frame.order;
           }
@@ -100,7 +136,7 @@ const dataManager: {
 
       const newFrame = {
         id: v4(),
-        project_id: projectId,
+        plan_id: planId,
         top: Math.min(bounds.min.y, bounds.max.y),
         left: Math.min(bounds.min.x, bounds.max.x),
         width: Math.round(Math.abs(bounds.min.x - bounds.max.x)),
@@ -112,11 +148,9 @@ const dataManager: {
 
       console.log('adding frame', newFrame);
       await db.frames.incrementalUpsert(newFrame);
-      dataManager.poll(projectId);
     } catch (err) {
       console.log('error in adding frame:', err);
     }
-
   }
 }
 

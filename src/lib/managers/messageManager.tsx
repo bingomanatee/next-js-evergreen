@@ -22,6 +22,10 @@ export type MessageManager = {
     },
    async dialog() {
      // @TODO
+    },
+
+    sidebar(view) {
+
     }
   }
 

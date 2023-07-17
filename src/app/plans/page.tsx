@@ -20,8 +20,8 @@ const Home: NextPageWithLayout = () => {
   const manager = useContext(ManagerContext);
   useEffect(() => {
     userManager.do.set_user(user);
-    userManager.do.set_router(router);
-    userManager.do.set_supabaseClient(supabaseClient);
+    userManager.setMeta('router', router, true);
+    userManager.setMeta('supabaseClient', supabaseClient, true);
   }, [user, router, supabaseClient])
 
   useEffect(() => {

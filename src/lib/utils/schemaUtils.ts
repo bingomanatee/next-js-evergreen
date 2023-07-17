@@ -1,4 +1,5 @@
 import { v4 } from 'uuid'
+import { RxDocument } from 'rxdb'
 
 export const sampleId = v4();
 export const ID_PROP = {
@@ -34,4 +35,17 @@ export const STYLE = {
       }
     }
   }
+}
+
+export function asJson(items: RxDocument[]) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  return items.map((doc) => {
+    try {
+      return doc.toJSON();
+    } catch (err) {
+      return null;
+    }
+  }).filter((a) => !!a);
 }

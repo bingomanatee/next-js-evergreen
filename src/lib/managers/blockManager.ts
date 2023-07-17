@@ -1,4 +1,5 @@
-import { Subject, SubjectLike, Unsubscribable } from 'rxjs'
+import { Subject, SubjectLike, Subscription, Unsubscribable } from 'rxjs'
+import { historyStream } from '~/lib/managers/historyStream'
 
 /**
  * the BlockManager allows one activity to run until it completes (or errors);
@@ -6,6 +7,14 @@ import { Subject, SubjectLike, Unsubscribable } from 'rxjs'
  * you can either submit a subject or allow one to spawn in its absence
  */
 class BlockManager {
+  private _historySub: Subscription
+
+  constructor() {
+    this._historySub = historyStream.subscribe((url) => {
+      this.clear();
+    })
+  }
+
   private _obsSub: Unsubscribable | null = null;
   public blockerName: string | null = null;
   public block(blockerName: string, blocker?: SubjectLike<any>, force = false) {
@@ -45,6 +54,7 @@ class BlockManager {
 
   private clear() {
     this._obsSub = null;
+    this.blocker?.complete();
     this.blocker = null;
     this.blockerName = null;
   }

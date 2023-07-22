@@ -16,3 +16,13 @@ img {
  user-drag: none;
  -webkit-user-drag: none;
 }
+
+.modal-floater, .chakra-portal {
+ position: absolute;
+ z-index: 10000000;
+ left: 0;
+ top: 0;
+ overflow: visible;
+ width: 0;
+ height: 0;
+}

@@ -26,29 +26,42 @@ const dbPromise: Promise<RxDatabase<any>> = createRxDatabase(
   });
 
 type DataManager = {
+  userOwnsPlan(id): Promise<boolean>;
   addCollections(colls: Record<string, any>): Promise<void>;
-  initPlan(id): Promise<void>;
+  planStream: BehaviorSubject<{
+    frames: any[];
+    links: any[];
+    plan: Plan | null
+  }>;
+  initPlan(id: string): Promise<void>;
   addCollection(name: string, colls: Record<string, any>): Promise<any>;
-  plan: null;
-  anonUserId: string;
+  anonUserId: any;
   addFrame(planId: string, bounds: Box2): Promise<void>;
   _productSub?: Subscription;
-  poll(id: string, userId): Promise<void>;
-  planStream: BehaviorSubject<PlanData>;
-  plan: Plan | null;
-  db(): Promise<RxDatabase<any>>;
-  userOwnsPlan(planId: string): boolean;
+  endPoll(): void;
+  poll(id: string): Promise<void>;
+  plan: null;
+  db(): Promise<RxDatabase<any>>
+  do(action: Action)
 }
 
-const dataManager: { initPlan(id: string): Promise<void>; anonUserId: any; _productSub: undefined; endPoll(): void; poll(id: string): Promise<void>; loadPlan(id): Promise<void>; userOwnsPlan(id): Promise<boolean>; addCollections(colls: Record<string, any>): Promise<void>; planStream: BehaviorSubject<{ frames: any[]; links: any[]; plan: null }>; addCollection(name: string, colls: Record<string, any>): Promise<any>; addFrame(planId: string, bounds: Box2): Promise<void>; plan: null; db(): Promise<RxDatabase<any>> } = {
+type Action = (db: RxDatabase<any>) => Promise<any>;
+
+const dataManager: DataManager = {
   _productSub: undefined,
   async initPlan(id: string) {
     if (!id) {
       throw new Error('initPlan: id must be nonempty string')
     }
     const isOwned = await dataManager.userOwnsPlan(id);
-    if (!isOwned) throw new Error(`current user does not own plan ${id}`)
+    if (!isOwned) {
+      throw new Error(`current user does not own plan ${id}`)
+    }
     await dataManager.poll(id);
+  },
+  async do(action: Action) {
+    const db = await dbPromise;
+    return action(db);
   },
   plan: null,
   endPoll() {
@@ -60,9 +73,13 @@ const dataManager: { initPlan(id: string): Promise<void>; anonUserId: any; _prod
     const plans = await db.plans.findByIds([id]).exec();
     console.log('userOwnsPlan.plans are ', plans);
     const plan = plans.get(id);
-    if (!plan) throw (`cannot find plan ${id}`)
+    if (!plan) {
+      throw (`cannot find plan ${id}`)
+    }
     const userId = userManager.$.currentUserId();
-    if (plan.user_id === userId) return true;
+    if (plan.user_id === userId) {
+      return true;
+    }
     console.error(plan?.toJSON(), 'plan is not owned by user:', userManager.value.user);
     return false;
   },
@@ -71,7 +88,6 @@ const dataManager: { initPlan(id: string): Promise<void>; anonUserId: any; _prod
     const db = await dataManager.db();
     const frames = await db.frames.find().where('plan_id').eq(id).$;
     const links = await db.links.find().where('plan_id').eq(id).$;
-    console.log('db plans = ', db.plans);
     const plans = await db.plans.findByIds([id]).$;
     dataManager._productSub = combineLatest([
       frames,
@@ -103,18 +119,19 @@ const dataManager: { initPlan(id: string): Promise<void>; anonUserId: any; _prod
   },
   anonUserId,
   async addCollections(colls: Record<string, any>) {
-    const db = await dbPromise;
-    try {
-      console.log('loading colls:', colls);
-      await db.addCollections(colls)
-    } catch (err) {
-      console.warn('cannot process colls:', colls, err);
-      throw err;
-    }
+    return dataManager.do((db) => {
+      try {
+        return db.addCollections(colls)
+      } catch (err) {
+        console.warn('cannot process colls:', colls, err);
+        throw err;
+      }
+    });
   },
   async addCollection(name: string, colls: Record<string, any>) {
-    const db = await dataManager.db();
-    return db.addCollections({ [name]: colls })
+   return dataManager.do((db) => {
+      return db.addCollections({ [name]: colls })
+    })
   },
   async addFrame(planId: string, bounds: Box2) {
     try {

@@ -15,9 +15,9 @@ export default function UserMenuItem({ user = null }) {
   if (user) {
     return (
       <HStack spacing="4">
-        <Menu>
-          <MenuButton rightIcon={<ChevronDownIcon/>}>
-            {user.email}
+        <Menu zIndex={1}>
+          <MenuButton rightIcon={<ChevronDownIcon/>} sx={{height: '100%', margin: 0}}>
+            <Text fontSize="xs"> {user.email}</Text>
           </MenuButton>
           <MenuList>
             <MenuItem onClick={signOut}>Sign Out</MenuItem>

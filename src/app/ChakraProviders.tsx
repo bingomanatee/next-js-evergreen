@@ -8,6 +8,36 @@ const theme = extendTheme({
       py: 10,
       h: '100%',
       overflowY: 'auto'
+    },
+    label: {
+      backgroundColor: 'rgba(255,255,255,0.8)',
+      px: 2,
+      py: 0.5
+    },
+    keyHintRow: {
+      alignItems: 'baseline',
+      backgroundColor: 'rgba(255,255,255,0.8)',
+      px: 3,
+      py: 2
+    },
+    newFrame: {
+      position: "absolute",
+      zIndex: "50",
+      background: "black", color: "white",
+      pad: 2,
+      overflow: "hidden",
+    },
+    keyHint: {
+      px: '3px',
+      py: '2px',
+      borderRadius: '0.333em',
+      borderColor: 'gray.500',
+      borderWidth: '1px',
+      mr: 4,
+      backgroundColor: 'white',
+      width: 10,
+      justifyContent: 'center',
+      flexDirection: 'row',
     }
   },
   colors: {
@@ -21,6 +51,10 @@ const theme = extendTheme({
     'nav-light': 'hsl(200,86%,80%)',
     'nav': 'hsl(200,55%,50%)',
     'nav-dark': 'hsl(200,100%,25%)',
+    'active-button-back': 'hsl(30,50%,25%)',
+    'button-back': 'hsl(30,0%,85%)',
+    'active-button': 'hsl(30,100%,75%)',
+    'inactive-button': 'hsl(150,20%,33%)',
   },
   components: {
     Button: {
@@ -37,6 +71,14 @@ const theme = extendTheme({
       },
 
       variants: {
+        controlIcon: {
+          size: 'sm',
+          isRound: true,
+          backgroundColor: 'rgba(0,0,0,0)',
+          _hover: {
+            backgroundColor: 'rgba(0,0,0,0)',
+          }
+        },
         nav: {
           borderColor: 'nav-x-light',
           background: 'white',
@@ -78,7 +120,7 @@ const theme = extendTheme({
       variants: {
         ['form-card']: {
           container: {
-            'border-radius': 0,
+            borderRadius: 0,
             boxShadow: 'lg',
             Input: {
               backgroundColor: 'white'
@@ -99,10 +141,10 @@ const theme = extendTheme({
             w: "100%",
             m: [0.25, 0.5],
             p: 0,
-            'border-radius': 0
+            borderRadius: 0
           },
           body: {
-            'border-radius': 0,
+            borderRadius: 0,
             px: 1.5,
             py: 0.5,
 
@@ -118,13 +160,18 @@ const theme = extendTheme({
     },
     Heading: {
       variants: {
+        "accordionHead": {
+          fontSize: 'xs',
+          fontWeight: 600,
+          lineHeight: '100%'
+        },
         textTitle: {
           fontSize: '2xl',
           textAlign: 'center'
         }
       }
     },
-    Text: {}
+    Text: {},
   },
 
   textStyles: {
@@ -133,6 +180,26 @@ const theme = extendTheme({
       mb: '8',
       mt: '4'
     },
+    "code": {
+      fontFamily: 'var(--font-space-mono) monospace',
+      fontSize: 'sm',
+      lineHeight: '100%'
+    },
+    info: {
+      fontSize: 'sm',
+      color: 'gray.700',
+      padding: 3
+    },
+    keyHintKey: {
+      textAlign: 'center',
+      fontSize: 'sm',
+      color: 'black'
+    },
+    keyHint: {
+      textAlign: 'center',
+      fontSize: 'sm',
+      color: 'gray.700'
+    }
   }
 });
 

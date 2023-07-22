@@ -4,13 +4,14 @@ import { ID_PROP, LINK_POINT, sampleId, STYLE } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
 
 function projectIdToPanId(oldDoc) {
-    if ('project_id' in oldDoc) {
-      oldDoc.plan_id = oldDoc.project_id;
-      delete oldDoc.project_id;
-    }
-    return oldDoc;
+  if ('project_id' in oldDoc) {
+    oldDoc.plan_id = oldDoc.project_id;
+    delete oldDoc.project_id;
+  }
+  return oldDoc;
 }
-function projectIdToProject_id (oldDoc) {
+
+function projectIdToProject_id(oldDoc) {
   if (!('project_id' in oldDoc)) {
     oldDoc.projectId = v4();
     delete oldDoc.project_id;
@@ -84,7 +85,7 @@ export default function framesSchema(dataManager) {
     },
     frames: {
       schema: {
-        version: 4,
+        version: 5,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -97,6 +98,14 @@ export default function framesSchema(dataManager) {
           },
           created: {
             type: 'integer'
+          },
+          content: {
+            type: 'object',
+            properties: {
+              type: {
+                type: 'string',
+              }
+            }
           },
           linkMode: {
             type: 'string',
@@ -136,7 +145,16 @@ export default function framesSchema(dataManager) {
         3: (oldDoc) => {
           return oldDoc;
         },
-        4: projectIdToPanId
+        4: projectIdToPanId,
+        5: (oldDoc) => {
+          if (!oldDoc.content) {
+            oldDoc.content = { type: 'markdown' }
+          }
+          if (!oldDoc.content.type) {
+            oldDoc.content.type = 'markdown'
+          }
+          return oldDoc;
+        }
       }
     },
     links: {
@@ -162,6 +180,44 @@ export default function framesSchema(dataManager) {
       migrationStrategies: {
         1: projectIdToProject_id,
         2: projectIdToPanId
+      }
+    },
+    /**
+     * represents a single style designation for a tag
+     * scoped to either an individual frame or all frames.
+     */
+    style: {
+      schema: {
+        version: 0,
+        primaryKey: {
+          // where should the composed string be stored
+          key: 'id',
+          // fields that will be used to create the composed key
+          fields: [
+            'scope',
+            'tag'
+          ],
+          // separator which is used to concat the fields values.
+          separator: '|'
+        },
+        properties: {
+          id: {
+            type: 'string',
+            maxLength: 100
+          },
+          scope: {
+            type: 'string',
+            maxLength: 50
+          },
+          tag: {
+            type: 'string',
+            maxLength: 50
+          },
+          style: {
+            type: 'string'
+          }
+        },
+        required: ['id', 'scope', 'tag', 'style']
       }
     }
   });

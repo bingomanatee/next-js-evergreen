@@ -14,6 +14,7 @@ enum planEditorMode {
 
 export type PlanEditorStateValue = {
   loaded: boolean,
+  keys: Set<string>,
   mode: planEditorMode,
   newFrame: Box2 | null,
   frames: [],
@@ -26,6 +27,7 @@ const PlanEditorState = (id, planContainerRef) => {
   const $value: PlanEditorStateValue = {
     frames: [],
     links: [],
+    keys: new Set(),
     loaded: false,
     mode: planEditorMode.NONE,
     newFrame: null
@@ -45,8 +47,9 @@ const PlanEditorState = (id, planContainerRef) => {
       initContainer(state: leafType) {
         if (planContainerRef.current) {
           planContainerRef.current.addEventListener('contextmenu', (e) => {
-
-            state.do.onMouseDown(e, true)
+            if (!e.shiftKey) {
+              state.do.onMouseDown(e, true)
+            }
           });
           planContainerRef.current.addEventListener('mousedown', state.do.onMouseDown);
         } else {
@@ -57,12 +60,13 @@ const PlanEditorState = (id, planContainerRef) => {
 
     actions: {
       onMouseDown(state: leafType, e: MouseEvent, fromContextMenu = false) {
-        console.log('state intercepted mouse event: ', e);
         e.preventDefault();
         e.stopPropagation();
 
-        if (fromContextMenu || e.button === 2) {
-          state.do.onRightMouseDown(e);
+        if (!e.shiftKey) {
+          if (fromContextMenu || e.button === 2 || state.value.keys.has('f')) {
+            state.do.onRightMouseDown(e);
+          }
         }
       },
 
@@ -113,7 +117,7 @@ const PlanEditorState = (id, planContainerRef) => {
         dataManager.initPlan(id)
           .then(() => {
             state.do.set_loaded(true);
-           sub = dataManager.planStream.subscribe(({plan, frames, links}) => {
+            sub = dataManager.planStream.subscribe(({ plan, frames, links }) => {
               state.do.set_frames(frames);
               state.do.set_links(links);
             })

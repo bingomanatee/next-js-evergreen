@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import styles from './EditorView.module.scss';
-import stateFactory from './EditorView.state.ts';
+import styles from './Map.module.scss';
+import stateFactory from './Map.state.ts';
 import useForest from '~/lib/useForest';
 
-type EditorViewProps = {}
+type MapProps = {}
 
-export default function EditorView(props: EditorViewProps) {
+export default function Map(props: MapProps) {
   const [value, state] = useForest([stateFactory, props],
     (localState) => {
     });

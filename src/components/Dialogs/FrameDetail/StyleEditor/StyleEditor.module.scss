@@ -1,0 +1,74 @@
+
+@mixin item {
+  text-align: left;
+  padding: 2px 4px;
+  margin-bottom: 2px;
+}
+
+@mixin style {
+  font-family: var(--font-space-mono) !important;
+}
+
+@mixin local {
+  color: #2c3d3d;
+}
+
+@mixin head {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.container {
+  font-size: 0.8em;
+
+  .grid {
+    display: grid;
+    grid-template-columns: [name] auto [local] 1fr [delete-local] auto [global] 1fr [delete-global] auto [end];
+    grid-auto-rows: auto;
+    margin-bottom: 12px;
+    align-items: stretch;
+  }
+}
+
+.head {
+  @include item;
+  @include head;
+}
+.head-centered {
+  @include item;
+  @include head;
+  text-align: center;
+}
+
+.head-blank {
+  @include head
+}
+
+.id {
+  @include item;
+  font-weight: 600;
+  color: #003d3d;
+  align-self: baseline;
+  line-height: 300%;
+}
+
+
+.delete {
+  @include item;
+  padding-left: 0;
+}
+
+.local {
+  @include item;
+  @include style;
+  @include local;
+}
+.delete-local {
+  @include item;
+  @include local;
+  padding-left: 0;
+}
+
+.global {
+  @include item;
+  @include style;
+}

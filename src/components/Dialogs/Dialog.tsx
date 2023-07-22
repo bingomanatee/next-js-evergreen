@@ -16,10 +16,13 @@ import { MessageTypeValue } from '~/lib/managers/types'
 
 const views = new Map();
 
-type DialogProps = { value: MessageTypeValue, closeDialog: GenFunction }
+type DialogProps = { value: { view: MessageTypeValue }, closeDialog: GenFunction }
 const Dialog = ({ value, form, closeDialog }: DialogProps) => {
-  const { view, title, onClose, onSave } = value;
+  console.log('dialog value:', value);
+  const { view, title, onClose, onSave, cancelPrompt, actionPrompt } = value.view;
   let ViewComponent;
+
+  console.log('----- cancelPrompt', cancelPrompt);
   /**
    * The dialogStream exists to ensure any of multiple effects
    * can have their resolution managed and interpreted at any stage.
@@ -61,7 +64,6 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
     return subject;
   });
 
-
   const cancel = useCallback((value?: any) => {
     try {
       dialogStream.next({ type: 'cancel', value });
@@ -84,29 +86,29 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
     }
   }, [dialogStream]);
 
-  if (!views.has(view.view)) {
-    switch (view.view) {
-      case 'help':
-        views.set(view.view, dynamic(() => import ( '~/components/Dialogs/HelpView'), {
-          suspense: true
-        }))
-        break;
+  if (view) {
+    if (!views.has(view)) {
+      switch (view) {
+        case 'help':
+          views.set(view, dynamic(() => import ( '~/components/Dialogs/HelpView'), {
+            suspense: true
+          }))
+          break;
 
-      case 'frame-detail':
-        views.set(view.view, dynamic(() => import ( '~/components/Dialogs/FrameDetail/FrameDetail'), {
-          suspense: true
-        }))
-        break;
+        case 'frame-detail':
+          views.set(view, dynamic(() => import ( '~/components/Dialogs/FrameDetail/FrameDetail'), {
+            suspense: true
+          }))
+          break;
+      }
     }
+    ViewComponent = views.get(view);
   }
-  ViewComponent = views.get(view.view);
 
   if (!ViewComponent) {
     return null;
   }
-  const size = value.size ?? 'xl';
-  const actionPrompt = value.actionPrompt ?? 'Save';
-  const cancelPrompt = value.cancelPrompt ?? 'Cancel';
+  const size = value?.size ?? 'xl';
   if (form === 'shelf') {
     return (
       <Drawer
@@ -118,7 +120,7 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
         <DrawerOverlay/>
         <DrawerContent zIndex={1000}>
           <DrawerCloseButton/>
-          {value.title ? (<DrawerHeader>{title}</DrawerHeader>) : null}
+          {title ? (<DrawerHeader>{title}</DrawerHeader>) : null}
           <DrawerBody>
             <Suspense fallback={<Spinner/>}>
               <ViewComponent value={view}
@@ -130,11 +132,16 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
           </DrawerBody>
 
           <DrawerFooter>
-            <Button variant='outline' mr={3} onClick={cancel}>
-              {cancelPrompt}
-            </Button>
+            {
+              cancelPrompt === '' ? null :
+                (
+                  <Button variant='outline' mr={3} onClick={cancel}>
+                    {cancelPrompt || 'Cancel'}
+                  </Button>
+                )
+            }
             <Button colorScheme='blue' onClick={save}>
-              {actionPrompt}
+              {actionPrompt || 'Save'}
             </Button>
           </DrawerFooter>
         </DrawerContent>
@@ -147,7 +154,7 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
                 zIndex={1000} position="absolute">
     <ModalOverlay/>
     <ModalContent zIndex={1000}>
-      {value.title ? (<ModalHeader>{title}</ModalHeader>) : null}
+      {title ? (<ModalHeader>{title}</ModalHeader>) : null}
       <ModalCloseButton tabIndex={-1}/>
       <ModalBody>
         <Suspense fallback={<Spinner/>}>
@@ -156,9 +163,14 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
       </ModalBody>
 
       <ModalFooter>
-        <Button variant='outline' mr={3} onClick={cancel}>
-          {cancelPrompt}
-        </Button>
+        {
+          cancelPrompt === '' ? null :
+            (
+              <Button variant='outline' mr={3} onClick={cancel}>
+                {cancelPrompt || 'Cancel'}
+              </Button>
+            )
+        }
         <Button colorScheme='blue' mr={3} onClick={save}>
           {actionPrompt}
         </Button>

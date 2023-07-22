@@ -18,14 +18,25 @@ import Image from 'next/image';
 import useForestFiltered from '~/lib/useForestFiltered'
 import { userManager } from '~/lib/managers/userManager'
 import navManager from '~/lib/managers/navManager'
-import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useCallback, useEffect } from 'react'
 import { historyStream } from '~/lib/managers/historyStream'
 import { HamburgerIcon } from '@chakra-ui/icons'
+import messageManager from '~/lib/managers/messageManager'
 
 function NavBar ({user}) {
+  const router = useRouter();
 
-  const {subTitle} = useForestFiltered(navManager, ['subTitle'])
+  const {subTitle} = useForestFiltered(navManager, ['subTitle']);
+  const showHelp = useCallback(() => {
+     messageManager.dialog({
+      title: 'How To Create and Edit Frames',
+      view: 'help',
+      actionPrompt: 'OK',
+      cancelPrompt: ''
+    })
+  }, []);
+  const goHome = useCallback(() => {router.push('/')}, [router])
 
   return <Flex direction="row" justify="space-between" align="center" py={0} pt={2} h={8} px={4} w="100%" as="header" zIndex={100000}>
     <Menu zIndex={100000}>
@@ -33,8 +44,8 @@ function NavBar ({user}) {
         Menu
       </MenuButton>
       <MenuList>
-        <MenuItem>Home Page</MenuItem>
-        <MenuItem>Help</MenuItem>
+        <MenuItem onClick={goHome}>Home Page</MenuItem>
+        <MenuItem onClick={showHelp}>Help</MenuItem>
       </MenuList>
     </Menu>
     <HStack>

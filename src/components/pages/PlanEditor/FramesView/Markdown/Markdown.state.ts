@@ -28,15 +28,7 @@ const MarkdownState = (props: { frame: Frame }) => {
         return (state.value.frame.content?.markdown) ?? '_-- no content --_';
       },
       style(state: leafType) {
-        const styles = state.value.styles;
-        const globalStyle = styles.has('global') ? styles.get('global') : '';
-        const localStyle = styles.has(props.frame.id) ? styles.get(id) : '';
-
-        return `
-        ${globalStyle.replace('#__ID', `#frame-${id} > .markdown >`)}
-        
-        ${localStyle.replace('#__ID', `#frame-#frame-${id} > .markdown .local >`)}
-        `
+        return '';
       }
     },
 

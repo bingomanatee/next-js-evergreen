@@ -23,8 +23,6 @@ export default function Messages(props: MessagesProps) {
 
   const { dialog, shelf } = value;
 
-  console.log('--- Messages d', dialog, 's', shelf);
-
   return (<div className={styles.container}>
     {dialog ? (
       <Dialog value={dialog} closeDialog={state.do.closeDialog}/>

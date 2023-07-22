@@ -6,7 +6,7 @@ export type MessageTypeValue = {
   cancelPrompt?: string
   actionPrompt?: string
   title: string,
-  view?: string,
+  view?: string | {view: string}
   size?: string,
   onClose?: GenFunction,
   onSave?: GenFunction,

@@ -30,17 +30,17 @@ const messageManager = {
       }
     )
   },
-  async dialog(view: MessageTypeValue, title = '') {
+  async dialog(view: MessageTypeValue) {
     messageManager.notifySubject.next({
       type: 'dialog',
-      value: { view, title }
+      value: { view, title: view.title }
     })
   },
 
-  sidebar(view, title = '') {
+  sidebar(view) {
     messageManager.notifySubject.next({
       type: 'shelf',
-      value: { view, title }
+      value: { view, title: view.title }
     })
   }
 }

@@ -22,7 +22,7 @@ import { MarkdownIcon } from '~/icons/MarkdownIcon'
 import useForestFiltered from '~/lib/useForestFiltered'
 import dynamic from 'next/dynamic'
 import { ChoiceWrapper } from '~/components/Dialogs/FrameDetail/ChoiceWrapper'
-import { ContentCtx } from '~/components/Dialogs/FrameDetail/ContentCtx'
+import { FrameStateContext } from '~/components/Dialogs/FrameDetail/FrameStateContext'
 import { FrameDetailProps } from '~/components/Dialogs/FrameDetail/types'
 import ErrorTrapper from '~/components/ErrorTrapper'
 
@@ -74,7 +74,7 @@ export default function FrameDetail(props: FrameDetailProps) {
   }, [type, DetailView])
 
   return (<div className={styles.container}>
-    <ContentCtx.Provider value={contentState}>
+    <FrameStateContext.Provider value={contentState}>
       <Accordion defaultIndex={0}>
         <AccordionItem>
           <h2>
@@ -186,6 +186,6 @@ export default function FrameDetail(props: FrameDetailProps) {
           </AccordionItem>
         )}
       </Accordion>
-    </ContentCtx.Provider>
+    </FrameStateContext.Provider>
   </div>);
 }

@@ -85,7 +85,7 @@ export default function framesSchema(dataManager) {
     },
     frames: {
       schema: {
-        version: 5,
+        version: 6,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -99,13 +99,12 @@ export default function framesSchema(dataManager) {
           created: {
             type: 'integer'
           },
-          content: {
-            type: 'object',
-            properties: {
-              type: {
-                type: 'string',
-              }
-            }
+          type: {
+            type: 'string',
+            defaultValue: 'markdown'
+          },
+          value: {
+            type: 'string'
           },
           linkMode: {
             type: 'string',
@@ -153,6 +152,17 @@ export default function framesSchema(dataManager) {
           if (!oldDoc.content.type) {
             oldDoc.content.type = 'markdown'
           }
+          return oldDoc;
+        },
+        6: (oldDoc) => {
+          if (oldDoc.content?.type) {
+            oldDoc.type = oldDoc.content.type;
+          }
+          if (oldDoc.content?.markdown) {
+            oldDoc.value = oldDoc.content.markdown;
+          }
+          if (!oldDoc.type) oldDoc.type = 'markdown';
+          delete oldDoc.content;
           return oldDoc;
         }
       }

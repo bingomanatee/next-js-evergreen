@@ -4,13 +4,6 @@ import { Subject } from 'rxjs'
 
 export type Orientation = HORIZ | VERT
 export type FrameType = 'markdown' | 'image' | 'map';
-export type FrameContentBase = {
-  type: FrameType
-}
-export type MarkdownContent = FrameContentBase & { type: 'markdown', content?: string };
-export type ImageContent = FrameContentBase & {type: 'image'};
-export type MapContent = FrameContentBase & {type: 'map'};
-export type FrameContent = MarkdownContent | ImageContent | MapContent
 export type Frame = {
   name?: string,
   id: string,
@@ -20,7 +13,8 @@ export type Frame = {
   height: number,
   order: number,
   projectId: number,
-  content?: FrameContent
+  type: FrameType,
+  value: string
 }
 
 export type Plan = {

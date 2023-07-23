@@ -27,36 +27,35 @@ export function FrameView(props: { frame: Frame }) {
     boxRef.current?.addEventListener('mousedown', (e) => {
       if (!e.shiftKey) {
         messageManager.sidebar(
-          { view: 'frame-detail', id: frame.id }, 'Edit frame ' + (
-          frame.name ?? frame.id)
+          { view: 'frame-detail', id: frame.id, title: `Edit frame ${frame.name ?? frame.id}` }
         );
       }
     })
   }, []);
 
   let DetailView;
-  if (frame.content?.type) {
-    switch (frame.content?.type) {
+  if (frame.type) {
+    switch (frame.type) {
       case 'markdown':
-        if (!resourceMap.has(frame.content?.type)) {
-          resourceMap.set(frame.content?.type, dynamic(() => import ( './Markdown/Markdown')))
+        if (!resourceMap.has(frame.type)) {
+          resourceMap.set(frame.type, dynamic(() => import ( './Markdown/Markdown')))
         }
         break;
 
       case 'map':
-        if (!resourceMap.has(frame.content?.type)) {
-          resourceMap.set(frame.content?.type, dynamic(() => import ( './Map/Map')))
+        if (!resourceMap.has(frame.type)) {
+          resourceMap.set(frame.type, dynamic(() => import ( './Map/Map')))
         }
 
       case 'image':
-        if (!resourceMap.has(frame.content?.type)) {
-          resourceMap.set(frame.content?.type, dynamic(() => import ( './Image/Image')))
+        if (!resourceMap.has(frame.type)) {
+          resourceMap.set(frame.type, dynamic(() => import ( './Image/Image')))
         }
         break;
     }
   }
 
-  DetailView = resourceMap.get(frame.content?.type ?? null) || NullView
+  DetailView = resourceMap.get(frame.type ?? null) || NullView
   return (
     <Box
       ref={boxRef}

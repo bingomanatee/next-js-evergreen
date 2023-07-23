@@ -94,14 +94,11 @@ const FrameDetailState = (props: FrameDetailProps) => {
         })
       },
       async saveFrame(state: leafType) {
-        console.log('---- saveFrame started');
         try {
           const db = await dataManager.db();
           const frameData = state.child('frame')!.value;
-          console.log('--- preserving frame ', frameData);
           await db.frames.incrementalUpsert(frameData);
           state.value.styles.forEach((style, id) => {
-            console.log('--- preserving style', id, style);
             db.styles.incrementalUpsert({ id, style })
           })
         } catch (err) {

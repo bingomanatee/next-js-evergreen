@@ -22,7 +22,6 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
   const { view, title, onClose, onSave, cancelPrompt, actionPrompt } = value.view;
   let ViewComponent;
 
-  console.log('----- cancelPrompt', cancelPrompt);
   /**
    * The dialogStream exists to ensure any of multiple effects
    * can have their resolution managed and interpreted at any stage.
@@ -123,7 +122,7 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
           {title ? (<DrawerHeader>{title}</DrawerHeader>) : null}
           <DrawerBody>
             <Suspense fallback={<Spinner/>}>
-              <ViewComponent value={view}
+              <ViewComponent value={value.view}
                              dialogStream={dialogStream}
                              save={save}
                              cancel={cancel}
@@ -158,7 +157,7 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
       <ModalCloseButton tabIndex={-1}/>
       <ModalBody>
         <Suspense fallback={<Spinner/>}>
-          <ViewComponent value={view} cancel={cancel} save={save} dialogStream={dialogStream}/>
+          <ViewComponent value={value.view} cancel={cancel} save={save} dialogStream={dialogStream}/>
         </Suspense>
       </ModalBody>
 

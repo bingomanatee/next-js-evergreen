@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from 'react';
+import { ComponentType, Suspense, useEffect, useState } from 'react';
 import styles from './FrameDetail.module.scss';
 import stateFactory from './FrameDetail.state.ts';
 import useForest from '~/lib/useForest';
@@ -21,7 +21,7 @@ import { MapIcon } from '~/icons/MapIcon'
 import { MarkdownIcon } from '~/icons/MarkdownIcon'
 import dynamic from 'next/dynamic'
 import { ChoiceWrapper } from '~/components/Dialogs/FrameDetail/ChoiceWrapper'
-import { ContentCtx } from '~/components/Dialogs/FrameDetail/ContentCtx'
+import { FrameStateContext } from '~/components/Dialogs/FrameDetail/FrameStateContext'
 import { FrameDetailProps } from '~/components/Dialogs/FrameDetail/types'
 import StyleEditor from '~/components/Dialogs/FrameDetail/StyleEditor/StyleEditor'
 
@@ -37,51 +37,43 @@ export default function FrameDetail(props: FrameDetailProps) {
     });
 
   const frameState = state.child('frame')!;
-  const contentState = frameState.child('content')!;
   const { frame } = value;
-  const type = frame?.content.type;
+  const { type } = frame;
 
   const [left, setLeft] = useForestInput(frameState, 'left', { filter: (n) => Number(n) });
   const [top, setTop] = useForestInput(frameState, 'top', { filter: (n) => Number(n) });
   const [width, setWidth] = useForestInput(frameState, 'width', { filter: (n) => Number(n) });
   const [height, setHeight] = useForestInput(frameState, 'height', { filter: (n) => Number(n) });
 
-  let DetailView;
-  try {
-    if (type) {
-      switch (type) {
-        case 'markdown':
-          if (!resourceMap.has(type)) {
-            resourceMap.set(type, dynamic(() => import ( './MarkdownEditor/MarkdownEditor')))
-          }
-          break;
+  let DetailView: ComponentType<any> | null = null;
 
-        case 'map':
-          if (!resourceMap.has(type)) {
-            resourceMap.set(type, dynamic(() => import ( './MapEditor/MapEditor')))
-          }
+  if (type) {
+    switch (type) {
+      case 'markdown':
+        if (!resourceMap.has(type)) {
+          resourceMap.set(type, dynamic(() => import ( './MarkdownEditor/MarkdownEditor')))
+        }
+        break;
 
-        case 'image':
-          if (!resourceMap.has(type)) {
-            resourceMap.set(type, dynamic(() => import ( './ImageEditor/ImageEditor')))
-          }
-          break;
+      case 'map':
+        if (!resourceMap.has(type)) {
+          resourceMap.set(type, dynamic(() => import ( './MapEditor/MapEditor')))
+        }
+        break;
 
-        default:
-          console.error('----- NO DETAIL in FrameDetail', type);
-      }
-      DetailView = resourceMap.get(type);
-    } else {
-      console.log('--- no type ')
+      case 'image':
+        if (!resourceMap.has(type)) {
+          resourceMap.set(type, dynamic(() => import ( './ImageEditor/ImageEditor')))
+        }
+        break;
     }
-  } catch (err) {
-    console.error('laod error: ', err)
+    DetailView = resourceMap.get(type);
+  } else {
+    DetailView = null;
   }
 
-  console.log('----- DETAIL VIEW = ', DetailView);
-
   return (<div className={styles.container}>
-    <ContentCtx.Provider value={contentState}>
+    <FrameStateContext.Provider value={frameState}>
       <Accordion defaultIndex={0}>
         <AccordionItem>
           <h2>
@@ -138,7 +130,7 @@ export default function FrameDetail(props: FrameDetailProps) {
             {type && DetailView ? (
               <div>
                 <Suspense fallback={<Spinner/>}>
-                  <DetailView contentState={contentState}/>
+                  <DetailView frameState={frameState}/>
                 </Suspense>
               </div>
             ) : (<p>
@@ -159,12 +151,12 @@ export default function FrameDetail(props: FrameDetailProps) {
               </AccordionButton>
             </h2>
             <AccordionPanel>
-              <StyleEditor id={id} />
+              <StyleEditor dialogStream={props.dialogStream} id={id}/>
             </AccordionPanel>
           </AccordionItem>
         )}
       </Accordion>
-    </ContentCtx.Provider>
+    </FrameStateContext.Provider>
   </div>);
 
   return <div>Frame Detail</div>

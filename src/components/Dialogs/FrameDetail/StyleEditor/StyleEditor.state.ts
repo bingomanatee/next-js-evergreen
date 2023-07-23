@@ -1,6 +1,8 @@
-import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import { leafConfig, leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { c } from '@wonderlandlabs/collect'
 import dataManager from '~/lib/managers/dataManager'
+import { DialogEvt } from '~/types'
+import { Subject } from 'rxjs'
 
 export type StyleEditorStateValue = {
   tagName: string, id: string
@@ -8,26 +10,35 @@ export type StyleEditorStateValue = {
 
 type leafType = typedLeaf<StyleEditorStateValue>;
 
-function scopeState(scope: string) {
+function scopeForestFactory(scope: string, dialogStream: Subject<DialogEvt>): leafConfig {
   try {
-    let $value = new Map();
-
     return {
       $value: new Map(),
       name: scope,
       actions: {
         load(state: leafI) {
-         return dataManager.do(async (db) => {
+          return dataManager.do(async (db) => {
             const styles = await db.style.find()
               .where('scope')
               .eq(scope)
               .exec();
 
-            console.log('--- loaded scope', scope, 'styles = ', styles);
             state.do.addStyles(styles);
+            state.do.listenForCommit();
           });
         },
-
+        listenForCommit(state: leafType) {
+          dialogStream.subscribe((evt) => {
+            if (evt.type === 'save') {
+              if (!state.value.loaded) {
+                return;
+              }
+              if (!state.value.saving) {
+                state.do.save();
+              }
+            }
+          })
+        },
         addStyles(state: leafI, styles: any[]) {
           const value = new Map(state.value);
           styles.forEach((styleDoc) => {
@@ -47,7 +58,7 @@ function scopeState(scope: string) {
       }
     };
   } catch (err) {
-    return null;
+    return { $value: null };
   }
 }
 
@@ -58,7 +69,7 @@ function scopeState(scope: string) {
  * @constructor
  */
 const StyleEditorState = (props) => {
-  const { id } = props
+  const { id, dialogStream } = props
   const $value: StyleEditorStateValue = { tagName: 'p', id: id };
 
   return {
@@ -95,7 +106,9 @@ const StyleEditorState = (props) => {
       addStyle(state: leafType, scope) {
         const tagName: string = state.value.tagName;
         console.log('add style scope', scope, tagName);
-        if (!tagName) return;
+        if (!tagName) {
+          return;
+        }
         console.log('adding style', tagName, 'to scope', scope);
         state.do.upsertScope(scope);
         state.child(scope)?.set(tagName, 'prop: value;');
@@ -103,7 +116,7 @@ const StyleEditorState = (props) => {
 
       upsertScope(state: leafType, scope: string) {
         if (!state.child(scope)) {
-          const def = scopeState(scope)
+          const def = scopeForestFactory(scope, dialogStream)
           state.addChild(def, scope);
           return state.child(scope)!.do.load();
         }

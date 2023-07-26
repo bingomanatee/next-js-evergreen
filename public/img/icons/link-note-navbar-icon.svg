@@ -5,7 +5,7 @@
         <g transform="matrix(0.689655,0,0,0.740741,155.379,74.7367)">
             <rect id="link-note-navbar-icon" x="85" y="27" width="29" height="27" style="fill:none;"/>
             <clipPath id="_clip1">
-                <rect id="link-note-navbar-icon1" serif:id="link-note-navbar-icon" x="85" y="27" width="29" height="27"/>
+                <rect id="link-note-navbar-icon1" x="85" y="27" width="29" height="27"/>
             </clipPath>
             <g clip-path="url(#_clip1)">
                 <g transform="matrix(1.45,-0,-0,1.35,85,26.0055)">

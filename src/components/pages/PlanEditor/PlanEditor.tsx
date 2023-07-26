@@ -73,10 +73,10 @@ function PlanEditor(props: PlanEditorProps) {
       };
     }, 'PLAN EDITOR ');
 
-  const { newFrame, frames, keys, globalStyles } = value;
+  const { newFrame, frames, keys, markdownStyles } = value;
 
   return (<div className={styles.container} ref={planContainerRef}>
-    <style dangerouslySetInnerHTML={{ __html: globalStyles }}/>
+    <style dangerouslySetInnerHTML={{ __html: markdownStyles }}/>
     <FrameAnchorView>
       <GridView/>
       <FramesView frames={frames}/>

@@ -16,13 +16,12 @@ const MarkdownState = (props: { frame: Frame }) => {
   const frameId = props.frame.id;
 
   const $value: MarkdownStateValue = {
-    frame: null,
+    frame: props.frame,
     text: '',
     loaded: false,
     error: null,
     styles: ''
   };
-  const id = props.frame.id;
   return {
     name: "Markdown",
     $value,
@@ -50,25 +49,8 @@ const MarkdownState = (props: { frame: Frame }) => {
         });
       },
       async load(state: leafType) {
-        state.do.loadStyles();
-        await dataManager.do(async (db) => {
-          const map = await db.frames.findByIds([frameId]).exec();
-          if (!state.value.loaded) {
-            state.do.set_loaded(true);
-          }
-          if (map.has(frameId)) {
-            const doc = map.get(frameId);
-            try {
-              state.do.set_frame(doc.toJSON());
-            } catch (err) {
-              console.error('error in markdown doc', err);
-            }
-          } else {
-            console.error('bad id ', frameId, 'from frame', props.frame);
-            state.do.set_error('cannot find id ' + frameId);
-          }
-        });
-
+        await state.do.loadStyles();
+        state.do.set_loaded(true);
       }
     }
   };

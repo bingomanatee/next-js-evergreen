@@ -5,19 +5,31 @@ import useForest from '~/lib/useForest';
 import { Box, Heading, Spinner } from '@chakra-ui/react'
 import { Frame } from '~/types'
 import ReactMarkdown from "react-markdown";
+import { useEffect } from 'react'
 
 type MarkdownProps = { frame: Frame }
 
 export default function Markdown(props: MarkdownProps) {
+  const {frame} = props;
+
   const [value, state] = useForest([stateFactory, props],
     (localState) => {
-      localState.do.load();
+      setTimeout(() => {
+        localState.do.load()
+      }, 500);
     });
 
-  const { loaded, frame, styles } = value;
+  const { loaded, styles } = value;
+
+  useEffect(() => {
+    console.log('setting frame with content', frame.value)
+    state.do.set_frame(frame);
+  }, [state, frame, loaded]);
+
   if (!loaded) {
     return <Spinner/>
   }
+
 
   return <>
     <style dangerouslySetInnerHTML={{ __html: styles }}/>

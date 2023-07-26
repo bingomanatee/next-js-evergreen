@@ -48,7 +48,7 @@ export default function FrameDetail(props: FrameDetailProps) {
   const [top, setTop] = useForestInput(frameState, 'top', { filter: (n) => Number(n) });
   const [width, setWidth] = useForestInput(frameState, 'width', { filter: (n) => Number(n) });
   const [height, setHeight] = useForestInput(frameState, 'height', { filter: (n) => Number(n) });
-
+  const [name, setName] = useForestInput(frameState, 'name');
   let DetailView: ComponentType<any> | null = null;
 
   if (type) {
@@ -82,6 +82,10 @@ export default function FrameDetail(props: FrameDetailProps) {
     <FrameStateContext.Provider value={frameState}>
       <DrawerBody>
         <div className={styles.container}>
+          <FieldGrid>
+            <Text textStyle="fieldLabel">Name</Text>
+            <Input value={name} onChange={setName} />
+          </FieldGrid>
           <Accordion defaultIndex={0}>
             <AccordionItem>
               <h2>

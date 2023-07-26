@@ -19,7 +19,7 @@ export type PlanEditorStateValue = {
   newFrame: Box2 | null,
   frames: [],
   links: [],
-  globalStyle: string
+  markdownStyles: string
 };
 
 type leafType = typedLeaf<PlanEditorStateValue>;
@@ -32,7 +32,7 @@ const PlanEditorState = (id, planContainerRef) => {
     loaded: false,
     mode: planEditorMode.NONE,
     newFrame: null,
-    globalStyle: '',
+    markdownStyles: '',
   };
   return {
     name: "PlanEditor",
@@ -46,7 +46,7 @@ const PlanEditorState = (id, planContainerRef) => {
         box.translate(offset)
         return box;
       },
-      async globalStyleSub() {
+      async markdownStyleSub() {
         return dataManager.do(async (db) => {
           return db.style.find()
             .where('scope')
@@ -69,12 +69,12 @@ const PlanEditorState = (id, planContainerRef) => {
     },
 
     actions: {
-      async loadGlobalStyle(state: leafType) {
-        const subject = await state.$.globalStyleSub();
+      async loadMarkdownStyles(state: leafType) {
+        const subject = await state.$.markdownStyleSub();
         return subject.subscribe((styles) => {
-          const styleString = styles.map(({ tag, style }) => `.markdown ${tag === '.markdown' ? '' : tag} { ${style} }`)
+          const styleString = styles.map(({ tag, style }) => `.markdown-frame ${tag === '.markdown-frame' ? '' : tag} { ${style} }`)
             .join("\n")
-          state.do.set_globalStyle(styleString);
+          state.do.set_markdownStyles(styleString);
         });
       },
       onMouseDown(state: leafType, e: MouseEvent, fromContextMenu = false) {
@@ -136,6 +136,7 @@ const PlanEditorState = (id, planContainerRef) => {
           .then(() => {
             state.do.set_loaded(true);
             sub = dataManager.planStream.subscribe(({ plan, frames, links }) => {
+              console.log('PlanEditor: updating frames with ', frames);
               state.do.set_frames(frames);
               state.do.set_links(links);
             })
@@ -144,7 +145,7 @@ const PlanEditorState = (id, planContainerRef) => {
             console.error('cannot init project', id, err);
             userManager.getMeta('router')?.push('/');
           })
-
+        state.do.loadMarkdownStyles();
         return sub;
       }
     }

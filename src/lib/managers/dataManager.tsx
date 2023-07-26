@@ -43,11 +43,49 @@ type DataManager = {
   plan: null;
   db(): Promise<RxDatabase<any>>
   do(action: Action)
+  deleteFrame(id): Promise<void>
+  deleteState(scope: string, tagName: string): void
 }
 
 type Action = (db: RxDatabase<any>) => Promise<any>;
 
 const dataManager: DataManager = {
+  deleteState(scope: string, tagName: string) {
+    dataManager.do(async (db) => {
+      const style = await db.style.findOne({
+        selector: {
+          $and: [
+            {
+              tag: {
+                $eq: tagName
+              },
+            },
+            {
+              scope: {
+                $eq: scope
+              }
+            }
+          ]
+        }
+      }).exec();
+
+      if (style) {
+        console.log('removing document ', style);
+        return style.remove();
+      } else {
+        console.log('cannot find style to delete:', scope, tagName);
+      }
+    })
+  },
+  async deleteFrame(id) {
+    return dataManager.do(async (db) => {
+      const doc = await db.frames.findOne()
+        .where('id')
+        .eq(id).exec();
+
+      return doc?.remove();
+    })
+  },
   _productSub: undefined,
   async initPlan(id: string) {
     if (!id) {
@@ -66,12 +104,10 @@ const dataManager: DataManager = {
   plan: null,
   endPoll() {
     dataManager._productSub?.unsubscribe();
-    console.log('ending poll');
   },
   async userOwnsPlan(id) {
     const db = await dataManager.db();
     const plans = await db.plans.findByIds([id]).exec();
-    console.log('userOwnsPlan.plans are ', plans);
     const plan = plans.get(id);
     if (!plan) {
       throw (`cannot find plan ${id}`)
@@ -103,12 +139,16 @@ const dataManager: DataManager = {
         }),
       )
       .subscribe(async (data) => {
-        console.log('--- poll data plan = ', data.plan, data, 'comp user id = ', userManager.$.currentUserId());
         if (data.plan?.user_id === userManager.$.currentUserId()) {
-          console.log('sending data', data);
           dataManager.planStream.next(data);
         } else {
-          console.log('ending poll');
+          console.log(
+            '--- dataManager; poll -- terminating, user id not current user id ',
+            data.plan?.user_id,
+            '!==',
+            userManager.$.currentUserId()
+          );
+
           dataManager.endPoll();
         }
       });
@@ -129,7 +169,7 @@ const dataManager: DataManager = {
     });
   },
   async addCollection(name: string, colls: Record<string, any>) {
-   return dataManager.do((db) => {
+    return dataManager.do((db) => {
       return db.addCollections({ [name]: colls })
     })
   },

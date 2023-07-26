@@ -1,89 +1,37 @@
-import {
-  Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Input, Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay, Spinner
-} from '@chakra-ui/react'
-import dynamic from 'next/dynamic'
-import { Suspense, useCallback, useEffect, useRef } from 'react'
-import { useConst } from '@chakra-ui/hooks'
-import { Subject } from 'rxjs'
-import { GenFunction } from '@wonderlandlabs/can-di-land/lib/types'
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import styles from './Dialog.module.scss';
+import stateFactory from './Dialog.state.ts';
+import useForest from '~/lib/useForest';
 import { MessageTypeValue } from '~/lib/managers/types'
-
-const views = new Map();
+import { GenFunction } from '@wonderlandlabs/can-di-land/lib/types'
+import dynamic from 'next/dynamic'
+import {
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent, DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay,
+  Spinner
+} from '@chakra-ui/react'
+import DialogStateCtx from '~/components/Dialogs/DialogStateCtx'
 
 type DialogProps = { value: { view: MessageTypeValue }, closeDialog: GenFunction }
-const Dialog = ({ value, form, closeDialog }: DialogProps) => {
-  console.log('dialog value:', value);
+
+const views = new Map();
+export default function Dialog(props: DialogProps) {
+  const { value, form, closeDialog } = props;
   const { view, title, onClose, onSave, cancelPrompt, actionPrompt } = value.view;
+
   let ViewComponent;
 
-  /**
-   * The dialogStream exists to ensure any of multiple effects
-   * can have their resolution managed and interpreted at any stage.
-   *
-   * It is expected that it will only receive one event,
-   * as the first event method should complete the dialog.
-   * Completing the dialog triggers the closeDialog hook above
-   * completing the message stream.
-   *
-   * The dialogStream shouldn't be updated directly, but through
-   * the callbacks below.
-   */
+  const [stateValue, state] = useForest([stateFactory, props],
+    (localState) => {
+      localState.do.load();
+    });
 
-  const dialogStream = useConst(() => {
-    const subject = new Subject();
-    subject.subscribe({
-      next(evt) {
-        switch (evt.type) {
-          case 'close':
-            if (onClose) {
-              onClose(evt);
-            }
-            break;
-
-          case 'save':
-            if (onSave) {
-              onSave(evt);
-            }
-            break;
-        }
-      },
-      error() {
-        closeDialog();
-      },
-      complete() {
-        closeDialog();
-      }
-    })
-    return subject;
-  });
-
-  const cancel = useCallback((value?: any) => {
-    try {
-      dialogStream.next({ type: 'cancel', value });
-      dialogStream.complete();
-    } finally {
-      if (!dialogStream.closed) {
-        dialogStream.complete();
-      }
-    }
-  }, [dialogStream]);
-
-  const save = useCallback((value?: any) => {
-    try {
-      dialogStream.next({ type: 'save', value });
-      dialogStream.complete();
-    } finally {
-      if (!dialogStream.closed) {
-        dialogStream.complete();
-      }
-    }
-  }, [dialogStream]);
+  const { buttons } = stateValue;
 
   if (view) {
     if (!views.has(view)) {
@@ -110,45 +58,33 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
   const size = value?.size ?? 'xl';
   if (form === 'shelf') {
     return (
-      <Drawer
-        isOpen
-        placement='right'
-        size={size}
-        onClose={close}
-      >
-        <DrawerOverlay/>
-        <DrawerContent zIndex={1000}>
-          <DrawerCloseButton/>
-          {title ? (<DrawerHeader>{title}</DrawerHeader>) : null}
-          <DrawerBody>
+      <DialogStateCtx.Provider value={state}>
+        <Drawer
+          isOpen
+          autoFocus={false}
+          placement='right'
+          size={size}
+          onClose={close}
+        >
+          <DrawerOverlay/>
+          <DrawerContent zIndex={1000}>
+            <DrawerCloseButton tabIndex={-1}/>
+            {title ? (<DrawerHeader>{title}</DrawerHeader>) : null}
             <Suspense fallback={<Spinner/>}>
-              <ViewComponent value={value.view}
-                             dialogStream={dialogStream}
-                             save={save}
-                             cancel={cancel}
+              <ViewComponent
+                value={value.view}
+                cancel={state.do.cancel}
+                save={state.do.save}
               />
             </Suspense>
-          </DrawerBody>
-
-          <DrawerFooter>
-            {
-              cancelPrompt === '' ? null :
-                (
-                  <Button variant='outline' mr={3} onClick={cancel}>
-                    {cancelPrompt || 'Cancel'}
-                  </Button>
-                )
-            }
-            <Button colorScheme='blue' onClick={save}>
-              {actionPrompt || 'Save'}
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+          </DrawerContent>
+        </Drawer>
+      </DialogStateCtx.Provider>
     )
   }
 
   return <Modal isOpen
+                autoFocus={false}
                 onClose={closeDialog} size={size}
                 zIndex={1000} position="absolute">
     <ModalOverlay/>
@@ -157,25 +93,22 @@ const Dialog = ({ value, form, closeDialog }: DialogProps) => {
       <ModalCloseButton tabIndex={-1}/>
       <ModalBody>
         <Suspense fallback={<Spinner/>}>
-          <ViewComponent value={value.view} cancel={cancel} save={save} dialogStream={dialogStream}/>
+          <ViewComponent
+            value={value.view}
+            cancel={state.do.cancel}
+            save={state.do.save}
+          />
         </Suspense>
       </ModalBody>
 
       <ModalFooter>
         {
-          cancelPrompt === '' ? null :
-            (
-              <Button variant='outline' mr={3} onClick={cancel}>
-                {cancelPrompt || 'Cancel'}
-              </Button>
-            )
+          buttons.map((buttonDef) => {
+            const { onClick, key, label, ...rest } = buttonDef;
+            return <Button mr={3} key={key} onClick={onClick} {...rest}>{label}</Button>
+          })
         }
-        <Button colorScheme='blue' mr={3} onClick={save}>
-          {actionPrompt}
-        </Button>
       </ModalFooter>
     </ModalContent>
   </Modal>
 }
-
-export default Dialog

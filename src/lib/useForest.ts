@@ -4,6 +4,7 @@
   import { Forest } from '@wonderlandlabs/forest'
   import { leafConfig, leafI } from '@wonderlandlabs/forest/lib/types'
   import { useConst } from '@chakra-ui/hooks'
+  import { isPromise } from '~/types'
 
   type configArray = [initializer: (...args: any) => leafConfig, ...rest: any];
 
@@ -13,6 +14,8 @@
     debug?: any
   )
     : [value: valueType, state: leafI] {
+
+    let [value, setValue] = useState<valueType>(null);
 
     const onComplete = useRef<any>(null);
     const state = useConst(() => {
@@ -24,12 +27,14 @@
         initializer = config[0](...config.slice(1))
       }
       const localState = new Forest(initializer);
+      value = localState.value;
+
       if (onCreate) {
         if (debug) {
           console.log('---- useForest -- calling onCreate', onCreate, debug)
         }
         onComplete.current = onCreate(localState);
-        if (typeof (onComplete.current?.then) === 'function') {
+        if (isPromise(onComplete.current)) {
           onComplete.current.then((result) => {
             onComplete.current = result
           });
@@ -39,34 +44,9 @@
           console.log('--- usesForest --- ', debug,  'no on create');
         }
       }
+      localState.subscribe(setValue);
       return localState
     });
-    const [value, setValue] = useState<valueType>(state.value);
 
-    useEffect(() => {
-        if (!state) {
-          return;
-        }
-        if (debug) {
-          console.log('---- useForest -- subscribing to state', debug)
-        }
-        const sub = state.subscribe(setValue);
-        return () => {
-          sub.unsubscribe()
-          if (typeof onComplete.current === 'function') {
-            onComplete.current();
-          } else if (typeof (onComplete.current?.then) === 'function') {
-            onComplete.current.then((result) => {
-              if (typeof result === 'function') {
-                result();
-              }
-            });
-          }
-          onComplete.current = null;
-        };
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [state]);
-
-    return [value, state];
+    return [value || state.value, state];
   }

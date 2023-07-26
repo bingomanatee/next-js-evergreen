@@ -1,0 +1,54 @@
+body, html {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.noto {
+  font-family: var(--font-noto-serif);
+}
+
+.overflow-svg-container svg {
+  overflow: visible;
+}
+
+img {
+  user-drag: none;
+  -webkit-user-drag: none;
+}
+
+.modal-floater, .chakra-portal {
+  position: absolute;
+  z-index: 10000000;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  width: 0;
+  height: 0;
+}
+
+.markdown-frame {
+  height: 100%;
+  overflow-y: auto;
+  padding: 0.5em 1em;
+  h1, h2, h3, h4 {
+    font-weight: bold;
+  }
+
+  ol, ul {
+    list-style-position: outside;
+    padding-left: 1em;
+
+    li {
+      margin-left: 1.5em;
+    }
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ul {
+    list-style-type: bullet;
+  }
+}

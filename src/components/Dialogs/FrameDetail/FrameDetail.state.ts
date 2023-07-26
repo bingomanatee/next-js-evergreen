@@ -1,6 +1,5 @@
-import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
-import { FrameDetailProps } from '~/components/Dialogs/FrameDetail/types'
 import { debounce } from 'lodash'
 
 export type FrameDetailStateValue = {
@@ -9,12 +8,7 @@ export type FrameDetailStateValue = {
 };
 type leafType = typedLeaf<FrameDetailStateValue>;
 
-export type ContentDetailStateValue = {
-  type: string
-};
-type contentType = typedLeaf<ContentDetailStateValue>;
-
-const FrameDetailState = (props: FrameDetailProps) => {
+const FrameDetailState = (id: string, dialogState: leafI) => {
   const $value: FrameDetailStateValue = {
     loaded: false, saving: false
   };
@@ -32,80 +26,44 @@ const FrameDetailState = (props: FrameDetailProps) => {
           top: 0,
           width: 0,
           height: 0,
-        },
-        children: {
-          content: {
-            $value: {
-              type: 'markdown'
-              // note - as this is a polymorphic field
-              // we can't set default values beyond the type name
-            },
-            actions: {
-              updateMarkdown(state: contentType, e: InputEvent) {
-                //@ts-ignore
-                const markdown = e.target.value;
-                state.value = { ...state.value, markdown };
-              }
-            }
-          }
+          type: 'markdown',
+          value: ''
         }
       }
     },
 
     actions: {
-      updateStyle(state: leafType, id: string, value: string) {
-        const styles = new Map(state.value.styles);
-        styles.set(id, value);
-        state.do.set_styles(styles);
-      },
-      updateStyles(state: leafType, styles?: Map<string, string>) {
-
-        if (!state.getMeta('stylesDB')) {
-          state.setMeta('stylesDB', debounce((styles: Map<string, string>) => {
-            if (!styles) {
-              styles = new Map(state.value.styles);
-            }
-            state.do.set_styles(styles);
-          }));
-        }
-
-        state.getMeta('stylesDB')(styles)
-      },
       async initData(state: leafType) {
         const db = await dataManager.db();
-        const frame = await db.frames.findByIds([props.value.id]).exec();
-        const myFrame = frame.get(props.value.id);
+        const frame = await db.frames.findByIds([id]).exec();
+        const myFrame = frame.get(id);
         const data = { ...myFrame.toJSON() };
-        data.content = { ...data.content };
         state.do.set_loaded(true);
         state.child('frame')!.value = data;
       },
       listenForCommit(state: leafType) {
-        props.dialogStream.subscribe((evt) => {
-          if (evt.type === 'save') {
-            if (!state.value.loaded) {
+        dialogState.select(({ mode }) => {
+          if (mode === 'save') {
+            if (!state.value.loaded || state.value.saving) {
               return;
             }
-            if (!state.value.saving) {
-              state.do.set_saving(true);
-              state.do.saveFrame();
-            }
+            state.do.set_saving(true);
+            state.do.saveFrame();
           }
-        })
+        }, ({ closed }) => closed)
       },
       async saveFrame(state: leafType) {
-        try {
-          const db = await dataManager.db();
-          const frameData = state.child('frame')!.value;
-          await db.frames.incrementalUpsert(frameData);
-          state.value.styles.forEach((style, id) => {
-            db.styles.incrementalUpsert({ id, style })
+          dataManager.do(async(db) => {
+            const frameData = state.child('frame')!.value;
+            await db.frames.incrementalUpsert(frameData);
           })
-        } catch (err) {
-          console.error('load error:', err)
-        }
-
       },
+
+      deleteFrame(state: leafType) {
+        dataManager.deleteFrame(state.value.frame.id);
+        dialogState.do.cancel();
+      },
+
       load(state: leafType) {
         state.do.initData();
         state.do.listenForCommit();

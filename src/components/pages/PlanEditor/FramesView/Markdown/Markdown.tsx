@@ -19,13 +19,9 @@ export default function Markdown(props: MarkdownProps) {
     return <Spinner/>
   }
 
-  if (frame.value) {
-    console.log('--------- frame value', frame.value)
-  }
-
   return <>
     <style dangerouslySetInnerHTML={{ __html: styles }}/>
-    <Box id={`frame-${frame?.id ?? 'unknown'}`}>
+    <Box id={`frame-${frame?.id ?? 'unknown'}`} layerStyle="markdownOuter">
       <Heading size="xs"> Markdown: {frame?.id}</Heading>
       <ReactMarkdown className="markdown-frame">{frame.value}</ReactMarkdown>
     </Box></>;

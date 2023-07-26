@@ -1,44 +1,48 @@
-import { ComponentType, Suspense, useEffect, useState } from 'react';
+import { ComponentType, Suspense, useContext, useEffect, useState } from 'react';
 import styles from './FrameDetail.module.scss';
 import stateFactory from './FrameDetail.state.ts';
 import useForest from '~/lib/useForest';
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box, Heading,
-  HStack,
-  Input,
-  Spinner,
-  Text, Textarea
+  Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
+  Box, DrawerBody, DrawerFooter, Heading,
+  HStack, Input, Spinner, Text,
 } from '@chakra-ui/react'
+import dynamic from 'next/dynamic'
+
+// site
 import useForestInput from '~/lib/useForestInput'
 import FieldGrid from '~/components/FieldGrid'
 import { ImageIcon } from '~/icons/ImageIcon'
 import { MapIcon } from '~/icons/MapIcon'
 import { MarkdownIcon } from '~/icons/MarkdownIcon'
-import dynamic from 'next/dynamic'
-import { ChoiceWrapper } from '~/components/Dialogs/FrameDetail/ChoiceWrapper'
-import { FrameStateContext } from '~/components/Dialogs/FrameDetail/FrameStateContext'
-import { FrameDetailProps } from '~/components/Dialogs/FrameDetail/types'
-import StyleEditor from '~/components/Dialogs/FrameDetail/StyleEditor/StyleEditor'
+import DialogButton from '~/components/Dialogs/DialogButton'
+import { DialogButtonProps } from '~/components/Dialogs/Dialog.state'
+
+// local
+import { ChoiceWrapper } from './ChoiceWrapper'
+import { FrameStateContext } from './FrameStateContext'
+import { FrameDetailProps } from './types'
+import StyleEditor from './StyleEditor/StyleEditor'
+import useForestFiltered from '~/lib/useForestFiltered'
+import DialogStateCtx from '~/components/Dialogs/DialogStateCtx'
 
 const resourceMap = new Map();
 
 export default function FrameDetail(props: FrameDetailProps) {
+  const dialogState = useContext(DialogStateCtx)
+  const { id } = props.value;
 
-  const id = props.value.id;
+  useEffect(() => {
+    console.log('-=------ FrameDetail unique id / dialog state', id, dialogState.id)
+  }, [id, dialogState])
 
-  const [value, state] = useForest([stateFactory, props],
+  const [value, state] = useForest([stateFactory, id, dialogState],
     (localState) => {
       localState.do.load();
-    });
+    }, true);
 
   const frameState = state.child('frame')!;
-  const { frame } = value;
-  const { type } = frame;
+  const { frame: { type } } = value;
 
   const [left, setLeft] = useForestInput(frameState, 'left', { filter: (n) => Number(n) });
   const [top, setTop] = useForestInput(frameState, 'top', { filter: (n) => Number(n) });
@@ -72,92 +76,105 @@ export default function FrameDetail(props: FrameDetailProps) {
     DetailView = null;
   }
 
-  return (<div className={styles.container}>
+  const { buttons } = useForestFiltered(dialogState, ['buttons'])
+
+  return (
     <FrameStateContext.Provider value={frameState}>
-      <Accordion defaultIndex={0}>
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex='1' textAlign='left'>
-                <Heading variant="accordionHead"> Size and Position</Heading>
-              </Box>
-              <AccordionIcon/>
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
-            <HStack gap={4}>
-              <FieldGrid>
-                <Text>Left</Text>
-                <Input value={left} onChange={setLeft} textAlign="right" type="number"/>
-                <Text>Top</Text>
-                <Input value={top} onChange={setTop} textAlign="right" ype="number"/>
-              </FieldGrid>
-              <FieldGrid>
-                <Text>Width</Text>
-                <Input value={width} onChange={setWidth} textAlign="right" type="number" min={50}/>
-                <Text>Height</Text>
-                <Input value={height} onChange={setHeight} textAlign="right" type="number" min={50}/>
-              </FieldGrid>
-            </HStack>
-          </AccordionPanel>
-        </AccordionItem>
+      <DrawerBody>
+        <div className={styles.container}>
+          <Accordion defaultIndex={0}>
+            <AccordionItem>
+              <h2>
+                <AccordionButton>
+                  <Box as="span" flex='1' textAlign='left'>
+                    <Heading variant="accordionHead"> Size and Position</Heading>
+                  </Box>
+                  <AccordionIcon/>
+                </AccordionButton>
+              </h2>
+              <AccordionPanel pb={4}>
+                <HStack gap={4}>
+                  <FieldGrid>
+                    <Text>Left</Text>
+                    <Input value={left} onChange={setLeft} textAlign="right" type="number"/>
+                    <Text>Top</Text>
+                    <Input value={top} onChange={setTop} textAlign="right" ype="number"/>
+                  </FieldGrid>
+                  <FieldGrid>
+                    <Text>Width</Text>
+                    <Input value={width} onChange={setWidth} textAlign="right" type="number" min={50}/>
+                    <Text>Height</Text>
+                    <Input value={height} onChange={setHeight} textAlign="right" type="number" min={50}/>
+                  </FieldGrid>
+                </HStack>
+              </AccordionPanel>
+            </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex='1' textAlign='left'>
-                <Heading variant="accordionHead">Content</Heading>
-              </Box>
-              <AccordionIcon/>
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
-            <HStack gap={8} justify="center" fontSize="48px" mb={8}>
+            <AccordionItem>
+              <h2>
+                <AccordionButton>
+                  <Box as="span" flex='1' textAlign='left'>
+                    <Heading variant="accordionHead">Content</Heading>
+                  </Box>
+                  <AccordionIcon/>
+                </AccordionButton>
+              </h2>
+              <AccordionPanel pb={4}>
+                <HStack gap={8} justify="center" fontSize="48px" mb={8}>
 
-              <ChoiceWrapper target="markdown" title="Markdown (text)">
-                <MarkdownIcon active={type === 'markdown'}/>
-              </ChoiceWrapper>
+                  <ChoiceWrapper target="markdown" title="Markdown (text)">
+                    <MarkdownIcon active={type === 'markdown'}/>
+                  </ChoiceWrapper>
 
-              <ChoiceWrapper target="image" title="Image">
-                <ImageIcon active={type === 'image'}/>
-              </ChoiceWrapper>
+                  <ChoiceWrapper target="image" title="Image">
+                    <ImageIcon active={type === 'image'}/>
+                  </ChoiceWrapper>
 
-              <ChoiceWrapper target="map" title="Map (location)">
-                <MapIcon active={type === 'map'}/>
-              </ChoiceWrapper>
-            </HStack>
+                  <ChoiceWrapper target="map" title="Map (location)">
+                    <MapIcon active={type === 'map'}/>
+                  </ChoiceWrapper>
+                </HStack>
 
-            {type && DetailView ? (
-              <div>
-                <Suspense fallback={<Spinner/>}>
-                  <DetailView frameState={frameState}/>
-                </Suspense>
-              </div>
-            ) : (<p>
-              <Text>Select a content type from the buttons above</Text>
-            </p>)
-            }
-          </AccordionPanel>
-        </AccordionItem>
+                {type && DetailView ? (
+                  <div>
+                    <Suspense fallback={<Spinner/>}>
+                      <DetailView frameState={frameState}/>
+                    </Suspense>
+                  </div>
+                ) : (
+                  <Text>Select the content style for this frame from the buttons above</Text>
+                )
+                }
+              </AccordionPanel>
+            </AccordionItem>
 
-        {(type !== 'markdown') ? null : (
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box as="span" flex='1' textAlign='left'>
-                  <Heading variant="accordionHead">CSS Style</Heading>
-                </Box>
-                <AccordionIcon/>
-              </AccordionButton>
-            </h2>
-            <AccordionPanel>
-              <StyleEditor dialogStream={props.dialogStream} id={id}/>
-            </AccordionPanel>
-          </AccordionItem>
-        )}
-      </Accordion>
+            {(type !== 'markdown') ? null : (
+              <AccordionItem>
+                <h2>
+                  <AccordionButton>
+                    <Box as="span" flex='1' textAlign='left'>
+                      <Heading variant="accordionHead">CSS Style</Heading>
+                    </Box>
+                    <AccordionIcon/>
+                  </AccordionButton>
+                </h2>
+                <AccordionPanel>
+                  <StyleEditor id={id}/>
+                </AccordionPanel>
+              </AccordionItem>
+            )}
+          </Accordion>
+        </div>
+      </DrawerBody>
+
+      <DrawerFooter>
+        <DialogButton onClick={state.do.deleteFrame} colorScheme="red">Delete Frame</DialogButton>
+        {
+          buttons.map((buttonDef: DialogButtonProps) => {
+            return <DialogButton key={buttonDef.key} {...buttonDef} />
+          })
+        }
+      </DrawerFooter>
     </FrameStateContext.Provider>
-  </div>);
-
-  return <div>Frame Detail</div>
+  );
 }

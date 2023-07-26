@@ -3,3 +3,13 @@
  position: absolute;
   overflow: visible;
 }
+
+.frame-nav-popup {
+ display: none;
+}
+
+.frame-view:hover {
+ .frame-nav-popup {
+  display: block;
+ }
+}

@@ -9,6 +9,27 @@ const theme = extendTheme({
       h: '100%',
       overflowY: 'auto'
     },
+    frameView: {
+      overflow: "visible",
+      position: "absolute",
+      border: "1px solid black",
+      borderColor: "gray.300",
+      backgroundColor: "white",
+      display: "block"
+    },
+    frameDetailWrapper: {
+      display: "block",
+      width: "100%",
+      height: "100%",
+      overflow: "hidden"
+    },
+    markdownOuter: {
+      display: "block",
+      as: 'div',
+      width: "100%",
+      height: "100%",
+      overflow: "hidden"
+    },
     label: {
       backgroundColor: 'rgba(255,255,255,0.8)',
       px: 2,

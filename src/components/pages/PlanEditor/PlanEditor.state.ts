@@ -18,7 +18,8 @@ export type PlanEditorStateValue = {
   mode: planEditorMode,
   newFrame: Box2 | null,
   frames: [],
-  links: []
+  links: [],
+  globalStyle: string
 };
 
 type leafType = typedLeaf<PlanEditorStateValue>;
@@ -30,7 +31,8 @@ const PlanEditorState = (id, planContainerRef) => {
     keys: new Set(),
     loaded: false,
     mode: planEditorMode.NONE,
-    newFrame: null
+    newFrame: null,
+    globalStyle: '',
   };
   return {
     name: "PlanEditor",
@@ -43,6 +45,14 @@ const PlanEditorState = (id, planContainerRef) => {
         const offset = new Vector2(rect.x, rect.y).multiplyScalar(-1);
         box.translate(offset)
         return box;
+      },
+      async globalStyleSub() {
+        return dataManager.do(async (db) => {
+          return db.style.find()
+            .where('scope')
+            .eq('global')
+            .$;
+        })
       },
       initContainer(state: leafType) {
         if (planContainerRef.current) {
@@ -59,6 +69,14 @@ const PlanEditorState = (id, planContainerRef) => {
     },
 
     actions: {
+      async loadGlobalStyle(state: leafType) {
+        const subject = await state.$.globalStyleSub();
+        return subject.subscribe((styles) => {
+          const styleString = styles.map(({ tag, style }) => `.markdown ${tag === '.markdown' ? '' : tag} { ${style} }`)
+            .join("\n")
+          state.do.set_globalStyle(styleString);
+        });
+      },
       onMouseDown(state: leafType, e: MouseEvent, fromContextMenu = false) {
         e.preventDefault();
         e.stopPropagation();

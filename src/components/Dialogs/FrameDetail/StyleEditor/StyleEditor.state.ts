@@ -1,75 +1,18 @@
-import { leafConfig, leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { c } from '@wonderlandlabs/collect'
-import dataManager from '~/lib/managers/dataManager'
-import { DialogEvt } from '~/types'
-import { Subject } from 'rxjs'
+import { scopeForestFactory } from '~/components/Dialogs/FrameDetail/StyleEditor/scopeForestFactory'
+import { leafType } from '~/components/Dialogs/FrameDetail/StyleEditor/types'
 
 export type StyleEditorStateValue = {
-  tagName: string, id: string
-}
-
-type leafType = typedLeaf<StyleEditorStateValue>;
-
-function scopeForestFactory(scope: string, dialogStream: Subject<DialogEvt>): leafConfig {
-  try {
-    return {
-      $value: new Map(),
-      name: scope,
-      actions: {
-        load(state: leafI) {
-          return dataManager.do(async (db) => {
-            const styles = await db.style.find()
-              .where('scope')
-              .eq(scope)
-              .exec();
-
-            state.do.addStyles(styles);
-            state.do.listenForCommit();
-          });
-        },
-        listenForCommit(state: leafType) {
-          dialogStream.subscribe((evt) => {
-            if (evt.type === 'save') {
-              if (!state.value.loaded) {
-                return;
-              }
-              if (!state.value.saving) {
-                state.do.save();
-              }
-            }
-          })
-        },
-        addStyles(state: leafI, styles: any[]) {
-          const value = new Map(state.value);
-          styles.forEach((styleDoc) => {
-            value.set(styleDoc.tag, styleDoc.style);
-          });
-          state.value = value;
-        },
-        save(state: leafI) {
-          dataManager.do(async (db) => {
-            state.value.forEach((style, tag) => {
-              db.style.incrementalUpsert({
-                scope, style, tag
-              });
-            });
-          });
-        }
-      }
-    };
-  } catch (err) {
-    return { $value: null };
-  }
+  tagName: string, id: string,
 }
 
 /**
- * The styles are organized scope (global/local) > styleName > styleDef;
- *
- * @param props
- * @constructor
+ * The styles are organized by scopes;
+ * there should be (up to) two scopes - one global scope for all the frames
+ * and one
  */
-const StyleEditorState = (props) => {
-  const { id, dialogStream } = props
+const StyleEditorState = (props, dialogState) => {
+  const { id } = props
   const $value: StyleEditorStateValue = { tagName: 'p', id: id };
 
   return {
@@ -109,28 +52,33 @@ const StyleEditorState = (props) => {
         if (!tagName) {
           return;
         }
-        console.log('adding style', tagName, 'to scope', scope);
         state.do.upsertScope(scope);
         state.child(scope)?.set(tagName, 'prop: value;');
       },
-
       upsertScope(state: leafType, scope: string) {
         if (!state.child(scope)) {
-          const def = scopeForestFactory(scope, dialogStream)
+          const def = scopeForestFactory(scope, dialogState)
           state.addChild(def, scope);
           return state.child(scope)!.do.load();
         }
       },
-
-      save(state: leafType) {
-        state.children.forEach(({ child, key: scope }) => {
-          child.do.save(scope);
-        });
+      async save(state: leafType) {
+        console.log('----- styleEditor - save');
+        const children = state.children;
+        for (const { child } of children) {
+         await child.do.save();
+        }
       },
       async load(state: leafType) {
         await state.do.upsertScope(id);
         await state.do.upsertScope('global');
-        console.log(id, '----- styles loaded', state.$.invert());
+      },
+      async delete(state: leafType, tag, scope) {
+        if (scope === 'local') {
+         return state.child(id)!.do.delete(tag);
+        } else {
+         return state.child(scope)!.do.delete(tag);
+        }
       }
     }
   };

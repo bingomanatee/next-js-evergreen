@@ -1,5 +1,5 @@
 "use client"
-import '~/app/globals.css'
+import '~/app/globals.scss'
 import { Inter } from 'next/font/google'
 import { ChakraProviders } from '~/app/ChakraProviders'
 import { useState } from 'react'

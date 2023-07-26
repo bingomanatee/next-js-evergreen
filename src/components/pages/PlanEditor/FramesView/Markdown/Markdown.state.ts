@@ -27,14 +27,7 @@ const MarkdownState = (props: { frame: Frame }) => {
     name: "Markdown",
     $value,
 
-    selectors: {
-      text(state: leafType) {
-        return (state.value.frame.content?.markdown) ?? '_-- no content --_';
-      },
-      style(state: leafType) {
-        return '';
-      }
-    },
+    selectors: {},
 
     actions: {
       async loadStyles(state: leafType) {
@@ -45,8 +38,10 @@ const MarkdownState = (props: { frame: Frame }) => {
             .exec();
 
           const styleText = styles.map(({ tag, style }) => {
+            let selector = tag === '.markdown-frame' ? tag :  `.markdown-frame ${tag}`;
+
             return `
-              #frame-${frameId} ${tag} {
+              #frame-${frameId} ${selector} {
                 ${style}
               }
               `

@@ -1,6 +1,7 @@
 import { VERT, HORIZ } from './constants'
 import { GenFunction } from '@wonderlandlabs/can-di-land/lib/types'
 import { Subject } from 'rxjs'
+import { leafI } from '@wonderlandlabs/forest/lib/types'
 
 export type Orientation = HORIZ | VERT
 export type FrameType = 'markdown' | 'image' | 'map';
@@ -23,7 +24,7 @@ export type Plan = {
   created?: number
 }
 
-const isPromise = (input: any): input is Promise<any> => {
+export const isPromise = (input: any): input is Promise<any> => {
   return input && (typeof input.then === 'function')
     && (typeof input.catch === 'function')
     && (typeof input.finally === 'function')
@@ -37,5 +38,5 @@ export type DialogEvt = {
 export type DialogView = {
   close: GenFunction;
   save: GenFunction;
-  dialogStream: Subject<DialogEvt>
+  dialogState: leafI
 }

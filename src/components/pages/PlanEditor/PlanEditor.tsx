@@ -61,9 +61,7 @@ function PlanEditor(props: PlanEditorProps) {
 
   const [value, state] = useForest([stateFactory, id, planContainerRef],
     async (localState) => {
-      console.log('create - local state')
       const sub = await localState.do.load();
-      console.log('create - local state loaded');
       keyManager.init();
 
       let keySub = keyManager.stream.subscribe((keys) => {
@@ -71,12 +69,14 @@ function PlanEditor(props: PlanEditorProps) {
       })
       return () => {
         sub?.unsubscribe()
+        keySub?.unsubscribe();
       };
     }, 'PLAN EDITOR ');
 
-  const { newFrame, frames, keys } = value;
+  const { newFrame, frames, keys, globalStyles } = value;
 
   return (<div className={styles.container} ref={planContainerRef}>
+    <style dangerouslySetInnerHTML={{ __html: globalStyles }}/>
     <FrameAnchorView>
       <GridView/>
       <FramesView frames={frames}/>

@@ -1,6 +1,23 @@
 'use client'
 import { extendTheme } from '@chakra-ui/react'
 
+const FRAMES_LIST = {
+  as: 'div',
+  fontSize: '0.8em',
+  overflow: 'hidden',
+  fontWeight: 400,
+  px: 3,
+  py: 1,
+  noOfLines: 1
+};
+
+const EDIT_LINK = {
+  color: 'editLink',
+  _hover : {
+    textDecoration: 'underline'
+  }
+}
+
 const theme = extendTheme({
   layerStyles: {
     'text-document': {
@@ -13,7 +30,7 @@ const theme = extendTheme({
       overflow: "visible",
       position: "absolute",
       border: "1px solid black",
-      borderColor: "gray.300",
+      borderColor: "blackAlpha.200",
       backgroundColor: "white",
       display: "block"
     },
@@ -72,6 +89,7 @@ const theme = extendTheme({
     'nav-light': 'hsl(200,86%,80%)',
     'nav': 'hsl(200,55%,50%)',
     'nav-dark': 'hsl(200,100%,25%)',
+    'editLink': 'hsl(228,70%,50%)',
     'active-button-back': 'hsl(30,50%,25%)',
     'button-back': 'hsl(30,0%,85%)',
     'active-button': 'hsl(30,100%,75%)',
@@ -180,7 +198,17 @@ const theme = extendTheme({
       }
     },
     Heading: {
+      baseStyle: {},
       variants: {
+        markdownHead: {
+          fontWeight: 'normal',
+          noOfLines: 1,
+          position: 'absolute',
+          width: '100%',
+          _hover: {
+            color: 'black'
+          }
+        },
         "accordionHead": {
           fontSize: 'xs',
           fontWeight: 600,
@@ -201,7 +229,38 @@ const theme = extendTheme({
       mb: '8',
       mt: '4'
     },
-    "code": {
+    markdownHead: {
+      fontWeight: 'normal',
+      textAlign: 'center',
+      color: 'blackAlpha.200',
+      numLines: 1,
+      _hover: {
+        color: 'black'
+      }
+    },
+    framesList: FRAMES_LIST,
+    framesListEdit: {
+      ...FRAMES_LIST,
+      ...EDIT_LINK
+    },
+    framesListHover: {
+      ...FRAMES_LIST,
+      backgroundColor: 'light-accent'
+    },
+    framesListHoverEdit: {
+      ...FRAMES_LIST,
+      backgroundColor: 'light-accent',
+      ...EDIT_LINK
+    },
+
+    framesListHead: {
+      ...FRAMES_LIST,
+      color: 'blackAlpha.700',
+      borderBottom: '1px solid gray',
+      borderColor: 'blackAlpha.300',
+      textAlign: 'center'
+    },
+    code: {
       fontFamily: 'var(--font-space-mono) monospace',
       fontSize: 'sm',
       lineHeight: '100%'

@@ -15,7 +15,7 @@ export default function StyleEditor(props: StyleEditorProps) {
 
   const [value, state] = useForest([stateFactory, props, dialogState],
     (localState) => {
-      localState.do.load();
+      localState.do.init();
     });
 
   const frameId = props.id;

@@ -208,6 +208,12 @@ const dataManager: DataManager = {
     } catch (err) {
       console.log('error in adding frame:', err);
     }
+  },
+  async fetchFrame(frameId) {
+    return dataManager.do(async (db) => {
+      const map = await db.frames.findByIds([frameId])
+      return map.get(frameId);
+    })
   }
 }
 

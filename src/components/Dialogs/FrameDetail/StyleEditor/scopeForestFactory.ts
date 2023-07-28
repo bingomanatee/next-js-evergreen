@@ -8,7 +8,7 @@ export function scopeForestFactory(scope: string, dialogState: leafI): leafConfi
       $value: new Map(),
       name: scope,
       actions: {
-        load(state: leafI) {
+        init(state: leafI) {
           return dataManager.do(async (db) => {
             const styles = await db.style.find()
               .where('scope')

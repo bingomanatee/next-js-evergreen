@@ -18,15 +18,19 @@ export default function Messages(props: MessagesProps) {
 
   const [value, state] = useForest([stateFactory, props, toast],
     (localState) => {
-      localState.do.load();
+      localState.do.init();
     });
 
   const { dialog, shelf } = value;
 
-  return (<div className={styles.container}>
-    {dialog ? (
-      <Dialog value={dialog} closeDialog={state.do.closeDialog}/>
-    ) : null}
-    {shelf ? <Dialog value={shelf} form="shelf" closeDialog={state.do.closeShelf} /> : null}
+  if (dialog) {
+   return (<div className={styles.container}>
+        <Dialog value={dialog} closeDialog={state.do.closeDialog}/>
+    </div>);
+  }
+  if (shelf) return (<div className={styles.container}>
+    <Dialog value={shelf} form="shelf" closeDialog={state.do.closeShelf} />
   </div>);
+
+  return <div className={styles.container}>&nbsp;</div>
 }

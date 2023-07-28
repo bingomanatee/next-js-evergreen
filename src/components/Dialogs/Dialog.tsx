@@ -21,14 +21,14 @@ type DialogProps = { value: { view: MessageTypeValue }, closeDialog: GenFunction
 
 const views = new Map();
 export default function Dialog(props: DialogProps) {
-  const { value, form, closeDialog } = props;
-  const { view, title, onClose, onSave, cancelPrompt, actionPrompt } = value.view;
+  const { form, closeDialog } = props;
+  const { view, title, value } = props.value.view;
 
   let ViewComponent;
 
   const [stateValue, state] = useForest([stateFactory, props],
     (localState) => {
-      localState.do.load();
+      localState.do.init();
     });
 
   const { buttons } = stateValue;
@@ -44,6 +44,12 @@ export default function Dialog(props: DialogProps) {
 
         case 'frame-detail':
           views.set(view, dynamic(() => import ( '~/components/Dialogs/FrameDetail/FrameDetail'), {
+            suspense: true
+          }))
+          break;
+
+        case 'frame-list':
+          views.set(view, dynamic(() => import ( '~/components/Dialogs/FrameList/FrameList'), {
             suspense: true
           }))
           break;
@@ -72,7 +78,7 @@ export default function Dialog(props: DialogProps) {
             {title ? (<DrawerHeader>{title}</DrawerHeader>) : null}
             <Suspense fallback={<Spinner/>}>
               <ViewComponent
-                value={value.view}
+                value={props.value.view}
                 cancel={state.do.cancel}
                 save={state.do.save}
               />
@@ -94,7 +100,7 @@ export default function Dialog(props: DialogProps) {
       <ModalBody>
         <Suspense fallback={<Spinner/>}>
           <ViewComponent
-            value={value.view}
+            value={props.value.view}
             cancel={state.do.cancel}
             save={state.do.save}
           />

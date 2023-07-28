@@ -64,7 +64,7 @@ const FrameDetailState = (id: string, dialogState: leafI) => {
         dialogState.do.cancel();
       },
 
-      load(state: leafType) {
+      init(state: leafType) {
         state.do.initData();
         state.do.listenForCommit();
       }

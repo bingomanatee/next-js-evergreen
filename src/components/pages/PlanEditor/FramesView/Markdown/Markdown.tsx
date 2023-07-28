@@ -10,20 +10,22 @@ import { useEffect } from 'react'
 type MarkdownProps = { frame: Frame }
 
 export default function Markdown(props: MarkdownProps) {
-  const {frame} = props;
+  const { frame } = props;
 
   const [value, state] = useForest([stateFactory, props],
     (localState) => {
       setTimeout(() => {
-        localState.do.load()
+        localState.do.init()
       }, 500);
     });
 
   const { loaded, styles } = value;
 
+  // update the state's frame data if it changes.
   useEffect(() => {
-    console.log('setting frame with content', frame.value)
-    state.do.set_frame(frame);
+    if (loaded && state.value.frame !== frame) {
+      state.do.set_frame(frame);
+    }
   }, [state, frame, loaded]);
 
   if (!loaded) {
@@ -33,8 +35,9 @@ export default function Markdown(props: MarkdownProps) {
 
   return <>
     <style dangerouslySetInnerHTML={{ __html: styles }}/>
-    <Box id={`frame-${frame?.id ?? 'unknown'}`} layerStyle="markdownOuter">
-      <Heading size="xs"> Markdown: {frame?.id}</Heading>
+    <Box id={`frame-${frame.id ?? 'unknown'}`} layerStyle="markdownOuter">
+      <Heading position="absolute" width="100%" textStyle="markdownHead" variant="markdownHead"
+               size="xs">{frame.name ?? frame.id}</Heading>
       <ReactMarkdown className="markdown-frame">{frame.value}</ReactMarkdown>
     </Box></>;
 }

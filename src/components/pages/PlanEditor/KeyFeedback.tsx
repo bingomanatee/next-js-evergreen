@@ -1,0 +1,29 @@
+import { Flex, Kbd, Text, VStack } from '@chakra-ui/react'
+import { memo } from 'react'
+import styles from '~/components/pages/PlanEditor/PlanEditor.module.scss'
+
+function KeyFeedbackItem(props: { value: string }) {
+  switch (props.value) {
+    case ('f'):
+      return <Flex direction="row" layerStyle="keyHintRow">
+        <Kbd>F</Kbd>
+        <Text textStyle="keyHint" size="sm">Draw a frame with a mouse drag</Text>
+      </Flex>
+      break;
+  }
+  return null;
+}
+
+const KeyFeedbackItemM = memo(KeyFeedbackItem);
+
+export function KeyFeedback({ keys }) {
+  const keyValues = Array.from(keys);
+  if (!keyValues.length) {
+    return null;
+  }
+  return <section className={styles['key-feedback']}>
+    <VStack>
+      {keyValues.map((key: string) => (<KeyFeedbackItemM key={key} value={key}/>))}
+    </VStack>
+  </section>
+}

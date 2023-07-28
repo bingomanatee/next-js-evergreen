@@ -8,12 +8,12 @@ export type FrameType = 'markdown' | 'image' | 'map';
 export type Frame = {
   name?: string,
   id: string,
+  project_id: number,
   left: number,
   top: number,
   width: number,
   height: number,
   order: number,
-  projectId: number,
   type: FrameType,
   value: string
 }
@@ -22,6 +22,13 @@ export type Plan = {
   id: string,
   user_id: string,
   created?: number
+}
+
+export type Link = {
+  id: string,
+  project_id: number,
+  from_frame: string,
+  to_frame: string
 }
 
 export const isPromise = (input: any): input is Promise<any> => {

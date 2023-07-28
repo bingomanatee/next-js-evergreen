@@ -23,27 +23,6 @@ export function FrameView(props: { frame: Frame }) {
   /**
    * edit on click handler
    */
-  const onEditClick= useCallback(() => {
-    messageManager.sidebar(
-      {
-        view: 'frame-detail',
-        id: frame.id,
-        title: `Edit frame ${frame.name ?? frame.id}`,
-        actionPrompt: 'Save Frame',
-        cancelPrompt: 'Close'
-      }
-    );
-  }, [frame])
-  const onListClick = useCallback(() => {
-    messageManager.sidebar(
-      {
-        view: 'frame-list',
-        title: `Frames`,
-        actionPrompt: 'Done',
-        cancelPrompt: ''
-      }
-    );
-  }, [])
 
   let DetailView;
   if (frame.type) {
@@ -80,7 +59,7 @@ export function FrameView(props: { frame: Frame }) {
       zIndex={frame.order}
       className={styles['frame-view']}
     >
-      <HStack pad={8} spacing="4" position="absolute" className={styles['frame-nav-popup']}>
+      <HStack pad={8} top={'20px'} spacing="4" position="absolute" zIndex={10} className={styles['frame-nav-popup']}>
         <IconButton
           aria-label="move"
           p={2}
@@ -91,7 +70,7 @@ export function FrameView(props: { frame: Frame }) {
           backgroundColor="white" isRound
         />
         <IconButton
-          onClick={onEditClick}
+          onClick={() => messageManager.editFrame(frame.id, frame.name)}
           ml={4}
           p={2}
           w="36px" h="36px"
@@ -102,7 +81,7 @@ export function FrameView(props: { frame: Frame }) {
           backgroundColor="white" isRound
         />
         <IconButton
-          onClick={onListClick}
+          onClick={() => messageManager.listFrames(frame.id)}
           ml={4}
           p={2}
           w="36px" h="36px"

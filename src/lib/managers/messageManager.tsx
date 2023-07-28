@@ -42,6 +42,30 @@ const messageManager = {
       type: 'shelf',
       value: { view, title: view.title }
     })
+  },
+
+  editFrame(id: string, name? : string) {
+    messageManager.sidebar(
+      {
+        view: 'frame-detail',
+        id: id,
+        title: `Edit frame ${name?? id}`,
+        actionPrompt: 'Save Frame',
+        cancelPrompt: 'Close'
+      }
+    );
+  },
+
+  listFrames(id: string) {
+    messageManager.sidebar(
+      {
+        view: 'frame-list',
+        title: `Frames`,
+        actionPrompt: 'Done',
+        cancelPrompt: '',
+        value: {size: 'sm', id}
+      }
+    );
   }
 }
 

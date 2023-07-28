@@ -38,7 +38,7 @@ export default function FrameDetail(props: FrameDetailProps) {
 
   const [value, state] = useForest([stateFactory, id, dialogState],
     (localState) => {
-      localState.do.load();
+      localState.do.init();
     }, true);
 
   const frameState = state.child('frame')!;

@@ -104,13 +104,12 @@ const PlanEditorState = (id, planContainerRef) => {
 
       onRightMouseDown(state: leafType, e: MouseEvent) {
         if (blockManager.isBlocked) {
-          console.log('blocked to create new frame');
           return;
         }
         const subject = blockManager.block('');
         let end = null;
         const start = new Vector2(e.x, e.y);
-        console.log('----- start is ', start.toArray());
+
         const onMove = (e: MouseEvent) => {
           end = new Vector2(e.x, e.y);
           state.do.drawPendingFrame(start, end);
@@ -129,7 +128,7 @@ const PlanEditorState = (id, planContainerRef) => {
         state.setMeta('rightDownSub', subject);
         state.do.set_mode(planEditorMode.ADDING_FRAME)
       },
-      async load(state: leafType) {
+      async init(state: leafType) {
         state.$.initContainer();
         let sub;
         dataManager.initPlan(id)

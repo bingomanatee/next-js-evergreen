@@ -1,4 +1,4 @@
-import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { Frame } from '~/types'
 import dataManager from '~/lib/managers/dataManager'
 
@@ -30,25 +30,26 @@ const MarkdownState = (props: { frame: Frame }) => {
 
     actions: {
       async loadStyles(state: leafType) {
-        await dataManager.do(async (db) => {
-          const styles = await db.style.find()
+        return dataManager.do(async (db) => {
+          const subject = db.style.find()
             .where('scope')
             .eq(frameId)
-            .exec();
+            .$;
 
-          const styleText = styles.map(({ tag, style }) => {
-            let selector = tag === '.markdown-frame' ? tag :  `.markdown-frame ${tag}`;
-
-            return `
+          return subject.subscribe((styles) => {
+            const styleText = styles.map(({ tag, style }) => {
+              let selector = tag === '.markdown-frame' ? tag : `.markdown-frame ${tag}`;
+              return `
               #frame-${frameId} ${selector} {
                 ${style}
               }
               `
-          }).join(`\n\n`);
-          state.do.set_styles(styleText);
+            }).join(`\n\n`);
+            state.do.set_styles(styleText);
+          });
         });
       },
-      async load(state: leafType) {
+      async init(state: leafType) {
         await state.do.loadStyles();
         state.do.set_loaded(true);
       }

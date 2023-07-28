@@ -59,7 +59,7 @@ const StyleEditorState = (props, dialogState) => {
         if (!state.child(scope)) {
           const def = scopeForestFactory(scope, dialogState)
           state.addChild(def, scope);
-          return state.child(scope)!.do.load();
+          return state.child(scope)!.do.init();
         }
       },
       async save(state: leafType) {
@@ -69,7 +69,7 @@ const StyleEditorState = (props, dialogState) => {
          await child.do.save();
         }
       },
-      async load(state: leafType) {
+      async init(state: leafType) {
         await state.do.upsertScope(id);
         await state.do.upsertScope('global');
       },

@@ -74,7 +74,7 @@ const DialogState = (props) => {
         state.do.set_buttons([{ label, onClick, key, ...rest }, ...state.value.buttons]);
       },
 
-      load(state: leafType) {
+      init(state: leafType) {
 
         state.do.addButton(
           actionPrompt || 'Done',

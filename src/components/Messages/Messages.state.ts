@@ -45,7 +45,7 @@ const MessagesState = (props, toast) => {
         state.do.set_shelf(null);
       },
 
-      load(state: leafType) {
+      init(state: leafType) {
         let sub = messageManager.notifySubject.subscribe(state.do.onMessage);
         return () => sub?.unsubscribe()
       }

@@ -20,3 +20,7 @@ position: relative;
   grid-template-columns: [id] 2fr [name] 1fr [order] 3em [widget] auto [end];
   grid-row-gap: 4px;
 }
+
+.active-frame {
+  color: hsl(330, 100%, 60%) !important;
+}

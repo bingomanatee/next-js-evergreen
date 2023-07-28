@@ -2,6 +2,7 @@ import { VERT, HORIZ } from './constants'
 import { GenFunction } from '@wonderlandlabs/can-di-land/lib/types'
 import { Subject } from 'rxjs'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
+import { MessageTypeValue } from '~/lib/managers/types'
 
 export type Orientation = HORIZ | VERT
 export type FrameType = 'markdown' | 'image' | 'map';
@@ -46,4 +47,5 @@ export type DialogView = {
   close: GenFunction;
   save: GenFunction;
   dialogState: leafI
+  value: MessageTypeValue
 }

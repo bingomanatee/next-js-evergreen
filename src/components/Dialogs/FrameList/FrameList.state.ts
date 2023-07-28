@@ -3,12 +3,23 @@ import dataManager from '~/lib/managers/dataManager'
 import { Frame, Link } from '~/types'
 import { throttle } from 'lodash'
 import { Vector2 } from 'three'
+
+// local
 import px from '~/lib/utils/px'
 import sortByOrder from '~/lib/utils/SortByOrder'
 import messageManager from '~/lib/managers/messageManager'
 
-export type FrameListStateValue = { frames: Frame[], links: Link[], mousePos: Vector2, overId: string | null, clickedId: string | null };
+// component
+import { FrameListProps } from './types'
 
+export type FrameListStateValue = {
+  frames: Frame[],
+  links: Link[],
+  mousePos: Vector2,
+  overId: string | null,
+  activeId: string
+  clickedId: string | null
+};
 type leafType = typedLeaf<FrameListStateValue>;
 const THROTTLED = 'mouseMoveThrottled';
 
@@ -16,8 +27,17 @@ function describeFramesIter(f) {
   return `${f.id} - ${f.order}`
 }
 
-const FrameListState = (props, gridRef, bodyRef) => {
-  const $value: FrameListStateValue = { overId: null, frames: [], links: [], mousePos: new Vector2(), clickedId: null };
+const FrameListState = (props: FrameListProps, gridRef, bodyRef) => {
+  const value : {id?: string} = props.value.value;
+
+  const $value: FrameListStateValue = {
+    overId: null,
+    frames: [],
+    links: [],
+    mousePos: new Vector2(),
+    activeId: value.id ?? '',
+    clickedId: null
+  };
   return {
     name: "FrameList",
     $value,

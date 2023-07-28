@@ -10,6 +10,7 @@ export type MessageTypeValue = {
   size?: string,
   onClose?: GenFunction,
   onSave?: GenFunction,
+  value?: Record<any, any>
 };
 
 export type MessageType = 'dialog'  | 'shelf'  | 'toast'

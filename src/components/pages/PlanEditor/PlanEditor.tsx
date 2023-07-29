@@ -1,7 +1,7 @@
 "use client"
-import { memo, useRef } from 'react';
+import { createContext, memo, useRef } from 'react';
 import styles from './PlanEditor.module.scss';
-import stateFactory from './PlanEditor.state.ts';
+import stateFactory, { planEditorMode } from './PlanEditor.state.ts';
 import useForest from '~/lib/useForest';
 import keyManager from '~/lib/managers/keyManager'
 import FrameAnchorView from '~/components/pages/PlanEditor/FrameAnchorView/FrameAnchorView'
@@ -12,8 +12,11 @@ import { Box2 } from 'three'
 import { Box } from '@chakra-ui/react'
 import HelpPrompt from '~/components/pages/PlanEditor/HelpPrompt/HelpPrompt'
 import { KeyFeedback } from '~/components/pages/PlanEditor/KeyFeedback'
+import MoveFrameView from '~/components/pages/PlanEditor/MoveFrameView/MoveFrameView'
+import { leafI } from '@wonderlandlabs/forest/lib/types'
 
 type PlanEditorProps = { id: string, managers: ManagerMap }
+export const PlanEditorStateCtx = createContext<leafI | null>(null);
 
 function NewFrame(props: { box: Box2 | null }) {
   const { box } = props;
@@ -48,15 +51,18 @@ function PlanEditor(props: PlanEditorProps) {
       };
     }, 'PLAN EDITOR ');
 
-  const { newFrame, frames, keys, markdownStyles } = value;
+  const { newFrame, frames, keys, markdownStyles, mode } = value;
 
   return (<div className={styles.container} ref={planContainerRef}>
     <style dangerouslySetInnerHTML={{ __html: markdownStyles }}/>
-    <FrameAnchorView>
-      <GridView/>
-      <FramesView frames={frames}/>
-    </FrameAnchorView>
+    <PlanEditorStateCtx.Provider value={state}>
+      <FrameAnchorView>
+        <GridView/>
+        <FramesView frames={frames}/>
+      </FrameAnchorView>
+    </PlanEditorStateCtx.Provider>
     <NewFrame box={newFrame}/>
+    {mode === planEditorMode.MOVING_FRAME ? <MoveFrameView planEditorState={state}/> : null}
     <HelpPrompt/>
     <KeyFeedback keys={keys}/>
   </div>);

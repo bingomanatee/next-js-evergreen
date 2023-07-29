@@ -19,12 +19,12 @@ import useForestFiltered from '~/lib/useForestFiltered'
 import { userManager } from '~/lib/managers/userManager'
 import navManager from '~/lib/managers/navManager'
 import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { historyStream } from '~/lib/managers/historyStream'
 import { HamburgerIcon } from '@chakra-ui/icons'
 import messageManager from '~/lib/managers/messageManager'
 
-function NavBar ({user}) {
+function NavBar ({user, pathName}) {
   const router = useRouter();
 
   const {subTitle} = useForestFiltered(navManager, ['subTitle']);
@@ -38,6 +38,10 @@ function NavBar ({user}) {
   }, []);
   const goHome = useCallback(() => {router.push('/')}, [router])
 
+  const isPlanEditor = useMemo(() => {
+    return /plans\/[\w\-]{12,}/.test(pathName);
+  }, [pathName])
+
   return <Flex direction="row" justify="space-between" align="center" py={0} pt={2} h={8} px={4} w="100%" as="header" zIndex={100000}>
     <Menu zIndex={100000}>
       <MenuButton as={Button} leftIcon={<HamburgerIcon boxSize={6} />} backgroundColor="transparent">
@@ -45,7 +49,8 @@ function NavBar ({user}) {
       </MenuButton>
       <MenuList>
         <MenuItem onClick={goHome}>Home Page</MenuItem>
-        <MenuItem onClick={showHelp}>Help</MenuItem>
+        {isPlanEditor ? <MenuItem onClick={showHelp}>Help</MenuItem> : null}
+        {isPlanEditor ? <MenuItem onClick={() => messageManager.listFrames('all')}>List Frames</MenuItem> : null}
       </MenuList>
     </Menu>
     <HStack>
@@ -65,7 +70,7 @@ export default function NavLayout ({children}) {
   }, [pathname])
   return (
       <VStack w="100%" h="100%" overflow="hidden" align="stretch" as="main">
-        <NavBar user={user} />
+        <NavBar pathName={pathname} user={user} />
 
         <Box flex="1" background="blackAlpha.50" overflow="auto">
           {children}

@@ -70,7 +70,7 @@ export default function Dialog(props: DialogProps) {
           autoFocus={false}
           placement='right'
           size={size}
-          onClose={close}
+          onClose={closeDialog}
         >
           <DrawerOverlay/>
           <DrawerContent zIndex={1000}>

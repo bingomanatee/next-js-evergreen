@@ -3,19 +3,19 @@ import dataManager from '~/lib/managers/dataManager'
 import blockManager from '~/lib/managers/blockManager'
 import { Box2, Vector2 } from 'three'
 import { userManager } from '~/lib/managers/userManager'
+import messageManager from '~/lib/managers/messageManager'
 
-const ADDING_FRAME = 'adding-frame';
-const NONE = 'none';
-
-enum planEditorMode {
-  NONE,
-  ADDING_FRAME
+export enum planEditorMode {
+  NONE = 'none',
+  ADDING_FRAME = 'adding-frame',
+  MOVING_FRAME = 'moving-frame'
 }
 
 export type PlanEditorStateValue = {
   loaded: boolean,
   keys: Set<string>,
   mode: planEditorMode,
+  modeTarget: string | null;
   newFrame: Box2 | null,
   frames: [],
   links: [],
@@ -33,6 +33,7 @@ const PlanEditorState = (id, planContainerRef) => {
     mode: planEditorMode.NONE,
     newFrame: null,
     markdownStyles: '',
+    modeTarget: null,
   };
   return {
     name: "PlanEditor",
@@ -72,7 +73,10 @@ const PlanEditorState = (id, planContainerRef) => {
       async loadMarkdownStyles(state: leafType) {
         const subject = await state.$.markdownStyleSub();
         return subject.subscribe((styles) => {
-          const styleString = styles.map(({ tag, style }) => `.markdown-frame ${tag === '.markdown-frame' ? '' : tag} { ${style} }`)
+          const styleString = styles.map(({
+                                            tag,
+                                            style
+                                          }) => `.markdown-frame ${tag === '.markdown-frame' ? '' : tag} { ${style} }`)
             .join("\n")
           state.do.set_markdownStyles(styleString);
         });
@@ -98,8 +102,25 @@ const PlanEditorState = (id, planContainerRef) => {
       createFrame(state: leafType, start: Vector2, end: Vector2) {
         if (start && end) {
           const frame = state.$.offsetBox(start, end);
-          dataManager.addFrame(id, frame);
+          if (frame.width >= 150 && frame.height >= 150) {
+            dataManager.addFrame(id, frame);
+          } else {
+            messageManager.notify('New Frame',
+              'frame is too small - no frame created Frame width and height must be at least 150 pixels');
+          }
         }
+      },
+
+      moveFrame(state: leafType, id: string) {
+        if (blockManager.isBlocked) {
+          return;
+        }
+        state.do.initMode(planEditorMode.MOVING_FRAME, id);
+      },
+
+      initMode(state: leafType, mode: string, id: string) {
+        state.do.set_mode(mode);
+        state.do.set_modeTarget(id || null);
       },
 
       onRightMouseDown(state: leafType, e: MouseEvent) {
@@ -126,7 +147,7 @@ const PlanEditorState = (id, planContainerRef) => {
           state.do.createFrame(start, end);
         }, { once: true })
         state.setMeta('rightDownSub', subject);
-        state.do.set_mode(planEditorMode.ADDING_FRAME)
+        state.do.initMode(planEditorMode.ADDING_FRAME)
       },
       async init(state: leafType) {
         state.$.initContainer();

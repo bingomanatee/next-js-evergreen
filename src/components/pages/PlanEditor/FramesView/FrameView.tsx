@@ -1,11 +1,12 @@
 import { Frame } from '~/types'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useContext, useEffect, useRef } from 'react'
 import messageManager from '~/lib/managers/messageManager'
 import { Box, Heading, HStack, IconButton, Text, useBoolean } from '@chakra-ui/react'
 import px from '~/lib/utils/px'
 import dynamic from 'next/dynamic'
 import Image from 'next/image';
 import styles from './FramesView.module.scss'
+import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 
 const resourceMap = new Map();
 
@@ -20,6 +21,7 @@ function NullView({ frame: frame }) {
 export function FrameView(props: { frame: Frame }) {
   const { frame } = props;
   const boxRef = useRef(null);
+  const planEditorState = useContext(PlanEditorStateCtx);
   /**
    * edit on click handler
    */
@@ -62,6 +64,7 @@ export function FrameView(props: { frame: Frame }) {
       <HStack pad={8} top={'20px'} spacing="4" position="absolute" zIndex={10} className={styles['frame-nav-popup']}>
         <IconButton
           aria-label="move"
+          onClick={() => planEditorState?.do.moveFrame(frame.id)}
           p={2}
           w="36px" h="36px"
           border="1px solid black"
@@ -70,22 +73,22 @@ export function FrameView(props: { frame: Frame }) {
           backgroundColor="white" isRound
         />
         <IconButton
+          aria-label="edit"
           onClick={() => messageManager.editFrame(frame.id, frame.name)}
           ml={4}
           p={2}
           w="36px" h="36px"
-          aria-label="edit"
           border="1px solid black"
           borderColor="blackAlpha.500"
           icon={<Image alt="edit-icon" src="/img/icons/frame-edit.svg" width="30" height="30"/>}
           backgroundColor="white" isRound
         />
         <IconButton
+          aria-label="list"
           onClick={() => messageManager.listFrames(frame.id)}
           ml={4}
           p={2}
           w="36px" h="36px"
-          aria-label="edit"
           border="1px solid black"
           borderColor="blackAlpha.500"
           icon={<Image alt="edit-icon" src="/img/icons/frame-list.svg" width="30" height="30"/>}

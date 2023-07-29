@@ -161,9 +161,18 @@ export default function framesSchema(dataManager) {
           if (oldDoc.content?.markdown) {
             oldDoc.value = oldDoc.content.markdown;
           }
-          if (!oldDoc.type) oldDoc.type = 'markdown';
+          if (!oldDoc.type) {
+            oldDoc.type = 'markdown';
+          }
           delete oldDoc.content;
           return oldDoc;
+        }
+      },
+      statics: {
+        async fetch(id: string) {
+          //@ts-ignore
+          const map = await this.findByIds([id]).exec();
+          return map.get(id);
         }
       }
     },

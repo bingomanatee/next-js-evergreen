@@ -2,6 +2,7 @@ import { Subject, SubjectLike } from 'rxjs'
 import { ToastMessage } from '@chakra-ui/react'
 import { ToastStatus } from '@chakra-ui/toast/dist/toast.types'
 import { MessageTypeValue } from '~/lib/managers/types'
+import blockManager from '~/lib/managers/blockManager'
 
 export type MessageManager = {
   notifySubject: SubjectLike<MessageEvent>,
@@ -31,6 +32,7 @@ const messageManager = {
     )
   },
   async dialog(view: MessageTypeValue) {
+    if (blockManager.isBlocked) return;
     messageManager.notifySubject.next({
       type: 'dialog',
       value: { view, title: view.title }
@@ -38,6 +40,7 @@ const messageManager = {
   },
 
   sidebar(view) {
+    if (blockManager.isBlocked) return;
     messageManager.notifySubject.next({
       type: 'shelf',
       value: { view, title: view.title }

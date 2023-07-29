@@ -30,7 +30,7 @@ const theme = extendTheme({
       overflow: "visible",
       position: "absolute",
       border: "1px solid black",
-      borderColor: "blackAlpha.200",
+      borderColor: "blackAlpha.600",
       backgroundColor: "white",
       display: "block"
     },

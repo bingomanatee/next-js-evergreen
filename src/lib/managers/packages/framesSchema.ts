@@ -2,6 +2,10 @@ import { v4 } from 'uuid'
 import { BehaviorSubject, switchMap } from 'rxjs'
 import { ID_PROP, LINK_POINT, sampleId, STYLE } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
+import { Direction, X_DIR, X_DIR_R, Y_DIR } from '~/components/pages/PlanEditor/managers/resizeManager.types'
+import { Frame } from '~/types'
+import { Vector2 } from 'three'
+import px from '~/lib/utils/px'
 
 function projectIdToPanId(oldDoc) {
   if ('project_id' in oldDoc) {
@@ -173,6 +177,73 @@ export default function framesSchema(dataManager) {
           //@ts-ignore
           const map = await this.findByIds([id]).exec();
           return map.get(id);
+        }
+      },
+      methods: {
+        /**
+         * the position of a "drag box" relative to the frame
+         */
+        position(dir: Direction, offsetMap?: Map<string, number>, asStyle?: boolean) {
+          const self = this as Frame;
+          let x = self.left;
+          let y = self.top;
+          switch (dir.x) {
+            case X_DIR.X_DIR_C:
+              x += self.width / 2;
+              if (offsetMap) {
+                [X_DIR.X_DIR_L, X_DIR.X_DIR_R].forEach((dirName) => {
+                  if (offsetMap.has(dirName)) {
+                    x += offsetMap!.get(dirName)!;
+                  }
+                })
+              }
+              break;
+            case X_DIR.X_DIR_R:
+              x += self.width;
+              if (offsetMap?.has(dir.x)) {
+                x += offsetMap!.get(dir.x)!;
+              }
+              break;
+
+            case X_DIR.X_DIR_L:
+              if (offsetMap?.has(dir.x)) {
+                x += offsetMap!.get(dir.x)!;
+              }
+              break;
+          }
+
+          switch (dir.y) {
+            case Y_DIR.Y_DIR_M:
+              y += self.height / 2;
+              if (offsetMap) {
+                [Y_DIR.Y_DIR_T, Y_DIR.Y_DIR_B].forEach((dirName) => {
+                  if (offsetMap.has(dirName)) {
+                    x += offsetMap.get(dirName);
+                  }
+                });
+              }
+              break;
+
+            case Y_DIR.Y_DIR_B:
+              y += self.height;
+              if (offsetMap?.has(dir.y)) {
+                x += offsetMap!.get(dir.y)!;
+              }
+              break;
+
+            case Y_DIR.Y_DIR_T:
+              if (offsetMap?.has(dir.y)) {
+                x += offsetMap!.get(dir.y)!;
+              }
+              break;
+          }
+
+          const pt = new Vector2(x, y).round();
+          return asStyle ? {
+            position: 'absolute',
+            left: px(pt.x),
+            top: px(pt.y)
+          } : pt
         }
       }
     },

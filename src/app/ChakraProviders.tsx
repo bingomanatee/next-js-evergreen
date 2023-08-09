@@ -13,13 +13,23 @@ const FRAMES_LIST = {
 
 const EDIT_LINK = {
   color: 'editLink',
-  _hover : {
+  _hover: {
     textDecoration: 'underline'
   }
 }
 
 const theme = extendTheme({
   layerStyles: {
+    'nav-frame': {
+      direction: "row",
+      justify: "space-between",
+      align: "center",
+      py: 0, pt: 2, h: 8,
+      px: 4,
+      w: "100%",
+      as: "header",
+      zIndex: 100000,
+    },
     'text-document': {
       px: 16,
       py: 10,
@@ -285,6 +295,7 @@ const theme = extendTheme({
 
 import { CacheProvider } from '@chakra-ui/next-js'
 import { ChakraProvider } from '@chakra-ui/react'
+import { h } from '@chakra-ui/toast/dist/toast.types-f226a101'
 
 export function ChakraProviders({ children }: {
   children: React.ReactNode

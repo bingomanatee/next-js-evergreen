@@ -119,8 +119,9 @@ const PlanEditorState = (id, planContainerRef) => {
       },
 
       initMode(state: leafType, mode: string, id: string) {
-        state.do.set_mode(mode);
+        console.log('initMode: ', mode, id);
         state.do.set_modeTarget(id || null);
+        state.do.set_mode(mode);
       },
 
       onRightMouseDown(state: leafType, e: MouseEvent) {

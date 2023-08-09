@@ -59,10 +59,10 @@ function PlanEditor(props: PlanEditorProps) {
       <FrameAnchorView>
         <GridView/>
         <FramesView frames={frames}/>
+         <MoveFrameView />
       </FrameAnchorView>
     </PlanEditorStateCtx.Provider>
     <NewFrame box={newFrame}/>
-    {mode === planEditorMode.MOVING_FRAME ? <MoveFrameView planEditorState={state}/> : null}
     <HelpPrompt/>
     <KeyFeedback keys={keys}/>
   </div>);

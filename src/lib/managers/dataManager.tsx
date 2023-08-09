@@ -47,7 +47,7 @@ type DataManager = {
   deleteState(scope: string, tagName: string): void
 }
 
-type Action = (db: RxDatabase<any>) => Promise<any>;
+type Action = (db: RxDatabase<any>) => Promise<any> | Promise<void>
 
 const dataManager: DataManager = {
   deleteState(scope: string, tagName: string) {
@@ -98,6 +98,10 @@ const dataManager: DataManager = {
     await dataManager.poll(id);
   },
   async do(action: Action) {
+    if (typeof action !== 'function') {
+      console.error('bad argument to dataManager.do:', action);
+      return null;
+    }
     const db = await dbPromise;
     return action(db);
   },

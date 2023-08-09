@@ -1,3 +1,4 @@
+@import '~/utils.scss';
 
 .container {
  position: absolute;
@@ -12,4 +13,8 @@
  .frame-nav-popup {
   display: block;
  }
+}
+
+.frame-view {
+ @include no-select();
 }

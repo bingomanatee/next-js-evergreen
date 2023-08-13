@@ -1,17 +1,23 @@
-import { Fragment, useContext, useRef } from 'react';
-import styles from './FrameList.module.scss';
-import stateFactory from './FrameList.state.ts';
-import useForest from '~/lib/useForest';
 import { DrawerBody, DrawerFooter, Text } from '@chakra-ui/react'
+import { Fragment, useCallback, useContext, useEffect, useRef } from 'react';
+
+// ---- libs
+import useForest from '~/lib/useForest';
+import sortByOrder from '~/lib/utils/SortByOrder'
+import useForestFiltered from '~/lib/useForestFiltered'
+import frameListHoverManager from '~/lib/managers/frameListHoverManager'
+
+// ---- components
 import DialogButton from '~/components/Dialogs/DialogButton'
 import { DialogButtonProps } from '~/components/Dialogs/Dialog.state'
-import useForestFiltered from '~/lib/useForestFiltered'
 import DialogStateCtx from '~/components/Dialogs/DialogStateCtx'
-import sortByOrder from '~/lib/utils/SortByOrder'
-import { FrameListProps } from '~/components/Dialogs/FrameList/types'
-import { act } from 'react-dom/test-utils'
 
-export default function FrameList(props: FrameListProps) {
+// ---- local
+import { FrameListProps } from './types'
+import styles from './FramesEditPanel.module.scss';
+import stateFactory from './FramesEditPanel.state.ts';
+
+export default function FramesEditPanel(props: FrameListProps) {
   const dialogState = useContext(DialogStateCtx);
   const gridRef = useRef(null);
   const bodyRef = useRef(null);
@@ -24,7 +30,32 @@ export default function FrameList(props: FrameListProps) {
 
   const { frames, clickedId, overId, activeId } = value;
 
-  console.log('active id: ', activeId);
+  const { clicked, hover } = useForestFiltered(frameListHoverManager);
+
+  const itemTextStyle = useCallback((id) => {
+    if (id === hover && id === clicked) {
+      return 'framesListItem-hover-clicked';
+    }
+    if (id === clicked) {
+      return 'framesListItem-clicked';
+    }
+    if (id === hover) {
+      return 'framesListItem-hover';
+    }
+    return "framesListItem"
+  }, [clicked, hover])
+  const editTextStyle = useCallback((id) => {
+    if (id === hover && id === clicked) {
+      return 'framesListItem-edit-hover-clicked';
+    }
+    if (id === clicked) {
+      return 'framesListItem-edit-clicked';
+    }
+    if (id === hover) {
+      return 'framesListItem-edit-hover';
+    }
+    return "framesListItem-edit"
+  }, [clicked, hover])
 
   return (<>
     <DrawerBody ref={bodyRef}>
@@ -36,8 +67,8 @@ export default function FrameList(props: FrameListProps) {
         {frames.sort(sortByOrder).reverse().map((frame) => {
           const { id } = frame;
           const mouseEnter = () => state.do.mouseEnter(id);
-          const textStyle = clickedId && (overId === id) ? 'framesListHover' : "framesList"
-          const editTextStyle = clickedId && (overId === id) ? 'framesListHoverEdit' : "framesListEdit"
+          const text = itemTextStyle(id);
+          const editText = editTextStyle(id);
           return <Fragment key={id}>
             <Text
               data-id={id}
@@ -45,29 +76,39 @@ export default function FrameList(props: FrameListProps) {
               onMouseOver={mouseEnter}
               onMouseLeave={state.do.mouseLeave}
               noOfLines={1}
-              textStyle={textStyle}
+              textStyle={text}
               className={activeId === id ? styles['active-frame'] : null}
             >
               {activeId === id ? `*${frame.id}` : frame.id}
             </Text>
             <Text
               data-id={frame.id}
-              textStyle={textStyle}
+              onMouseDown={state.do.gridMouseDown}
+              onMouseOver={mouseEnter}
+              onMouseLeave={state.do.mouseLeave}
+              noOfLines={1}
+              textStyle={text}
               className={activeId === id ? styles['active-frame'] : null}
             >
               {frame.name}
             </Text>
             <Text
               data-id={frame.id} textAlign="right"
-              textStyle={textStyle}
+              onMouseDown={state.do.gridMouseDown}
+              onMouseOver={mouseEnter}
+              onMouseLeave={state.do.mouseLeave}
+              noOfLines={1}
+              textStyle={text}
               className={activeId === id ? styles['active-frame'] : null}
             >
               {frame.order}
             </Text>
             <Text
-              color="editLink"
+              onMouseOver={mouseEnter}
+              onMouseLeave={state.do.mouseLeave}
               onClick={(e) => state.do.editFrame(id, e)}
-              data-id={frame.id} textStyle={editTextStyle}
+              data-id={frame.id}
+              textStyle={editText}
               className={activeId === id ? styles['active-frame'] : null}
             >
               Edit

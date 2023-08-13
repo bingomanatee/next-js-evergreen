@@ -1,4 +1,4 @@
-import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
 import { Frame, Link } from '~/types'
 import { throttle } from 'lodash'
@@ -11,6 +11,7 @@ import messageManager from '~/lib/managers/messageManager'
 
 // component
 import { FrameListProps } from './types'
+import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 
 export type FrameListStateValue = {
   frames: Frame[],
@@ -27,7 +28,7 @@ function describeFramesIter(f) {
   return `${f.id} - ${f.order}`
 }
 
-const FrameListState = (props: FrameListProps, gridRef, bodyRef) => {
+const FramesEditPanelState = (props: FrameListProps, gridRef, bodyRef) => {
   const value : {id?: string} = props.value.value;
 
   const $value: FrameListStateValue = {
@@ -71,7 +72,6 @@ const FrameListState = (props: FrameListProps, gridRef, bodyRef) => {
           if (clickedId && overId && overId !== clickedId) {
             state.do.moveFrame(clickedId, overId);
           }
-          state.do.set_clickedId(null);
         };
         bodyRef.current?.addEventListener('mousemove', moveListener);
         bodyRef.current?.addEventListener('mouseup', moveUnListener, { once: true });
@@ -79,12 +79,11 @@ const FrameListState = (props: FrameListProps, gridRef, bodyRef) => {
       },
       editFrame(state: leafType, id: string, e: MouseEvent) {
         e.stopPropagation()
-        console.log('edit frame', id, props);
-        props.cancel();
-        console.log('ended list');
+        props.close();
+        frameListHoverManager.do.clear();
+
         setTimeout(async () => {
-          const m = await dataManager.do((db) => db.frames.findByIds([id]).exec());
-          messageManager.editFrame(id, m.get(id)?.name)
+          messageManager.editFrame(id)
         }, 500)
       },
       async moveFrame(state: leafType, fromId: string, toId: string) {
@@ -96,9 +95,6 @@ const FrameListState = (props: FrameListProps, gridRef, bodyRef) => {
           console.error('cannot find ', fromId);
           return
         }
-        ;
-        console.log('frame order from', frames.map(describeFramesIter));
-
 
         const reorderedFrames: Frame[] = orderedFrames.map((frame) => {
           if (frame.id === fromId) {
@@ -133,12 +129,14 @@ const FrameListState = (props: FrameListProps, gridRef, bodyRef) => {
         })
       },
       mouseEnter(state: leafType, id) {
+        frameListHoverManager.do.set_hover(id);
         if (state.value.clickedId) {
           state.do.set_overId(id);
         }
       },
 
       mouseLeave(state: leafType) {
+        frameListHoverManager.do.set_hover(null);
         if (state.value.overId) {
           state.do.set_overId(null);
         }
@@ -177,4 +175,4 @@ const FrameListState = (props: FrameListProps, gridRef, bodyRef) => {
   };
 };
 
-export default FrameListState;
+export default FramesEditPanelState;

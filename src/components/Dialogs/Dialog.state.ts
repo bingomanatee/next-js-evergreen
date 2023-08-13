@@ -2,6 +2,7 @@ import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { Subject } from 'rxjs'
 import { GenFunction } from '@wonderlandlabs/can-di-land/lib/types'
 import { MessageTypeValue } from '~/lib/managers/types'
+import messageManager from '~/lib/managers/messageManager'
 
 export type DialogButtonProps = { label: string, key: string | number, onClick: GenFunction, colorScheme?: string, variant?: string }
 type CloseAction = { mode: string, value?: any }
@@ -28,7 +29,6 @@ const DialogState = (props) => {
 
     actions: {
       cancel(state: leafType, value?: any) {
-        console.log('Dialog.state cancel')
         if (state.value.closed) {
           return;
         }
@@ -45,12 +45,17 @@ const DialogState = (props) => {
           console.error('error closing dialog', err);
         }
 
-        console.log('Dialog.state cancel closing dialog')
+        messageManager.notifySubject.next(
+          {
+            type: 'close-dialog',
+            action: 'cancel',
+            value
+          }
+        )
         closeDialog();
       },
 
       save(state: leafType, value?: any) {
-        console.log('Dialog.save');
         if (state.value.closed) {
           return;
         }
@@ -67,6 +72,12 @@ const DialogState = (props) => {
           console.error('error saving dialog', err);
         }
 
+        messageManager.notifySubject.next(
+          {
+            type: 'close-dialog',
+            action: 'cancel',
+            value
+          })
         closeDialog();
       },
 

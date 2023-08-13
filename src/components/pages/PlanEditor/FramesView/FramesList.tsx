@@ -4,7 +4,7 @@ import { FrameView } from '~/components/pages/PlanEditor/FramesView/FrameView'
 
 type FramesViewProps = { frames: Frame[] }
 
-export default function FramesView(props: FramesViewProps) {
+export default function FramesList(props: FramesViewProps) {
   const { frames } = props;
 
   return (<div className={styles.container}>

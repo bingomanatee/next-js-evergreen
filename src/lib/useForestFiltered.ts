@@ -8,7 +8,7 @@ export type Filter = oneParamFunction<any, any> | any[] | any;
 
 export default function useForestFiltered<InputElement = HTMLInputElement>(
   state: leafI,
-  filter: Filter,
+  filter?: Filter,
 ): any {
 
   /**
@@ -33,6 +33,9 @@ export default function useForestFiltered<InputElement = HTMLInputElement>(
         console.warn('cannot get value for leaf ', state);
         return {};
       }
+      if (filter === undefined) {
+        return value;
+      }
       if (Array.isArray(filter)) {
         return c(value)
           .getReduce((data, value, field) => {
@@ -42,12 +45,12 @@ export default function useForestFiltered<InputElement = HTMLInputElement>(
             return data;
           }, {})
       }
-      if (typeof filter === 'function') {
-        return filter(value, state);
+      if (filter && typeof filter === 'function') {
+        return filter!(value, state);
       }
       return c(value).get(filter);
     },
-    [filter]
+    [state, filter]
   );
   const [result, setResult] = useState(pick(state.value));
 

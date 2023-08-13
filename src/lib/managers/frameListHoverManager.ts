@@ -1,0 +1,23 @@
+import { BehaviorSubject } from 'rxjs'
+import { Forest } from '@wonderlandlabs/forest'
+import { leafI } from '@wonderlandlabs/forest/lib/types'
+
+/**
+ * a simple tracker to coordinate the hover factor of
+ */
+
+const frameListHoverManager = new Forest({
+  $value: {
+    clicked: null,
+    hover: null,
+  },
+  actions: {
+    clear(state: leafI) {
+      console.log('--- clearing FLHM');
+      state.do.set_clicked(null);
+      state.do.set_hover(null);
+    }
+  }
+});
+
+export default frameListHoverManager;

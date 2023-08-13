@@ -68,6 +68,8 @@ const bottomLeftDir = dirToString({ x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_B });
 const bottomCenterDir = dirToString({ x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_B });
 const bottomRightDir = dirToString({ x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_B });
 
+// deprecated
+
 function resizeManagerFactory(id: string): leafConfig {
   return {
     $value: {

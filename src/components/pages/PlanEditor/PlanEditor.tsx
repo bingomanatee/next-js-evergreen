@@ -1,19 +1,23 @@
 "use client"
-import { createContext, memo, useRef } from 'react';
-import styles from './PlanEditor.module.scss';
-import stateFactory, { planEditorMode } from './PlanEditor.state.ts';
-import useForest from '~/lib/useForest';
-import keyManager from '~/lib/managers/keyManager'
-import FrameAnchorView from '~/components/pages/PlanEditor/FrameAnchorView/FrameAnchorView'
-import FramesView from '~/components/pages/PlanEditor/FramesView/FramesView'
-import { GridView } from '~/components/pages/PlanEditor/GridView/GridView'
-import { ManagerMap } from '~/lib/managers/types'
+import { createContext, memo, useEffect, useRef } from 'react';
 import { Box2 } from 'three'
 import { Box } from '@chakra-ui/react'
-import HelpPrompt from '~/components/pages/PlanEditor/HelpPrompt/HelpPrompt'
-import { KeyFeedback } from '~/components/pages/PlanEditor/KeyFeedback'
-import MoveFrameView from '~/components/pages/PlanEditor/MoveFrameView/MoveFrameView'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
+
+// ----- site \
+import useForest from '~/lib/useForest';
+import keyManager from '~/lib/managers/keyManager'
+import { GridView } from './GridView/GridView'
+import { ManagerMap } from '~/lib/managers/types'
+
+// ----- local
+import HelpPrompt from './HelpPrompt/HelpPrompt'
+import { KeyFeedback } from './KeyFeedback'
+import MoveFrameView from './MoveFrameView/MoveFrameView'
+import FramesList from './FramesView/FramesList'
+import FrameAnchorView from './FrameAnchorView/FrameAnchorView'
+import stateFactory, { planEditorMode } from './PlanEditor.state.ts';
+import styles from './PlanEditor.module.scss';
 
 type PlanEditorProps = { id: string, managers: ManagerMap }
 export const PlanEditorStateCtx = createContext<leafI | null>(null);
@@ -36,11 +40,14 @@ function NewFrame(props: { box: Box2 | null }) {
 function PlanEditor(props: PlanEditorProps) {
   const { id } = props;
   const planContainerRef = useRef(null);
+  useEffect(() => {
+    keyManager.init();
+  }, [])
+
 
   const [value, state] = useForest([stateFactory, id, planContainerRef],
     async (localState) => {
       const sub = await localState.do.init();
-      keyManager.init();
 
       let keySub = keyManager.stream.subscribe((keys) => {
         localState.do.set_keys(keys);
@@ -58,7 +65,7 @@ function PlanEditor(props: PlanEditorProps) {
     <PlanEditorStateCtx.Provider value={state}>
       <FrameAnchorView>
         <GridView/>
-        <FramesView frames={frames}/>
+        <FramesList frames={frames}/>
          <MoveFrameView />
       </FrameAnchorView>
     </PlanEditorStateCtx.Provider>

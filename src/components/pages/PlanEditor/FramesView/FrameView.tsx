@@ -1,14 +1,16 @@
 import { Frame } from '~/types'
-import { useCallback, useContext, useEffect, useRef } from 'react'
-import messageManager from '~/lib/managers/messageManager'
-import { Box, Heading, HStack, IconButton, Text, useBoolean } from '@chakra-ui/react'
+import { useContext, useMemo, useRef } from 'react'
+import { Box, Heading } from '@chakra-ui/react'
 import px from '~/lib/utils/px'
 import dynamic from 'next/dynamic'
-import Image from 'next/image';
 import styles from './FramesView.module.scss'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
+import { FrameControls } from '~/components/pages/PlanEditor/FramesView/FrameControls'
+import frameListHoverManager from '~/lib/managers/frameListHoverManager'
+import useForestFiltered from '~/lib/useForestFiltered'
 
 const resourceMap = new Map();
+
 
 function NullView({ frame: frame }) {
   return (<Box>
@@ -39,6 +41,7 @@ export function FrameView(props: { frame: Frame }) {
         if (!resourceMap.has(frame.type)) {
           resourceMap.set(frame.type, dynamic(() => import ( './Map/Map')))
         }
+        break;
 
       case 'image':
         if (!resourceMap.has(frame.type)) {
@@ -47,6 +50,24 @@ export function FrameView(props: { frame: Frame }) {
         break;
     }
   }
+
+  const { clicked, hover } = useForestFiltered(frameListHoverManager, ['clicked', 'hover']);
+
+  const layerStyle = useMemo(() => {
+    if (frame) {
+      const { id, name } = frame;
+      if (clicked === id && hover === id) {
+        return "frameView-clicked-hover";
+      }
+      if (clicked === id) {
+        return "frameView-clicked"
+      }
+      if (hover === id) {
+        return "frameView-hover"
+      }
+    }
+    return "frameView";
+  }, [clicked, frame, hover]);
 
   DetailView = resourceMap.get(frame.type ?? null) || NullView
   return (
@@ -57,45 +78,12 @@ export function FrameView(props: { frame: Frame }) {
       top={px(frame.top)}
       width={px(frame.width)}
       height={px(frame.height)}
-      layerStyle="frameView"
+      layerStyle={layerStyle}
       zIndex={frame.order}
       className={styles['frame-view']}
     >
-      <HStack pad={8} top={'20px'} spacing="4" position="absolute" zIndex={10} className={styles['frame-nav-popup']}>
-        <IconButton
-          aria-label="move"
-          onClick={() => planEditorState?.do.moveFrame(frame.id)}
-          p={2}
-          w="36px" h="36px"
-          border="1px solid black"
-          borderColor="blackAlpha.500"
-          icon={<Image alt="edit-icon" src="/img/icons/frame-move.svg" width="30" height="30"/>}
-          backgroundColor="white" isRound
-        />
-        <IconButton
-          aria-label="edit"
-          onClick={() => messageManager.editFrame(frame.id, frame.name)}
-          ml={4}
-          p={2}
-          w="36px" h="36px"
-          border="1px solid black"
-          borderColor="blackAlpha.500"
-          icon={<Image alt="edit-icon" src="/img/icons/frame-edit.svg" width="30" height="30"/>}
-          backgroundColor="white" isRound
-        />
-        <IconButton
-          aria-label="list"
-          onClick={() => messageManager.listFrames(frame.id)}
-          ml={4}
-          p={2}
-          w="36px" h="36px"
-          border="1px solid black"
-          borderColor="blackAlpha.500"
-          icon={<Image alt="edit-icon" src="/img/icons/frame-list.svg" width="30" height="30"/>}
-          backgroundColor="white" isRound
-        />
-      </HStack>
-      <Box as="div" layerStyle="frameDetailWrapper" data-id="frame-detail-wrapper">
+      {<FrameControls planEditorState={planEditorState!} frameId={frame.id} frameName={frame.name}/>}
+      <Box as="div" layerStyle={"frameDetailWrapper"} data-id="frame-detail-wrapper">
         <DetailView frame={frame}/>
       </Box>
     </Box>

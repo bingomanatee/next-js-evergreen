@@ -18,93 +18,123 @@ const EDIT_LINK = {
   }
 }
 
+const FRAME_VIEW = {
+  overflow: "visible",
+  position: "absolute",
+  borderWidth: "2px",
+  borderStyle: 'solid',
+  borderColor: "blackAlpha.600",
+  backgroundColor: "white",
+  display: "block"
+}
+
+const LAYER_STYLES = {
+  'nav-frame': {
+    direction: "row",
+    justify: "space-between",
+    align: "center",
+    py: 0, pt: 2, h: 8,
+    px: 4,
+    w: "100%",
+    as: "header",
+    zIndex: 100000,
+  },
+  'text-document': {
+    px: 16,
+    py: 10,
+    h: '100%',
+    overflowY: 'auto'
+  },
+  'move-outline': {
+    position: 'absolute',
+    borderColor: 'magenta',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    zIndex: 100000
+  },
+  frameView: FRAME_VIEW,
+  'frameView-hover': {
+    ...FRAME_VIEW,
+    borderColor: "frame-view-hover-border",
+  },
+  'frameView-clicked': {
+    ...FRAME_VIEW,
+    borderColor: "frame-view-clicked-border",
+  },
+  'frameView-clicked-hover': {
+    ...FRAME_VIEW,
+    borderColor: "frame-view-clicked-hover-border",
+  },
+  frameDetailWrapper: {
+    display: "block",
+    width: "100%",
+    height: "100%",
+    overflow: "hidden"
+  },
+  markdownOuter: {
+    display: "block",
+    as: 'div',
+    width: "100%",
+    height: "100%",
+    overflow: "hidden"
+  },
+  label: {
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    px: 2,
+    py: 0.5
+  },
+  keyHintRow: {
+    alignItems: 'baseline',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    px: 3,
+    py: 2
+  },
+  newFrame: {
+    position: "absolute",
+    zIndex: "50",
+    background: "black", color: "white",
+    pad: 2,
+    overflow: "hidden",
+  },
+  keyHint: {
+    px: '3px',
+    py: '2px',
+    borderRadius: '0.333em',
+    borderColor: 'gray.500',
+    borderWidth: '1px',
+    mr: 4,
+    backgroundColor: 'white',
+    width: 10,
+    justifyContent: 'center',
+    flexDirection: 'row',
+  }
+}
+const COLORS = {
+  accent: 'hsl(30,100%,50%)',
+  'dark-accent': 'hsl(30,100%,33%)',
+  'x-dark-accent': 'hsl(30,50%,25%)',
+  'light-accent': 'hsl(30,100%,75%)',
+  'x-light-accent': 'hsl(30,100%,85%)',
+
+  'frame-view-hover-border': 'hsla(30,100%,50%,0.5)',
+  'frame-view-clicked-border': 'hsla(90,100%,50%,0.5)',
+  'frame-view-clicked-hover-border': 'hsl(90,100%,50%)',
+
+  'form-title': 'hsl(244,50%,25%)',
+  'nav-x-light': 'hsl(200,100%,90%)',
+  'nav-light': 'hsl(200,86%,80%)',
+  'nav': 'hsl(200,55%,50%)',
+  'nav-dark': 'hsl(200,100%,25%)',
+  'editLink': 'hsl(228,70%,50%)',
+  'active-button-back': 'hsl(30,50%,25%)',
+  'button-back': 'hsl(30,0%,85%)',
+  'active-button': 'hsl(30,100%,75%)',
+  'inactive-button': 'hsl(150,20%,33%)',
+};
+
 const theme = extendTheme({
-  layerStyles: {
-    'nav-frame': {
-      direction: "row",
-      justify: "space-between",
-      align: "center",
-      py: 0, pt: 2, h: 8,
-      px: 4,
-      w: "100%",
-      as: "header",
-      zIndex: 100000,
-    },
-    'text-document': {
-      px: 16,
-      py: 10,
-      h: '100%',
-      overflowY: 'auto'
-    },
-    frameView: {
-      overflow: "visible",
-      position: "absolute",
-      border: "1px solid black",
-      borderColor: "blackAlpha.600",
-      backgroundColor: "white",
-      display: "block"
-    },
-    frameDetailWrapper: {
-      display: "block",
-      width: "100%",
-      height: "100%",
-      overflow: "hidden"
-    },
-    markdownOuter: {
-      display: "block",
-      as: 'div',
-      width: "100%",
-      height: "100%",
-      overflow: "hidden"
-    },
-    label: {
-      backgroundColor: 'rgba(255,255,255,0.8)',
-      px: 2,
-      py: 0.5
-    },
-    keyHintRow: {
-      alignItems: 'baseline',
-      backgroundColor: 'rgba(255,255,255,0.8)',
-      px: 3,
-      py: 2
-    },
-    newFrame: {
-      position: "absolute",
-      zIndex: "50",
-      background: "black", color: "white",
-      pad: 2,
-      overflow: "hidden",
-    },
-    keyHint: {
-      px: '3px',
-      py: '2px',
-      borderRadius: '0.333em',
-      borderColor: 'gray.500',
-      borderWidth: '1px',
-      mr: 4,
-      backgroundColor: 'white',
-      width: 10,
-      justifyContent: 'center',
-      flexDirection: 'row',
-    }
-  },
-  colors: {
-    accent: 'hsl(30,100%,50%)',
-    'dark-accent': 'hsl(30,100%,33%)',
-    'x-dark-accent': 'hsl(30,50%,25%)',
-    'light-accent': 'hsl(30,100%,75%)',
-    'x-light-accent': 'hsl(30,100%,85%)',
-    'form-title': 'hsl(244,50%,25%)',
-    'nav-x-light': 'hsl(200,100%,90%)',
-    'nav-light': 'hsl(200,86%,80%)',
-    'nav': 'hsl(200,55%,50%)',
-    'nav-dark': 'hsl(200,100%,25%)',
-    'editLink': 'hsl(228,70%,50%)',
-    'active-button-back': 'hsl(30,50%,25%)',
-    'button-back': 'hsl(30,0%,85%)',
-    'active-button': 'hsl(30,100%,75%)',
-    'inactive-button': 'hsl(150,20%,33%)',
-  },
+  layerStyles: LAYER_STYLES,
+  colors: COLORS,
   components: {
     Button: {
       baseStyle: {
@@ -248,19 +278,37 @@ const theme = extendTheme({
         color: 'black'
       }
     },
-    framesList: FRAMES_LIST,
-    framesListEdit: {
-      ...FRAMES_LIST,
-      ...EDIT_LINK
-    },
-    framesListHover: {
+    framesListItem: FRAMES_LIST,
+    'framesListItem-hover': {
       ...FRAMES_LIST,
       backgroundColor: 'light-accent'
     },
-    framesListHoverEdit: {
+    'framesListItem-clicked-hover': {
       ...FRAMES_LIST,
-      backgroundColor: 'light-accent',
+      backgroundColor: 'accent'
+    },
+    'framesListItem-clicked': {
+      ...FRAMES_LIST,
+      backgroundColor: 'light-accent'
+    },
+    'framesListItem-edit': {
+      ...FRAMES_LIST,
       ...EDIT_LINK
+    },
+    'framesListItem-edit-hover': {
+      ...FRAMES_LIST,
+      ...EDIT_LINK,
+     backgroundColor: 'light-accent',
+    },
+    'framesListItem-edit-clicked': {
+      ...FRAMES_LIST,
+      ...EDIT_LINK,
+    backgroundColor: 'light-accent',
+    },
+    'framesListItem-edit-clicked-hover': {
+      ...FRAMES_LIST,
+      ...EDIT_LINK,
+     backgroundColor: 'accent',
     },
 
     framesListHead: {
@@ -296,6 +344,7 @@ const theme = extendTheme({
 import { CacheProvider } from '@chakra-ui/next-js'
 import { ChakraProvider } from '@chakra-ui/react'
 import { h } from '@chakra-ui/toast/dist/toast.types-f226a101'
+import { black } from 'kleur/colors'
 
 export function ChakraProviders({ children }: {
   children: React.ReactNode

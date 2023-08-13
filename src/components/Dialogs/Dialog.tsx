@@ -21,7 +21,7 @@ type DialogProps = { value: { view: MessageTypeValue }, closeDialog: GenFunction
 
 const views = new Map();
 export default function Dialog(props: DialogProps) {
-  const { form, closeDialog } = props;
+  const { form } = props;
   const { view, title, value } = props.value.view;
 
   let ViewComponent;
@@ -49,7 +49,7 @@ export default function Dialog(props: DialogProps) {
           break;
 
         case 'frame-list':
-          views.set(view, dynamic(() => import ( '~/components/Dialogs/FrameList/FrameList'), {
+          views.set(view, dynamic(() => import ( '~/components/Dialogs/FramesEditPanel/FramesEditPanel'), {
             suspense: true
           }))
           break;
@@ -70,7 +70,7 @@ export default function Dialog(props: DialogProps) {
           autoFocus={false}
           placement='right'
           size={size}
-          onClose={closeDialog}
+          onClose={state.do.cancel}
         >
           <DrawerOverlay/>
           <DrawerContent zIndex={1000}>
@@ -89,32 +89,37 @@ export default function Dialog(props: DialogProps) {
     )
   }
 
-  return <Modal isOpen
-                autoFocus={false}
-                onClose={closeDialog} size={size}
-                zIndex={1000} position="absolute">
-    <ModalOverlay/>
-    <ModalContent zIndex={1000}>
-      {title ? (<ModalHeader>{title}</ModalHeader>) : null}
-      <ModalCloseButton tabIndex={-1}/>
-      <ModalBody>
-        <Suspense fallback={<Spinner/>}>
-          <ViewComponent
-            value={props.value.view}
-            cancel={state.do.cancel}
-            save={state.do.save}
-          />
-        </Suspense>
-      </ModalBody>
+  return (
+    <DialogStateCtx.Provider value={state}>
+      <Modal isOpen
+             autoFocus={false}
+             onClose={state.do.cancel}
+             size={size}
+             zIndex={1000} position="absolute">
+        <ModalOverlay/>
+        <ModalContent zIndex={1000}>
+          {title ? (<ModalHeader>{title}</ModalHeader>) : null}
+          <ModalCloseButton tabIndex={-1}/>
+          <ModalBody>
+            <Suspense fallback={<Spinner/>}>
+              <ViewComponent
+                value={props.value.view}
+                cancel={state.do.cancel}
+                save={state.do.save}
+              />
+            </Suspense>
+          </ModalBody>
 
-      <ModalFooter>
-        {
-          buttons.map((buttonDef) => {
-            const { onClick, key, label, ...rest } = buttonDef;
-            return <Button mr={3} key={key} onClick={onClick} {...rest}>{label}</Button>
-          })
-        }
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
+          <ModalFooter>
+            {
+              buttons.map((buttonDef) => {
+                const { onClick, key, label, ...rest } = buttonDef;
+                return <Button mr={3} key={key} onClick={onClick} {...rest}>{label}</Button>
+              })
+            }
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </DialogStateCtx.Provider>
+  )
 }

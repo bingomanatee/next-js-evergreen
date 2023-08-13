@@ -1,13 +1,31 @@
 import { useRouter } from 'next/navigation'
 import useForestFiltered from '~/lib/useForestFiltered'
 import navManager from '~/lib/managers/navManager'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import messageManager from '~/lib/managers/messageManager'
-import { Button, Flex, Heading, HStack, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react'
+import { Button, Flex, Heading, HStack, Menu, MenuButton, MenuItem, MenuList, useBoolean, Box } from '@chakra-ui/react'
 import { HamburgerIcon } from '@chakra-ui/icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import UserMenuItem from './UserMenuItem'
+import blockManager from '~/lib/managers/blockManager'
+
+function BlockerWatcher() {
+  const {id, name} = useForestFiltered(blockManager, ['id', 'name']);
+
+  return id ? (
+    <Box
+      position="absolute"
+      top={4}
+      right="20vw"
+      p={1}
+      fontWeight="bold"
+      backgroundColor="yellow"
+    >
+      {name || '- blocked - '} - {id}
+    </Box>
+  ) : null;
+}
 
 export function NavBar({ user, pathName }) {
   const router = useRouter();
@@ -29,7 +47,7 @@ export function NavBar({ user, pathName }) {
     return /plans\/[\w\-]{12,}/.test(pathName);
   }, [pathName])
 
-  return <Flex layerType="nav-fame">
+  return <Flex layerStyle="nav-fame">
     <Menu zIndex={100000}>
       <MenuButton as={Button} leftIcon={<HamburgerIcon boxSize={6}/>} backgroundColor="transparent">
         Menu
@@ -45,6 +63,7 @@ export function NavBar({ user, pathName }) {
       <Link href="/"> <Heading size="sm">Planboard</Heading></Link>
       {subTitle ? <Heading fontWeight="normal" size="sm">{subTitle}</Heading> : null}
     </HStack>
+    <BlockerWatcher/>
     <UserMenuItem user={user}/>
   </Flex>
 }

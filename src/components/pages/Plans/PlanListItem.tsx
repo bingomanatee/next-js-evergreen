@@ -5,8 +5,9 @@ import OpenIcon from '~/components/icons/OpenIcon'
 import DeleteIcon from '~/components/icons/DeleteIcon'
 import { Orientation } from '~/types'
 import { useRouter } from 'next/navigation'
+import { string } from 'zod'
 
-function PlanListItem({ id, name, createdAt, userId, orientation, onDelete }: {
+function PlanListItem({ id, name, orientation, onDelete }: {
   id: string,
   name: string,
   createdAt: any,

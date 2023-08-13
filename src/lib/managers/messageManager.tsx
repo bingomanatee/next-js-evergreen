@@ -3,14 +3,21 @@ import { ToastMessage } from '@chakra-ui/react'
 import { ToastStatus } from '@chakra-ui/toast/dist/toast.types'
 import { MessageTypeValue } from '~/lib/managers/types'
 import blockManager from '~/lib/managers/blockManager'
+import dataManager from '~/lib/managers/dataManager'
+import frameListHoverManager from '~/lib/managers/frameListHoverManager'
+import dialogState from '~/components/Dialogs/Dialog.state'
 
 export type MessageManager = {
   notifySubject: SubjectLike<MessageEvent>,
-  send(title: string, description: string, status: ToastStatus, duration?: number, isClosable?: boolean): void,
+  send(title: string,
+       description: string,
+       status: ToastStatus,
+       duration?: number,
+       isClosable?: boolean): void,
 }
 
 const messageManager = {
-  notifySubject: new Subject(),
+  notifySubject: new Subject(), // triggers dialogs, sidebars, and notifications.
   notify(title,
          description,
          status = 'success',
@@ -32,7 +39,9 @@ const messageManager = {
     )
   },
   async dialog(view: MessageTypeValue) {
-    if (blockManager.isBlocked) return;
+    if (blockManager.$.isBlocked()) {
+      return;
+    }
     messageManager.notifySubject.next({
       type: 'dialog',
       value: { view, title: view.title }
@@ -40,19 +49,26 @@ const messageManager = {
   },
 
   sidebar(view) {
-    if (blockManager.isBlocked) return;
+    if (blockManager.$.isBlocked()) {
+      return;
+    }
     messageManager.notifySubject.next({
       type: 'shelf',
       value: { view, title: view.title }
     })
   },
 
-  editFrame(id: string, name? : string) {
+  async editFrame(id: string, name?: string) {
+    const frame = await dataManager.do((db) => db.frames.fetch(id));
+    if (!frame) {
+      console.error('cannot edit/find frame ', id);
+      return;
+    }
     messageManager.sidebar(
       {
         view: 'frame-detail',
         id: id,
-        title: `Edit frame ${name?? id}`,
+        title: `Edit frame ${frame.name ?? id}`,
         actionPrompt: 'Save Frame',
         cancelPrompt: 'Close'
       }
@@ -60,13 +76,22 @@ const messageManager = {
   },
 
   listFrames(id: string) {
+    frameListHoverManager.do.set_clicked(id);
+    const sub = messageManager.notifySubject.subscribe((value) => {
+      console.log('listFrames - observed', value);
+      if (value.type === 'close-dialog') {
+        console.log('got close dialog');
+        frameListHoverManager.do.clear();
+        sub.unsubscribe();
+      }
+    })
     messageManager.sidebar(
       {
         view: 'frame-list',
         title: `Frames`,
         actionPrompt: 'Done',
         cancelPrompt: '',
-        value: {size: 'sm', id}
+        value: { size: 'sm', id }
       }
     );
   }

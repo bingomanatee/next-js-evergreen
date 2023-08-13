@@ -4,6 +4,7 @@ import blockManager from '~/lib/managers/blockManager'
 import { Box2, Vector2 } from 'three'
 import { userManager } from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
+import { Direction } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 
 export enum planEditorMode {
   NONE = 'none',
@@ -16,6 +17,7 @@ export type PlanEditorStateValue = {
   keys: Set<string>,
   mode: planEditorMode,
   modeTarget: string | null;
+  moveDir: Direction | null,
   newFrame: Box2 | null,
   frames: [],
   links: [],
@@ -32,6 +34,7 @@ const PlanEditorState = (id, planContainerRef) => {
     loaded: false,
     mode: planEditorMode.NONE,
     newFrame: null,
+    moveDir: null,
     markdownStyles: '',
     modeTarget: null,
   };
@@ -73,10 +76,11 @@ const PlanEditorState = (id, planContainerRef) => {
       async loadMarkdownStyles(state: leafType) {
         const subject = await state.$.markdownStyleSub();
         return subject.subscribe((styles) => {
-          const styleString = styles.map(({
-                                            tag,
-                                            style
-                                          }) => `.markdown-frame ${tag === '.markdown-frame' ? '' : tag} { ${style} }`)
+          const styleString = styles.map(
+            ({
+               tag,
+               style
+             }) => `.markdown-frame ${tag === '.markdown-frame' ? '' : tag} { ${style} }`)
             .join("\n")
           state.do.set_markdownStyles(styleString);
         });
@@ -112,23 +116,50 @@ const PlanEditorState = (id, planContainerRef) => {
       },
 
       moveFrame(state: leafType, id: string) {
-        if (blockManager.isBlocked) {
+        if (blockManager.$.isBlocked()) {
           return;
         }
-        state.do.initMode(planEditorMode.MOVING_FRAME, id);
+        try {
+           blockManager.do.block(planEditorMode.MOVING_FRAME, {frameId: id})[1]
+          .subscribe({
+            error(err) {
+              console.error('error in blockSub:', err);
+            },
+            complete() {
+              state.do.clearMode();
+            }
+          })
+          state.do.initMode(planEditorMode.MOVING_FRAME, id);
+           //@TODO: migrate 100% to blockManager
+        } catch (_err) {
+          console.warn('attempt to move frame when blocked', _err);
+        }
       },
 
       initMode(state: leafType, mode: string, id: string) {
-        console.log('initMode: ', mode, id);
         state.do.set_modeTarget(id || null);
         state.do.set_mode(mode);
       },
 
+      clearMode(state: leafType) {
+        state.do.set_modeTarget(null);
+        state.do.set_mode(planEditorMode.NONE);
+      },
+      /**
+       * manage the drag event that creates a new frame
+       */
       onRightMouseDown(state: leafType, e: MouseEvent) {
-        if (blockManager.isBlocked) {
+          if (blockManager.$.isBlocked()) {
           return;
         }
-        const subject = blockManager.block('');
+        try {
+          const [_blockId, subject] = blockManager.do.block(planEditorMode.ADDING_FRAME);
+          state.getMeta('rightDownSub')?.complete();
+          state.setMeta('rightDownSub', subject, true);
+        } catch (_err) {
+          console.warn('right click while blocked');
+          return;
+        }
         let end = null;
         const start = new Vector2(e.x, e.y);
 
@@ -143,13 +174,14 @@ const PlanEditorState = (id, planContainerRef) => {
         }
         planContainerRef.current?.addEventListener('mousemove', onMove);
         planContainerRef.current?.addEventListener('mouseup', () => {
-          subject.complete();
+          state.getMeta('rightDownSub')?.complete();
+          state.setMeta('rightHandSub', null, true)
           finish();
           state.do.createFrame(start, end);
         }, { once: true })
-        state.setMeta('rightDownSub', subject);
         state.do.initMode(planEditorMode.ADDING_FRAME)
       },
+
       async init(state: leafType) {
         state.$.initContainer();
         let sub;
@@ -157,7 +189,6 @@ const PlanEditorState = (id, planContainerRef) => {
           .then(() => {
             state.do.set_loaded(true);
             sub = dataManager.planStream.subscribe(({ plan, frames, links }) => {
-              console.log('PlanEditor: updating frames with ', frames);
               state.do.set_frames(frames);
               state.do.set_links(links);
             })

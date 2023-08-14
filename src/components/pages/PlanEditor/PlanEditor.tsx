@@ -50,7 +50,7 @@ function PlanEditor(props: PlanEditorProps) {
       const sub = await localState.do.init();
 
       let keySub = keyManager.stream.subscribe((keys) => {
-        localState.do.set_keys(keys);
+        localState.do.keys(keys);
       })
       return () => {
         sub?.unsubscribe()

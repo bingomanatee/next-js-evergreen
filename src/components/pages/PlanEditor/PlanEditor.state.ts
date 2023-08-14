@@ -5,11 +5,13 @@ import { Box2, Vector2 } from 'three'
 import { userManager } from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
 import { Direction } from '~/components/pages/PlanEditor/managers/resizeManager.types'
+import keyManager from '~/lib/managers/keyManager'
 
 export enum planEditorMode {
   NONE = 'none',
   ADDING_FRAME = 'adding-frame',
-  MOVING_FRAME = 'moving-frame'
+  MOVING_FRAME = 'moving-frame',
+  PANNING = 'panning'
 }
 
 export type PlanEditorStateValue = {
@@ -73,6 +75,44 @@ const PlanEditorState = (id, planContainerRef) => {
     },
 
     actions: {
+      keys(state: leafType, keys: Set<string>) {
+        state.do.set_keys(keys);
+        console.log('keys: ', keys);
+        if ((!blockManager.$.isBlocked()) && keys.has(' ')) {
+          state.do.pan();
+        }
+      },
+
+      pan(state: leafType) {
+        console.log('---- panning');
+        const observable = blockManager.do.block(planEditorMode.PANNING);
+
+        const sub = observable.subscribe({
+          next(value) {
+            console.log(  'pan observed:', value)
+          },
+          error(_err) {
+            console.error('pan error', _err);
+            keySub.unsubscribe();
+          },
+          complete() {
+            console.log('pan complete');
+            keySub.unsubscribe();
+          }
+        });
+
+        let keySub = keyManager.stream.subscribe((keys) => {
+           if (!keys.has(' ')) {
+             // @TODO: finish panning
+             sub.unsubscribe()
+           }
+        });
+
+        /**
+         * TODO: observe mouse, pan POV
+         */
+      },
+
       async loadMarkdownStyles(state: leafType) {
         const subject = await state.$.markdownStyleSub();
         return subject.subscribe((styles) => {
@@ -120,17 +160,17 @@ const PlanEditorState = (id, planContainerRef) => {
           return;
         }
         try {
-           blockManager.do.block(planEditorMode.MOVING_FRAME, {frameId: id})[1]
-          .subscribe({
-            error(err) {
-              console.error('error in blockSub:', err);
-            },
-            complete() {
-              state.do.clearMode();
-            }
-          })
+          blockManager.do.block(planEditorMode.MOVING_FRAME, { frameId: id })[1]
+            .subscribe({
+              error(err) {
+                console.error('error in blockSub:', err);
+              },
+              complete() {
+                state.do.clearMode();
+              }
+            })
           state.do.initMode(planEditorMode.MOVING_FRAME, id);
-           //@TODO: migrate 100% to blockManager
+          //@TODO: migrate 100% to blockManager
         } catch (_err) {
           console.warn('attempt to move frame when blocked', _err);
         }
@@ -149,7 +189,7 @@ const PlanEditorState = (id, planContainerRef) => {
        * manage the drag event that creates a new frame
        */
       onRightMouseDown(state: leafType, e: MouseEvent) {
-          if (blockManager.$.isBlocked()) {
+        if (blockManager.$.isBlocked()) {
           return;
         }
         try {

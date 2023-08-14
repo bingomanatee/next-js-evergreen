@@ -29,6 +29,22 @@ const FRAME_VIEW = {
 }
 
 const LAYER_STYLES = {
+  'image-preview' : {
+    height: '250px',
+    justifyContent: "center",
+    align: 'center',
+    width: '100%',
+    backgroundImage: `url('/img/image-background.png')`,
+    objectPosition: 'center'
+  },
+  'drop-target': {
+    my: 2,
+    borderStyle: 'dashed',
+    borderWidth: '2px',
+    borderColor: 'nav',
+    backgroundColor: 'nav-x-light',
+    p: 2
+  },
   'nav-frame': {
     direction: "row",
     justify: "space-between",
@@ -108,7 +124,8 @@ const LAYER_STYLES = {
     justifyContent: 'center',
     flexDirection: 'row',
   }
-}
+};
+
 const COLORS = {
   accent: 'hsl(30,100%,50%)',
   'dark-accent': 'hsl(30,100%,33%)',
@@ -130,6 +147,89 @@ const COLORS = {
   'button-back': 'hsl(30,0%,85%)',
   'active-button': 'hsl(30,100%,75%)',
   'inactive-button': 'hsl(150,20%,33%)',
+};
+
+const TEXT_STYLES = {
+  par: {
+    fontSize: 'md',
+    mb: '8',
+    mt: '4'
+  },
+  markdownHead: {
+    fontWeight: 'normal',
+    textAlign: 'center',
+    color: 'blackAlpha.200',
+    numLines: 1,
+    _hover: {
+      color: 'black'
+    }
+  },
+  framesListItem: FRAMES_LIST,
+  'framesListItem-hover': {
+    ...FRAMES_LIST,
+    backgroundColor: 'light-accent'
+  },
+  'framesListItem-clicked-hover': {
+    ...FRAMES_LIST,
+    backgroundColor: 'accent'
+  },
+  'framesListItem-clicked': {
+    ...FRAMES_LIST,
+    backgroundColor: 'light-accent'
+  },
+  'framesListItem-edit': {
+    ...FRAMES_LIST,
+    ...EDIT_LINK
+  },
+  'framesListItem-edit-hover': {
+    ...FRAMES_LIST,
+    ...EDIT_LINK,
+    backgroundColor: 'light-accent',
+  },
+  'framesListItem-edit-clicked': {
+    ...FRAMES_LIST,
+    ...EDIT_LINK,
+    backgroundColor: 'light-accent',
+  },
+  'framesListItem-edit-clicked-hover': {
+    ...FRAMES_LIST,
+    ...EDIT_LINK,
+    backgroundColor: 'accent',
+  },
+
+  framesListHead: {
+    ...FRAMES_LIST,
+    color: 'blackAlpha.700',
+    borderBottom: '1px solid gray',
+    borderColor: 'blackAlpha.300',
+    textAlign: 'center'
+  },
+  code: {
+    fontFamily: 'var(--font-space-mono) monospace',
+    fontSize: 'sm',
+    lineHeight: '100%'
+  },
+  info: {
+    fontSize: 'sm',
+    color: 'gray.700',
+    padding: 3
+  },
+  'info-dropzone': {
+    color: 'nav-dark',
+    fontSize: 'sm',
+    textAlign: 'center',
+    py: 3
+  },
+  keyHintKey: {
+    textAlign: 'center',
+    fontSize: 'sm',
+    color: 'black'
+  },
+  keyHint: {
+    textAlign: 'center',
+    fontSize: 'sm',
+    color: 'gray.700'
+  }
 };
 
 const theme = extendTheme({
@@ -263,82 +363,7 @@ const theme = extendTheme({
     Text: {},
   },
 
-  textStyles: {
-    par: {
-      fontSize: 'md',
-      mb: '8',
-      mt: '4'
-    },
-    markdownHead: {
-      fontWeight: 'normal',
-      textAlign: 'center',
-      color: 'blackAlpha.200',
-      numLines: 1,
-      _hover: {
-        color: 'black'
-      }
-    },
-    framesListItem: FRAMES_LIST,
-    'framesListItem-hover': {
-      ...FRAMES_LIST,
-      backgroundColor: 'light-accent'
-    },
-    'framesListItem-clicked-hover': {
-      ...FRAMES_LIST,
-      backgroundColor: 'accent'
-    },
-    'framesListItem-clicked': {
-      ...FRAMES_LIST,
-      backgroundColor: 'light-accent'
-    },
-    'framesListItem-edit': {
-      ...FRAMES_LIST,
-      ...EDIT_LINK
-    },
-    'framesListItem-edit-hover': {
-      ...FRAMES_LIST,
-      ...EDIT_LINK,
-     backgroundColor: 'light-accent',
-    },
-    'framesListItem-edit-clicked': {
-      ...FRAMES_LIST,
-      ...EDIT_LINK,
-    backgroundColor: 'light-accent',
-    },
-    'framesListItem-edit-clicked-hover': {
-      ...FRAMES_LIST,
-      ...EDIT_LINK,
-     backgroundColor: 'accent',
-    },
-
-    framesListHead: {
-      ...FRAMES_LIST,
-      color: 'blackAlpha.700',
-      borderBottom: '1px solid gray',
-      borderColor: 'blackAlpha.300',
-      textAlign: 'center'
-    },
-    code: {
-      fontFamily: 'var(--font-space-mono) monospace',
-      fontSize: 'sm',
-      lineHeight: '100%'
-    },
-    info: {
-      fontSize: 'sm',
-      color: 'gray.700',
-      padding: 3
-    },
-    keyHintKey: {
-      textAlign: 'center',
-      fontSize: 'sm',
-      color: 'black'
-    },
-    keyHint: {
-      textAlign: 'center',
-      fontSize: 'sm',
-      color: 'gray.700'
-    }
-  }
+  textStyles: TEXT_STYLES
 });
 
 import { CacheProvider } from '@chakra-ui/next-js'

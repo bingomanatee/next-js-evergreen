@@ -1,6 +1,5 @@
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
-import { debounce } from 'lodash'
 
 export type FrameDetailStateValue = {
   loaded: boolean;
@@ -28,6 +27,17 @@ const FrameDetailState = (id: string, dialogState: leafI) => {
           height: 0,
           type: 'markdown',
           value: ''
+        },
+
+        actions: {
+          updateSize(state: leafI, width, height) {
+            if (width && typeof width === 'number' && width !== state.value.width) {
+              state.do.set_width(width);
+            }
+            if (width && typeof height === 'number' && height !== state.value.height) {
+              state.do.set_height(height);
+            }
+          }
         }
       }
     },
@@ -67,6 +77,9 @@ const FrameDetailState = (id: string, dialogState: leafI) => {
       init(state: leafType) {
         state.do.initData();
         state.do.listenForCommit();
+      },
+      updateSize(state: leafType, leafType, width, height) {
+        state.child('frame')!.do.updateSize(width, height);
       }
     }
   };

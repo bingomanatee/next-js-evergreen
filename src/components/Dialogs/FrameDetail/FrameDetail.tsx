@@ -1,4 +1,4 @@
-import { ComponentType, Suspense, useContext, useEffect, useState } from 'react';
+import { ComponentType, Suspense, useContext, useEffect } from 'react';
 import styles from './FrameDetail.module.scss';
 import stateFactory from './FrameDetail.state.ts';
 import useForest from '~/lib/useForest';
@@ -130,7 +130,7 @@ export default function FrameDetail(props: FrameDetailProps) {
                     <MarkdownIcon active={type === 'markdown'}/>
                   </ChoiceWrapper>
 
-                  <ChoiceWrapper target="image" title="Image">
+                  <ChoiceWrapper target="image" title="ImageDetail">
                     <ImageIcon active={type === 'image'}/>
                   </ChoiceWrapper>
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useRef } from 'react'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import styles from '~/components/pages/PlanEditor/MoveFrameView/MoveFrameView.module.scss'
 import stateFactory from './MoveFrameSprite.state';
@@ -22,9 +22,24 @@ export function DragFrameSprite() {
       planEditorState,
       moveState],
     (localState) => {
-      setTimeout(() => {
-        localState.do.init(spriteRef.current);
-      }, 100)
+      let out = null;
+      const tryInit = () => {
+        out = setTimeout(() => {
+          if (spriteRef.current) {
+            localState.do.init(spriteRef.current);
+          } else {
+            tryInit();
+          }
+        }, 100)
+      }
+
+      tryInit();
+
+      return () => {
+        if (out) {
+          clearTimeout(out);
+        }
+      }
     });
 
   return <div
@@ -42,4 +57,4 @@ export function DragFrameSprite() {
 }
 
 const CENTER_SPRITE_SIZE = 20;
-const POINT_OFFSET = new Vector2(-CENTER_SPRITE_SIZE/2, -CENTER_SPRITE_SIZE/2);
+const POINT_OFFSET = new Vector2(-CENTER_SPRITE_SIZE / 2, -CENTER_SPRITE_SIZE / 2);

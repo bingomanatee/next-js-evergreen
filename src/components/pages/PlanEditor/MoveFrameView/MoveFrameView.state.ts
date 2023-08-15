@@ -1,9 +1,5 @@
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import {
-  Direction,
-  X_DIR,
-  Y_DIR,
-} from '~/components/pages/PlanEditor/managers/resizeManager.types'
+import { Direction, X_DIR, Y_DIR, } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import { Frame } from '~/types'
 import { Vector2 } from 'three'
 import dataManager from '~/lib/managers/dataManager'
@@ -15,6 +11,7 @@ export type MoveFrameViewStateValue = {
   top: number,
   right: number,
   bottom: number,
+  type: string,
   loaded: boolean,
   deltas: Map<string, number>,
   id: string | null
@@ -30,6 +27,7 @@ const MoveFrameViewState = (props) => {
     bottom: 0,
     right: 0,
     id: '',
+    type: '',
     deltas: new Map(),
     loaded: false
   };
@@ -40,8 +38,8 @@ const MoveFrameViewState = (props) => {
       init(state: leafType) {
         // load in the current frame every time the id and mode changes
 
-        const sub = blockManager.select(state.do.updateId, (value) => {
-          const {type, data} = value;
+        return blockManager.select(state.do.updateId, (value) => {
+          const { type, data } = value;
 
           console.log('---- block editor watch:', value);
           if (type === planEditorMode.MOVING_FRAME) {
@@ -49,8 +47,6 @@ const MoveFrameViewState = (props) => {
           }
           return null;
         });
-
-        return sub;
       },
 
       updateId(state: leafI, id: string) {
@@ -64,6 +60,7 @@ const MoveFrameViewState = (props) => {
         state.do.set_top(frame.top);
         state.do.set_right(frame.left + frame.width);
         state.do.set_bottom(frame.top + frame.height);
+        state.do.set_type(frame.type);
         state.do.set_loaded(true);
         console.log('loaded mfv from frame:', state.value);
       },

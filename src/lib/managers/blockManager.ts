@@ -33,6 +33,9 @@ const blockManager = new Forest({
     forceUnblock(state){
       state.do._reset();
     },
+    close(state) {
+      state.do.finish();
+    },
     finish(state: leafType, forId? : string) {
       const {id, locked} = state.value;
 

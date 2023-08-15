@@ -1,4 +1,4 @@
-import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import axios from 'axios';
 import { Vector2 } from 'three'
 
@@ -10,14 +10,6 @@ export type ImageEditorStateValue = {
 };
 
 type leafType = typedLeaf<ImageEditorStateValue>;
-const EXTENSION_MAP = new Map([
-    ['gif', 'image/gif'],
-    ['jpg', ' image/jpeg'],
-    ['jpeg', ' image/jpeg'],
-    ['png', 'image/png'],
-    ['svg', 'image/svg+xml']
-  ]
-);
 
 const IMAGER_SIZE_TARGET = 250;
 
@@ -58,8 +50,13 @@ const ImageEditorState = (props) => {
         img.src = state.value.imageUrl;
         img.onload = () => {
           const size = new Vector2(img.width, img.height);
-          state.do.set_size(size);
+          state.do.setImageSize(size);
         }
+      },
+
+      setImageSize(state: leafType, size: Vector2) {
+        state.do.set_size(size);
+        frameState.do.updateSize(size.x, size.y);
       },
 
       async upload(state: leafType, files: File[], config) {

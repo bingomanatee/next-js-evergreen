@@ -149,16 +149,37 @@ const PlanEditorState = (id, planContainerRef) => {
           if (frame.width >= 150 && frame.height >= 150) {
             dataManager.addFrame(id, frame);
           } else {
+            blockManager.do.finish();
             messageManager.notify('New Frame',
               'frame is too small - no frame created Frame width and height must be at least 150 pixels');
           }
         }
       },
 
-      moveFrame(state: leafType, id: string) {
+      async moveFrame(state: leafType, id: string) {
         if (blockManager.$.isBlocked()) {
           return;
         }
+
+        const frame = await dataManager.do((db) => {
+          return db.frames.fetch(id);
+        })
+
+        if (!frame) {
+          messageManager.notify(
+            'Resize Frame',
+            'frame data cannot be found for id ' + id
+          );
+          return;
+        }
+
+        if (frame.type === 'image') {
+          messageManager.notify(
+            'Resize Frame',
+            'cannot resize frame -- image frame sizes are based on their content. You can still move the frame though.'
+          );
+        }
+
         try {
           blockManager.do.block(planEditorMode.MOVING_FRAME, { frameId: id })[1]
             .subscribe({

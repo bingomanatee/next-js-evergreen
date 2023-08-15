@@ -26,6 +26,10 @@ export default function MoveFrameSpriteState(props: MFSProps, planEditorState: l
     $value,
     actions: {
       init(state, element: HTMLDivElement) {
+        if (!element) {
+          console.error('cannot initialize MoveFrameSprite - no element');
+          return;
+        }
         console.log('initializing listener for ', dir, 'on', element);
         element.addEventListener('mousedown', state.do.onMouseDown);
       },

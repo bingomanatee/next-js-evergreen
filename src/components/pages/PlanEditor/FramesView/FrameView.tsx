@@ -45,7 +45,7 @@ export function FrameView(props: { frame: Frame }) {
 
       case 'image':
         if (!resourceMap.has(frame.type)) {
-          resourceMap.set(frame.type, dynamic(() => import ( './Image/Image')))
+          resourceMap.set(frame.type, dynamic(() => import ( './Image/ImageDetail')))
         }
         break;
     }
@@ -55,7 +55,7 @@ export function FrameView(props: { frame: Frame }) {
 
   const layerStyle = useMemo(() => {
     if (frame) {
-      const { id, name } = frame;
+      const { id } = frame;
       if (clicked === id && hover === id) {
         return "frameView-clicked-hover";
       }

@@ -11,7 +11,7 @@ import UserMenuItem from './UserMenuItem'
 import blockManager from '~/lib/managers/blockManager'
 
 function BlockerWatcher() {
-  const {id, name} = useForestFiltered(blockManager, ['id', 'name']);
+  const {id, type} = useForestFiltered(blockManager, ['id', 'type']);
 
   return id ? (
     <Box
@@ -22,7 +22,7 @@ function BlockerWatcher() {
       fontWeight="bold"
       backgroundColor="yellow"
     >
-      {name || '- blocked - '} - {id}
+      {type || '- blocked - '} - {id}
     </Box>
   ) : null;
 }

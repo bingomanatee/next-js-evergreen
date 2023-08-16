@@ -52,7 +52,7 @@ export function DragFrameSprite() {
     }
     ref={spriteRef}
   >
-    <Image src="/img/icons/widget-move.svg" width={20} height={20} alt="drag icon"/>
+    <Image src="/img/icons/widget-move.svg" width={CENTER_SPRITE_SIZE} height={CENTER_SPRITE_SIZE} alt="drag icon"/>
   </div>
 }
 

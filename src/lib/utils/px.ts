@@ -1,4 +1,5 @@
 import { Vector2 } from 'three'
+import { Frame } from '~/types'
 
 export default function px(n: number): string {
   if (!(n && (typeof n === 'number'))) {
@@ -8,7 +9,7 @@ export default function px(n: number): string {
 }
 
 export function vectorToStyle(p: Vector2) {
-  let out: { left?: string, top?: string } = {};
+  let out: { left?: string, top?: string, width?: string, height?: string } = {};
   if (p.x) {
     out.left = px(p.x);
   }
@@ -16,4 +17,14 @@ export function vectorToStyle(p: Vector2) {
     out.top = px(p.y);
   }
   return out;
+}
+
+
+export function frameToStyle(f: Frame) {
+  return {
+    left: px(f.left),
+    top: px(f.top),
+    width: px(f.width),
+    height: px(f.height)
+  }
 }

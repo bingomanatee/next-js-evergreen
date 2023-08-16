@@ -6,11 +6,14 @@ import { userManager } from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
 import { Direction } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import keyManager from '~/lib/managers/keyManager'
+import { mode } from '@chakra-ui/theme-tools'
+import { string } from 'zod'
 
 export enum planEditorMode {
   NONE = 'none',
   ADDING_FRAME = 'adding-frame',
   MOVING_FRAME = 'moving-frame',
+  LINKING_FRAME = 'linking-frame',
   PANNING = 'panning'
 }
 
@@ -89,7 +92,7 @@ const PlanEditorState = (id, planContainerRef) => {
 
         const sub = observable.subscribe({
           next(value) {
-            console.log(  'pan observed:', value)
+            console.log('pan observed:', value)
           },
           error(_err) {
             console.error('pan error', _err);
@@ -102,10 +105,10 @@ const PlanEditorState = (id, planContainerRef) => {
         });
 
         let keySub = keyManager.stream.subscribe((keys) => {
-           if (!keys.has(' ')) {
-             // @TODO: finish panning
-             sub.unsubscribe()
-           }
+          if (!keys.has(' ')) {
+            // @TODO: finish panning
+            sub.unsubscribe()
+          }
         });
 
         /**
@@ -156,6 +159,34 @@ const PlanEditorState = (id, planContainerRef) => {
         }
       },
 
+      async linkFrame(state: leafType, id: string) {
+
+        try {
+          keyManager.init();
+          let keySub = keyManager.stream.subscribe((keys) => {
+            if (keys.has('Escape')) {
+              blockManager.do.finish();
+              keySub.unsubscribe();
+            }
+          });
+          blockManager.do.block(planEditorMode.LINKING_FRAME, { frameId: id })[1]
+            .subscribe({
+              error(err) {
+                keySub.unsubscribe();
+                console.error('error in blockSub:', err);
+              },
+              complete() {
+                keySub.unsubscribe();
+                state.do.clearMode();
+              }
+            })
+          state.do.initMode(planEditorMode.LINKING_FRAME, id);
+          //@TODO: migrate 100% to blockManager
+        } catch (_err) {
+          console.warn('attempt to move frame when blocked', _err);
+        }
+      },
+
       async moveFrame(state: leafType, id: string) {
         if (blockManager.$.isBlocked()) {
           return;
@@ -181,12 +212,21 @@ const PlanEditorState = (id, planContainerRef) => {
         }
 
         try {
+          keyManager.init();
+          let keySub = keyManager.stream.subscribe((keys) => {
+            if (keys.has('Escape')) {
+              blockManager.do.finish();
+              keySub.unsubscribe();
+            }
+          });
           blockManager.do.block(planEditorMode.MOVING_FRAME, { frameId: id })[1]
             .subscribe({
               error(err) {
+                keySub.unsubscribe();
                 console.error('error in blockSub:', err);
               },
               complete() {
+                keySub.unsubscribe();
                 state.do.clearMode();
               }
             })

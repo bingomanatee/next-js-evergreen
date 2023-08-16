@@ -49,3 +49,14 @@ export type DialogView = {
   dialogState: leafI
   value: MessageTypeValue
 }
+
+export type DimensionValue = {
+  left: number,
+  top: number,
+  right: number,
+  bottom: number,
+  type: string,
+  loaded: boolean,
+  deltas: Map<string, number>,
+  id: string | null
+};

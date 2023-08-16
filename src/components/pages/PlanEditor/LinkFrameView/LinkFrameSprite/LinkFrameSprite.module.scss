@@ -1,0 +1,21 @@
+
+.container {
+
+}
+
+.sprite {
+  background-color: white;
+  z-index: 1000000;
+  border: 2px solid var(--chakra-colors-nav);
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  position: absolute;
+  pointer-events: all !important;
+  cursor: move;
+  border-radius: 50%;
+
+  &:hover {
+    background-color: var(--chakra-colors-accent)
+  }
+}

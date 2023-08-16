@@ -3,11 +3,12 @@ import { useContext, useMemo, useRef } from 'react'
 import { Box, Heading } from '@chakra-ui/react'
 import px from '~/lib/utils/px'
 import dynamic from 'next/dynamic'
-import styles from './FramesView.module.scss'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
-import { FrameControls } from '~/components/pages/PlanEditor/FramesView/FrameControls'
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 import useForestFiltered from '~/lib/useForestFiltered'
+
+import { FrameControls } from './FrameControls'
+import styles from './FramesView.module.scss'
 
 const resourceMap = new Map();
 
@@ -73,6 +74,7 @@ export function FrameView(props: { frame: Frame }) {
   return (
     <Box
       as="section"
+      id={`frame:${frame.id}`}
       ref={boxRef}
       left={px(frame.left)}
       top={px(frame.top)}
@@ -81,6 +83,7 @@ export function FrameView(props: { frame: Frame }) {
       layerStyle={layerStyle}
       zIndex={frame.order}
       className={styles['frame-view']}
+      data-frame-container={frame.id}
     >
       {<FrameControls planEditorState={planEditorState!} frameId={frame.id} frameName={frame.name}/>}
       <Box as="div" layerStyle={"frameDetailWrapper"} data-id="frame-detail-wrapper">

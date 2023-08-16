@@ -24,7 +24,9 @@ export default function Markdown(props: MarkdownProps) {
   // update the state's frame data if it changes.
   useEffect(() => {
     if (loaded && state.value.frame !== frame) {
-      state.do.set_frame(frame);
+      setTimeout(() => {
+        state.do.set_frame(frame);
+      })
     }
   }, [state, frame, loaded]);
 

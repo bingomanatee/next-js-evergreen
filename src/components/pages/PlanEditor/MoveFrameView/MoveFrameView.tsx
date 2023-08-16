@@ -24,17 +24,9 @@ export default function MoveFrameView() {
   useEffect(() => {
     if (planEditorState && state) {
       const sub = state.do.init(planEditorState);
-      keyManager.init();
-      let keySub = keyManager.stream.subscribe((keys) => {
-        if (keys.has('Escape')) {
-          blockManager.do.finish();
-        /*  if (blockManager.value.type === planEditorMode.MOVING_FRAME) {
-          }*/
-        }
-      });
+
       return () => {
         sub?.unsubscribe();
-        keySub?.unsubscribe();
       }
     }
   }, [state, planEditorState])

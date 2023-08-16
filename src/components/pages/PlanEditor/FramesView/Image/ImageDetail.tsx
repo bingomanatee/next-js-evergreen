@@ -7,7 +7,6 @@ import Image from 'next/image';
 type ImageProps = { frame: Frame }
 
 export default function ImageDetail(props: ImageProps) {
-  console.log('image detail for ', props.frame);
   const [value, _state] = useForest([stateFactory, props],
     (localState) => {
       localState.do.load();

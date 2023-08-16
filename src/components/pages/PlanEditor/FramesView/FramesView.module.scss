@@ -19,4 +19,5 @@
 
 .frame-view {
  @include no-select();
+ pointer-events: all;
 }

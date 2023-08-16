@@ -1,5 +1,7 @@
 'use client'
 import { extendTheme } from '@chakra-ui/react'
+import { CacheProvider } from '@chakra-ui/next-js'
+import { ChakraProvider } from '@chakra-ui/react'
 
 const FRAMES_LIST = {
   as: 'div',
@@ -29,7 +31,28 @@ const FRAME_VIEW = {
 }
 
 const LAYER_STYLES = {
-  'image-preview' : {
+  'link-frame-target-locked': {
+    zIndex: 900000,
+    position: 'absolute',
+    borderWidth: '3px',
+    borderStyle: 'solid',
+    borderColor: 'nav-dark',
+    backgroundColor: 'nav-alpha',
+    display: 'frame',
+    justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'all',
+  }, 'link-frame-target': {
+    zIndex: 900000,
+    position: 'absolute',
+    borderWidth: '3px',
+    borderStyle: 'solid',
+    borderColor: 'nav',
+    pointerEvents: 'none',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  'image-preview': {
     height: '250px',
     justifyContent: "center",
     align: 'center',
@@ -141,7 +164,9 @@ const COLORS = {
   'nav-x-light': 'hsl(200,100%,90%)',
   'nav-light': 'hsl(200,86%,80%)',
   'nav': 'hsl(200,55%,50%)',
+  'nav-alpha': 'hsla(200,55%,50%, 0.15)',
   'nav-dark': 'hsl(200,100%,25%)',
+  'nav-x-dark': 'hsl(200,100%,12.5%)',
   'editLink': 'hsl(228,70%,50%)',
   'active-button-back': 'hsl(30,50%,25%)',
   'button-back': 'hsl(30,0%,85%)',
@@ -150,6 +175,12 @@ const COLORS = {
 };
 
 const TEXT_STYLES = {
+  'link-frame-target': {
+    color: 'nav-x-dark',
+    fontSize: 'lg',
+    fontWeight: 600,
+    textAlign: 'center',
+  },
   par: {
     fontSize: 'md',
     mb: '8',
@@ -250,6 +281,16 @@ const theme = extendTheme({
       },
 
       variants: {
+        'frame-control-icon': {
+          ml: 1,
+          p: 2,
+          w: "36px",
+          h: "36px",
+          backgroundColor: "white",
+          isRound: true,
+          border: "1px solid black",
+          borderColor: "blackAlpha.500"
+        },
         controlIcon: {
           size: 'sm',
           isRound: true,
@@ -257,6 +298,12 @@ const theme = extendTheme({
           _hover: {
             backgroundColor: 'rgba(0,0,0,0)',
           }
+        },
+        'frame-link-locker': {
+          pointerEvents: 'all',
+          colorScheme: 'teal',
+          size: 'sm',
+          fontWeight: 600
         },
         nav: {
           borderColor: 'nav-x-light',
@@ -365,11 +412,6 @@ const theme = extendTheme({
 
   textStyles: TEXT_STYLES
 });
-
-import { CacheProvider } from '@chakra-ui/next-js'
-import { ChakraProvider } from '@chakra-ui/react'
-import { h } from '@chakra-ui/toast/dist/toast.types-f226a101'
-import { black } from 'kleur/colors'
 
 export function ChakraProviders({ children }: {
   children: React.ReactNode

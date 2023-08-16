@@ -18,6 +18,7 @@ import FramesList from './FramesView/FramesList'
 import FrameAnchorView from './FrameAnchorView/FrameAnchorView'
 import stateFactory, { planEditorMode } from './PlanEditor.state.ts';
 import styles from './PlanEditor.module.scss';
+import LinkFrameView from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameView'
 
 type PlanEditorProps = { id: string, managers: ManagerMap }
 export const PlanEditorStateCtx = createContext<leafI | null>(null);
@@ -66,7 +67,8 @@ function PlanEditor(props: PlanEditorProps) {
       <FrameAnchorView>
         <GridView/>
         <FramesList frames={frames}/>
-         <MoveFrameView />
+        <MoveFrameView />
+        <LinkFrameView />
       </FrameAnchorView>
     </PlanEditorStateCtx.Provider>
     <NewFrame box={newFrame}/>

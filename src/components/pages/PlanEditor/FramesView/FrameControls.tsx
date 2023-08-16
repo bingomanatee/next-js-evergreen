@@ -26,37 +26,30 @@ export function FrameControls(props: {
             spacing="4"
             className={styles['frame-nav-popup']}>
       <IconButton
+        variant="frame-control-icon"
         aria-label="move"
         onClick={() => planEditorState?.do.moveFrame(frameId)}
-        p={2}
-        w="36px" h="36px"
-        border="1px solid black"
-        borderColor="blackAlpha.500"
         icon={<Image alt="edit-icon" src="/img/icons/frame-move.svg" width="30" height="30"/>}
-        backgroundColor="white" isRound
       />
       <IconButton
+        variant="frame-control-icon"
+        icon={<Image alt="edit-icon" src="/img/icons/frame-edit.svg" width="30" height="30"/>}
         aria-label="edit"
         onClick={() => messageManager.editFrame(frameId, frameName)}
-        ml={4}
-        p={2}
-        w="36px" h="36px"
-        border="1px solid black"
-        borderColor="blackAlpha.500"
-        icon={<Image alt="edit-icon" src="/img/icons/frame-edit.svg" width="30" height="30"/>}
-        backgroundColor="white" isRound
       />
       <IconButton
+        variant="frame-control-icon"
         aria-label="list"
         onClick={() => messageManager.listFrames(frameId)}
-        ml={4}
-        p={2}
-        w="36px" h="36px"
-        border="1px solid black"
-        borderColor="blackAlpha.500"
         icon={<Image alt="edit-icon" src="/img/icons/frame-list.svg" width="30" height="30"/>}
-        backgroundColor="white" isRound
       />
+      <IconButton
+        variant="frame-control-icon"
+        aria-label="link"
+        onClick={() => planEditorState?.do.linkFrame(frameId)}
+        icon={<Image alt="edit-icon" src="/img/icons/frame-link.svg" width="30" height="30"/>}
+      />
+
     </HStack>
   )
 }

@@ -30,6 +30,8 @@ export function MoveFrameSprite(props: MFSProps) {
           }
         }, 100)
       }
+
+      tryInit();
     });
 
   const { } = value;

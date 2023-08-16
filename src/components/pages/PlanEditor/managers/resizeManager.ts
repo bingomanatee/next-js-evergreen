@@ -1,19 +1,12 @@
 import dataManager from '~/lib/managers/dataManager'
-import { Frame } from '~/types'
+import { Direction, dirToString, Frame, X_DIR, Y_DIR, Y_DIR_B, Y_DIR_M, Y_DIR_T } from '~/types'
 import { leafConfig, leafI } from '@wonderlandlabs/forest/lib/types'
 import { Vector2 } from 'three'
 import px from '~/lib/utils/px'
 import {
-  Direction,
-  dirToString,
-  X_DIR,
   X_DIR_C,
   X_DIR_L,
-  X_DIR_R,
-  Y_DIR,
-  Y_DIR_B,
-  Y_DIR_M,
-  Y_DIR_T
+  X_DIR_R
 } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import { RefObject } from 'react'
 import { state } from 'sucrase/dist/types/parser/traverser/base'

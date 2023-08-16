@@ -4,35 +4,43 @@ import stateFactory from './LinkFrameSprite.state.ts';
 import useForest from '~/lib/useForest'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import { LinkFrameStateContext } from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameView'
-import { dirToString } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import { vectorToStyle } from '~/lib/utils/px'
 import { Vector2 } from 'three'
+import planEditorState from '~/components/pages/PlanEditor/PlanEditor.state'
+import { sameDir } from '~/components/pages/PlanEditor/util'
+import useForestFiltered from '~/lib/useForestFiltered'
+import { Direction, dirToString } from '~/types'
 
-type LinkFrameSpriteProps = {}
+type LinkFrameSpriteProps = { dir: Direction, isEnd?: boolean }
 
 export default function LinkFrameSprite(props: LinkFrameSpriteProps) {
-  const planEditorState = useContext(PlanEditorStateCtx);
   const linkState = useContext(LinkFrameStateContext);
 
-  const { dir } = props;
+  const { dir, isEnd } = props;
 
-  const [value, state] = useForest([stateFactory,
-    props,
-    planEditorState,
-    linkState]);
+  const [_value, state] = useForest([stateFactory, props, linkState]);
 
-  const { } = value;
-  return <div
-    data-role="move-frame-sprite"
-    data-name={dirToString(dir)}
-    className={styles.sprite}
-    style={
-      vectorToStyle(linkState.$.point(dir, POINT_OFFSET))
-    }
-    ref={state.do.init}
-  >
-    &nbsp;
-  </div>
+  const frameStyle = linkState!.$.style(dir, POINT_OFFSET, isEnd);
+
+  const spriteDir = useForestFiltered(linkState!, 'spriteDir');
+  const targetSpriteDir = useForestFiltered(linkState!.child('target')!, 'spriteDir');
+
+  const active = sameDir(dir, isEnd ? targetSpriteDir : spriteDir);
+
+  return (
+    <div
+      data-role="link-frame-sprite"
+      data-name={dirToString(dir)}
+      className={active ? styles['sprite-active'] : styles.sprite}
+      style={
+        vectorToStyle(frameStyle)
+      }
+      ref={state.do.init}
+      onClick={state.do.onClick}
+    >
+      &nbsp;
+    </div>
+  )
 }
 
 const SPRITE_BOX_WIDTH = 20;

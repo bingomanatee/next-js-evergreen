@@ -1,9 +1,8 @@
 import { leafI } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
-import { Direction, X_DIR, Y_DIR } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import { Vector2 } from 'three'
 import { leafType } from '~/components/Dialogs/FrameDetail/StyleEditor/types'
-import { DimensionValue, Frame } from '~/types'
+import { DimensionValue, Direction, Frame, isDirection, X_DIR, Y_DIR } from '~/types'
 import blockManager from '~/lib/managers/blockManager'
 
 export const DIMENSION_ACTIONS = {
@@ -114,12 +113,14 @@ export const DIMENSION_SELECTORS = {
         break;
     }
     let point = new Vector2(x, y);
-    if (offset) return point.add(offset);
+    if (offset) {
+      return point.add(offset);
+    }
     return point;
   }
 }
 
-export function dimensionValue () : DimensionValue {
+export function dimensionValue(): DimensionValue {
   return {
     left: 0,
     top: 0,
@@ -130,4 +131,11 @@ export function dimensionValue () : DimensionValue {
     deltas: new Map(),
     loaded: false
   }
+}
+
+export function sameDir(d1: any, d2: any) {
+  if (isDirection(d1) && isDirection(d2)) {
+    return (d1.x === d2.x) && (d1.y === d2.y);
+  }
+  return false;
 }

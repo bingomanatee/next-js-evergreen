@@ -1,93 +1,28 @@
-import { createContext, memo, useContext, useEffect, useMemo, useState } from 'react';
-import { Button, CloseButton, HStack, IconButton, Text } from '@chakra-ui/react'
+import { createContext, useContext, useEffect } from 'react';
 import { leafI } from '@wonderlandlabs/forest/lib/types'
 
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
-import { X_DIR, Y_DIR } from '~/components/pages/PlanEditor/managers/resizeManager.types'
-import { Frame } from '~/types'
 import useForest from '~/lib/useForest'
-import dataManager from '~/lib/managers/dataManager'
-import { frameToStyle } from '~/lib/utils/px'
 
 // --------- local
-
 import LinkFrameSprite from './LinkFrameSprite/LinkFrameSprite'
 import stateFactory from './LinkFrame.state.ts';
-import styles from './LinkFrame.module.scss';
-import useForestFiltered from '~/lib/useForestFiltered'
+import { TargetView } from '~/components/pages/PlanEditor/LinkFrameView/TargetView'
+import { X_DIR, Y_DIR } from '~/types'
+import LineView from '~/components/pages/PlanEditor/LinkFrameView/LineView/LineView'
 
 type LinkFrameProps = {}
 
 export const LinkFrameStateContext = createContext<leafI | null>(null)
 
-function TargetView({ state }) {
-  const [frame, setFrame] = useState<Frame | null>(null);
-
-  const { id, targetFrameId, lockedTarget } = useForestFiltered(
-    state,
-    ['id', 'targetFrameId', 'lockedTarget']
-  );
-
-  const targetId = useMemo(() => {
-    return lockedTarget || targetFrameId
-  }, [targetFrameId, lockedTarget])
-
-  useEffect(() => {
-    if (!targetId || targetId === id) {
-      setFrame(null);
-      return;
-    }
-
-    if (frame?.id === targetId) {
-      return;
-    }
-
-    dataManager.do(async (db) => {
-      if (!targetId) {
-        setFrame(null);
-        return;
-      }
-      const fr = await db.frames.fetch(targetId);
-      if (fr?.id === targetId) { // hasn't changed due to async
-        setFrame(fr.toJSON());
-      }
-    })
-  }, [frame, targetId])
-
-  console.log('TFID:', targetFrameId, 'locked:', lockedTarget);
-
-  if (!frame) {
-    return null;
-  }
-
-  return <HStack layerStyle={lockedTarget ? 'link-frame-target' : "link-frame-target"}
-                 {...frameToStyle(frame)}
-                 spacing={4}
-  >
-    {lockedTarget ? <>
-        <Text textStyle="link-frame-target">LinkTarget</Text>
-        <CloseButton
-          color="red"
-          aria-label="cancel lock"
-          style={{ pointerEvents: 'all' }}
-          onClick={() => state.do.clearLock()}
-        />
-      </>
-      : (
-        <Button
-          variant="frame-link-locker"
-          onClick={() => state.do.lockTarget(targetFrameId)}>
-          Click to link</Button>
-      )
-    }
-  </HStack>
-}
-
 export default function LinkFrameView(props: LinkFrameProps) {
   const planEditorState = useContext(PlanEditorStateCtx);
 
   const [value, state] = useForest([stateFactory]);
-  const { loaded, id, targetFrameId, lockedTarget } = value;
+  const { loaded, id, target } = value;
+
+  console.log('target:', target);
+
   useEffect(() => {
     if (planEditorState && state) {
       const sub = state.do.init(planEditorState);
@@ -99,7 +34,7 @@ export default function LinkFrameView(props: LinkFrameProps) {
   }, [state, planEditorState])
 
   useEffect(() => {
-    if (!loaded || lockedTarget) {
+    if (!loaded || target.locked) {
       return;
     }
     const elements = window.document.querySelectorAll('[data-frame-container]')
@@ -117,12 +52,13 @@ export default function LinkFrameView(props: LinkFrameProps) {
           e.removeEventListener('mouseleave', state.do.onMouseLeave);
         });
     }
-  }, [loaded, id, state, lockedTarget])
+  }, [loaded, id, state, target.locked])
 
   return !(planEditorState && loaded) ? null : (
     <LinkFrameStateContext.Provider value={state}>
-      <TargetView state={state} data-role="frame-link-target"/>
+      <TargetView data-role="frame-link-target"/>
 
+      <LineView />
       <LinkFrameSprite dir={{ x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_T }}/>
       <LinkFrameSprite dir={{ x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_M }}/>
       <LinkFrameSprite dir={{ x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_B }}/>

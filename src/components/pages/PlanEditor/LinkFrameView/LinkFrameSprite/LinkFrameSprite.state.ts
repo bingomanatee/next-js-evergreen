@@ -4,19 +4,23 @@ export type LinkFrameSpriteStateValue = {}
 
 type leafType = typedLeaf<LinkFrameSpriteStateValue>;
 
-const LinkFrameSpriteState = (props) => {
+const LinkFrameSpriteState = (props, linkState) => {
+  const {dir, isEnd} = props;
+
   const $value: LinkFrameSpriteStateValue = {};
   return {
     name: "LinkFrameSprite",
     $value,
 
     selectors: {
-      alpha(state: leafType) {
-      }
     },
 
     actions: {
       init(state: leafType) {
+      },
+      onClick() {
+        if (isEnd) return linkState.child('target')!.do.spriteClicked(dir);
+        linkState.do.spriteClicked(dir);
       }
     }
   };

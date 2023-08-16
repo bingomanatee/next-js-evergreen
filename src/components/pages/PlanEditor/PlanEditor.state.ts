@@ -4,10 +4,10 @@ import blockManager from '~/lib/managers/blockManager'
 import { Box2, Vector2 } from 'three'
 import { userManager } from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
-import { Direction } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import keyManager from '~/lib/managers/keyManager'
 import { mode } from '@chakra-ui/theme-tools'
 import { string } from 'zod'
+import { Direction } from '~/types'
 
 export enum planEditorMode {
   NONE = 'none',

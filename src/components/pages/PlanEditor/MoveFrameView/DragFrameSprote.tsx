@@ -2,12 +2,12 @@ import { useContext, useRef } from 'react'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import styles from '~/components/pages/PlanEditor/MoveFrameView/MoveFrameView.module.scss'
 import stateFactory from './MoveFrameSprite.state';
-import { dirToString, X_DIR, Y_DIR, } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import useForest from '~/lib/useForest'
 import { MoveFrameStateContext } from '~/components/pages/PlanEditor/MoveFrameView/MoveFrameView'
 import { vectorToStyle } from '~/lib/utils/px'
 import { Vector2 } from 'three'
 import Image from 'next/image';
+import { dirToString, X_DIR, Y_DIR } from '~/types'
 
 const CENTER = { x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M };
 

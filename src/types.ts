@@ -1,6 +1,5 @@
-import { VERT, HORIZ } from './constants'
+import { HORIZ, VERT } from './constants'
 import { GenFunction } from '@wonderlandlabs/can-di-land/lib/types'
-import { Subject } from 'rxjs'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
 import { MessageTypeValue } from '~/lib/managers/types'
 
@@ -60,3 +59,54 @@ export type DimensionValue = {
   deltas: Map<string, number>,
   id: string | null
 };
+
+export type Area = {
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+}
+
+export enum X_DIR {
+  X_DIR_L = 'l',
+  X_DIR_C = 'c',
+  X_DIR_R = 'r'
+}
+
+export const Y_DIR_T = 't'
+export const Y_DIR_M = 'm'
+export const Y_DIR_B = 'b'
+
+export enum Y_DIR {
+  Y_DIR_T = 't',
+  Y_DIR_M = 'm',
+  Y_DIR_B = 'b'
+}
+
+export type Direction = {
+  x: X_DIR,
+  y: Y_DIR
+}
+
+export function isDirection(arg: unknown): arg is Direction {
+  return !!(
+    arg
+    && typeof arg === 'object'
+    && isX_DIR(arg.x)
+    && isY_DIR(arg.y)
+  )
+}
+
+export function isX_DIR(arg: unknown): arg is X_DIR {
+  return typeof arg === 'string' && ['l', 'c', 'r'].includes(arg);
+}
+
+export function isY_DIR(arg: unknown): arg is X_DIR {
+  return typeof arg === 'string' && ['t', 'm', 'b'].includes(arg);
+}
+
+export function dirToString(dir: Direction) {
+  return `${dir.x}-${dir.y}`;
+}
+
+export const AllDirections: Map<string, Direction> = new Map();

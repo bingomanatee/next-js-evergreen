@@ -1,6 +1,5 @@
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import { Direction, X_DIR, Y_DIR, } from '~/components/pages/PlanEditor/managers/resizeManager.types'
-import { DimensionValue, Frame } from '~/types'
+import { DimensionValue, Direction, Frame, X_DIR, Y_DIR } from '~/types'
 import { Vector2 } from 'three'
 import dataManager from '~/lib/managers/dataManager'
 import { planEditorMode } from '~/components/pages/PlanEditor/PlanEditor.state'

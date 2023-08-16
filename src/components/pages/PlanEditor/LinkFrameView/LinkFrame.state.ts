@@ -2,11 +2,13 @@ import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import blockManager from '~/lib/managers/blockManager'
 import { planEditorMode } from '~/components/pages/PlanEditor/PlanEditor.state'
 import { DIMENSION_ACTIONS, DIMENSION_SELECTORS, dimensionValue } from '~/components/pages/PlanEditor/util'
-import { DimensionValue } from '~/types'
+import { DimensionValue, Direction } from '~/types'
+import dataManager from '~/lib/managers/dataManager'
+import { Vector2 } from 'three'
+import { frameToPoint } from '~/lib/utils/px'
 
 export type LinkFrameStateValue = {
-  targetFrameId: string | null,
-  lockedTarget: string | null
+  spriteDir: Direction | null
 } & DimensionValue;
 
 type leafType = typedLeaf<LinkFrameStateValue>;
@@ -14,15 +16,21 @@ type leafType = typedLeaf<LinkFrameStateValue>;
 const LinkFrameState = (props) => {
   const $value: LinkFrameStateValue = {
     ...dimensionValue(),
-    targetFrameId: null,
-    lockedTarget: null,
+    spriteDir: null
   };
   return {
     name: "LinkFrame",
     $value,
 
     selectors: {
-      ...DIMENSION_SELECTORS
+      ...DIMENSION_SELECTORS,
+
+      style(state: leafType, dir: Direction, POINT_OFFSET: Vector2, isEnd: boolean) {
+
+        if (isEnd) return state.child('target')!.$.point(dir, POINT_OFFSET);
+
+        return state.$.point(dir, POINT_OFFSET)
+      }
     },
 
     actions: {
@@ -30,28 +38,42 @@ const LinkFrameState = (props) => {
         console.log('clearing lock');
         state.do.set_lockedTarget(null);
       },
-      lockTarget(state: leafType, id) {
-        if (state.value.lockedTarget) {
-          return;
-        }
-        state.do.set_lockedTarget(id);
-        state.do.set_lockedTarget(state.value.targetFrameId);
+      lockTarget(state: leafType) {
+        console.log('locking target');
+        state.child('target')!.do.set_locked(true);
       },
-
+      spriteClicked(state: leafType, dir: Direction, onEnd?: boolean) {
+        if (onEnd) {
+          state.child('target')!.do.set_spriteDir(dir);
+        } else {
+          state.do.set_spriteDir(dir);
+        }
+      },
       onMouseEnter(state: leafType, e: MouseEvent) {
-        e.stopPropagation()
+        e.stopPropagation();
+        const targetId = e.target.dataset['frameContainer'];
+        const target = state.child('target')!;
+        console.log('onMouseEnter:',  targetId, target.value);
+
+        if (target.value.locked) return;
+
         const closer = state.getMeta('closer');
         if (closer) clearTimeout(closer);
-        const targetId = e.target.dataset['frameContainer'];
-        console.log('hovered over', targetId);
-        state.do.set_targetFrameId(targetId);
+        target.do.updateId(targetId);
       },
-      onMouseLeave(state: leafType) {
+      onMouseLeave(state: leafType, e: MouseEvent) {
+        e.stopPropagation();
+
+        const target = state.child('target')!;
+        if (target.value.locked) return;
+
         const closer = state.getMeta('closer');
         if (closer) clearTimeout(closer);
 
         state.setMeta('closer', setTimeout(() => {
-          state.do.set_targetFrameId(null);
+          if (!target.value.locked) {
+            target.do.clear();
+          }
         }, 1200), true)
       },
 
@@ -67,6 +89,60 @@ const LinkFrameState = (props) => {
         });
       },
       ...DIMENSION_ACTIONS
+    },
+
+    children: {
+      target: {
+        $value: {
+          id: null,
+          frame: null,
+          locked: false,
+          spriteDir: null
+        },
+
+        selectors: {
+          point(state: leafI, dir: Direction, offset: Vector2) {
+            const {frame} = state.value;
+            if (!frame) return  new Vector2(0, 0);
+            return frameToPoint(frame, dir);
+          }
+        },
+
+        actions: {
+          spriteClicked(state: leafI, dir: Direction) {
+            state.do.set_spriteDir(dir);
+          },
+          updateId(state: leafI, id, locked) {
+            console.log('setting target id:', id);
+            state.do.set_id(id);
+            state.do.set_locked(!!locked);
+            state.do.loadFrame();
+          },
+          clear(state: leafI) {
+            state.do.set_id(null);
+            state.do.set_frame(null);
+          },
+          loadFrame(state: leafI) {
+            const {id, frame} = state.value;
+            const parentId = state.parent!.value.id;
+
+            if (!id || (id === parentId)) {
+              state.do.set_frame(null);
+              return;
+            }
+            if (frame && frame.id === id) {
+              return;
+            }
+
+            dataManager.do(async (db) => {
+             const frame = await db.frames.fetch(id);
+              if (frame && frame.id === state.value.id) { // ensure id target has not shifted while retrieving
+                state.do.set_frame(frame.toJSON());
+              }
+            });
+          }
+        }
+      }
     }
   };
 };

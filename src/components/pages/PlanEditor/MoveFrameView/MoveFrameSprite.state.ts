@@ -2,8 +2,7 @@ import { Vector2 } from 'three'
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { planEditorMode } from '~/components/pages/PlanEditor/PlanEditor.state'
 import { MFSProps } from '~/components/pages/PlanEditor/MoveFrameView/types'
-import { Frame } from '~/types'
-import { X_DIR, Y_DIR } from '~/components/pages/PlanEditor/managers/resizeManager.types'
+import { Frame, X_DIR, Y_DIR } from '~/types'
 
 type MoveFrameSpriteStateValue = {
   offset: Vector2,

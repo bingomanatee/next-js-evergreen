@@ -3,8 +3,7 @@
 
 }
 
-.sprite {
-  background-color: white;
+@mixin spriteBase {
   z-index: 1000000;
   border: 2px solid var(--chakra-colors-nav);
   width: 20px;
@@ -14,8 +13,18 @@
   pointer-events: all !important;
   cursor: move;
   border-radius: 50%;
+}
 
+.sprite {
+  @include spriteBase;
+
+  background-color: white;
   &:hover {
     background-color: var(--chakra-colors-accent)
   }
+}
+
+.sprite-active {
+  @include spriteBase;
+  background-color: var(--chakra-colors-nav)
 }

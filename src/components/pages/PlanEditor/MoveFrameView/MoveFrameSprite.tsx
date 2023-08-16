@@ -2,12 +2,12 @@ import { useContext, useRef } from 'react'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import styles from '~/components/pages/PlanEditor/MoveFrameView/MoveFrameView.module.scss'
 import stateFactory from './MoveFrameSprite.state';
-import { dirToString, } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import useForest from '~/lib/useForest'
 import { MFSProps } from '~/components/pages/PlanEditor/MoveFrameView/types'
 import { MoveFrameStateContext } from '~/components/pages/PlanEditor/MoveFrameView/MoveFrameView'
 import { vectorToStyle } from '~/lib/utils/px'
 import { Vector2 } from 'three'
+import { dirToString } from '~/types'
 
 export function MoveFrameSprite(props: MFSProps) {
   const planEditorState = useContext(PlanEditorStateCtx);

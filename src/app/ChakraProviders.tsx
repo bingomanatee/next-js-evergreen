@@ -30,27 +30,25 @@ const FRAME_VIEW = {
   display: "block"
 }
 
+const LINK_FRAME = {
+  zIndex: 900000,
+  position: 'absolute',
+  borderWidth: '3px',
+  borderStyle: 'solid',
+  justifyContent: 'center',
+  alignItems: 'center',
+}
+
 const LAYER_STYLES = {
   'link-frame-target-locked': {
-    zIndex: 900000,
-    position: 'absolute',
-    borderWidth: '3px',
-    borderStyle: 'solid',
+    ...LINK_FRAME,
     borderColor: 'nav-dark',
     backgroundColor: 'nav-alpha',
-    display: 'frame',
-    justifyContent: 'center',
-    alignItems: 'center',
     pointerEvents: 'all',
   }, 'link-frame-target': {
-    zIndex: 900000,
-    position: 'absolute',
-    borderWidth: '3px',
-    borderStyle: 'solid',
+    ...LINK_FRAME,
     borderColor: 'nav',
     pointerEvents: 'none',
-    justifyContent: 'center',
-    alignItems: 'center'
   },
   'image-preview': {
     height: '250px',

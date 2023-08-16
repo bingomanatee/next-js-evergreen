@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect } from 'react';
 import { Box } from '@chakra-ui/react'
-import { X_DIR, Y_DIR } from '~/components/pages/PlanEditor/managers/resizeManager.types'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import { MoveFrameSprite } from '~/components/pages/PlanEditor/MoveFrameView/MoveFrameSprite'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
@@ -12,6 +11,7 @@ import px from '~/lib/utils/px'
 import { DragFrameSprite } from '~/components/pages/PlanEditor/MoveFrameView/DragFrameSprote'
 import keyManager from '~/lib/managers/keyManager'
 import blockManager from '~/lib/managers/blockManager'
+import { X_DIR, Y_DIR } from '~/types'
 
 //@ts-ignore
 export const MoveFrameStateContext = createContext<leafI>(null);

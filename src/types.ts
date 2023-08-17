@@ -110,3 +110,9 @@ export function dirToString(dir: Direction) {
 }
 
 export const AllDirections: Map<string, Direction> = new Map();
+export type LFSummary = {
+  id: string | null,
+  spriteDir: Direction | null,
+  targetId: string | null,
+  targetSpriteDir: Direction | null
+}

@@ -50,6 +50,14 @@ const LAYER_STYLES = {
     borderColor: 'nav',
     pointerEvents: 'none',
   },
+  'line-view-button': {
+    position: 'absolute',
+    zIndex: 1000002000,
+    pointerEvents: 'all',
+    width: '250px',
+    p: 4,
+    backgroundColor: 'whiteAlpha.500'
+  },
   'image-preview': {
     height: '250px',
     justifyContent: "center",

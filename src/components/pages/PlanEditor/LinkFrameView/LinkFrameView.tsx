@@ -15,13 +15,11 @@ type LinkFrameProps = {}
 
 export const LinkFrameStateContext = createContext<leafI | null>(null)
 
-export default function LinkFrameView(props: LinkFrameProps) {
+export default function LinkFrameView() {
   const planEditorState = useContext(PlanEditorStateCtx);
 
   const [value, state] = useForest([stateFactory]);
   const { loaded, id, target } = value;
-
-  console.log('target:', target);
 
   useEffect(() => {
     if (planEditorState && state) {

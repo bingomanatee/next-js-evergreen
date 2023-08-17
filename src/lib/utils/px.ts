@@ -1,7 +1,5 @@
 import { Vector2 } from 'three'
 import { Area, Direction, Frame, X_DIR, Y_DIR } from '~/types'
-import { f } from '@chakra-ui/toast/dist/toast.types-f226a101'
-import { Dir } from 'fs'
 
 export default function px(n: number): string {
   if (!(n && (typeof n === 'number'))) {
@@ -31,8 +29,10 @@ export function frameToStyle(f: Frame) {
   }
 }
 
-export function frameToSize(f: Frame) : Area | null {
-  if (!f) return null;
+export function frameToSize(f: Frame): Area | null {
+  if (!f) {
+    return null;
+  }
   return {
     left: f.left,
     right: f.left + f.width,
@@ -73,9 +73,15 @@ function areaDirToPoint(size: Area, dir: Direction) {
   return new Vector2(x, y);
 }
 
-export function frameToPoint(f: Frame, dir: Direction) {
+export function frameToPoint(f: Frame, dir: Direction, offset?: Vector2) {
   const size = frameToSize(f);
-  if (!size) return null;
+  if (!size) {
+    return null;
+  }
 
-  return areaDirToPoint(size, dir);
+  const point = areaDirToPoint(size, dir);
+  if (offset) {
+    return point.add(offset);
+  }
+  return point;
 }

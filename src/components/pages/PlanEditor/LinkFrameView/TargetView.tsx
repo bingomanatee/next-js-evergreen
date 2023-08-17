@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext } from 'react'
 import { Frame, X_DIR, Y_DIR } from '~/types'
 import useForestFiltered from '~/lib/useForestFiltered'
 import dataManager from '~/lib/managers/dataManager'
@@ -41,6 +41,7 @@ export function TargetView({ isEnd }) {
         <LinkFrameSprite isEnd dir={{ x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_B }}/>
 
         <LinkFrameSprite isEnd dir={{ x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_T }}/>
+        <LinkFrameSprite isEnd dir={{ x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M }}/>
         <LinkFrameSprite isEnd dir={{ x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_B }}/>
       </>
       : (

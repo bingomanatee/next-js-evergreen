@@ -13,7 +13,7 @@ export type LinkFrameStateValue = {
 
 type leafType = typedLeaf<LinkFrameStateValue>;
 
-const LinkFrameState = (props) => {
+const LinkFrameState = () => {
   const $value: LinkFrameStateValue = {
     ...dimensionValue(),
     spriteDir: null
@@ -51,6 +51,7 @@ const LinkFrameState = (props) => {
       },
       onMouseEnter(state: leafType, e: MouseEvent) {
         e.stopPropagation();
+        //@ts-ignore
         const targetId = e.target.dataset['frameContainer'];
         const target = state.child('target')!;
         console.log('onMouseEnter:',  targetId, target.value);
@@ -104,7 +105,7 @@ const LinkFrameState = (props) => {
           point(state: leafI, dir: Direction, offset: Vector2) {
             const {frame} = state.value;
             if (!frame) return  new Vector2(0, 0);
-            return frameToPoint(frame, dir);
+            return frameToPoint(frame, dir, offset);
           }
         },
 

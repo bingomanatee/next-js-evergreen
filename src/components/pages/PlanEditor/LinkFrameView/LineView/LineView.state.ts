@@ -1,9 +1,11 @@
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { SVG } from '@svgdotjs/svg.js'
 import dataManager from '~/lib/managers/dataManager'
-import { frameToPoint, frameToSize } from '~/lib/utils/px'
+import { frameToPoint } from '~/lib/utils/px'
+import { LFSummary } from '~/types'
+import { Vector2 } from 'three'
 
-export type LineViewStateValue = {};
+export type LineViewStateValue = { fromPoint: Vector2 | null, toPoint: Vector2 | null } & LFSummary;
 
 type leafType = typedLeaf<LineViewStateValue>;
 
@@ -42,7 +44,13 @@ const retriever = (id) => async () => {
 }
 
 const LineViewState = (props, linkState) => {
-  const $value: LineViewStateValue = {};
+  const $value: LineViewStateValue = {
+    id: null,
+    spriteDir: null,
+    targetId: null,
+    targetSpriteDir: null,
+    fromPoint: null, toPoint: null
+  };
   let element: HTMLDivElement | null = null;
 
   return {
@@ -50,10 +58,11 @@ const LineViewState = (props, linkState) => {
     $value,
 
     selectors: {
-      canDraw() {
-        const { id, spriteDir } = linkState.value;
-        const { id: targetId, spriteDir: targetSpriteDir } = linkState.child('target')!.value;
-        return id && spriteDir && targetSpriteDir && targetId && element;
+      canDraw(state: leafI) {
+        const { id, spriteDir, targetId, targetSpriteDir } = state.value;
+        const out = !!(id && spriteDir && targetSpriteDir && targetId && element);
+        console.log('canDraw: ', id, targetId, 'ele = ', element, '>>> ', out);
+        return out;
       },
       async fromFrame(state: leafI) {
         const { id } = linkState.value;
@@ -63,15 +72,19 @@ const LineViewState = (props, linkState) => {
         const { id } = linkState.child('target')!.value;
         return cache(state, 'toFrame', retriever(id), validator(id));
       },
-      async fromPoint(state: leafI) {
+      async genFromPoint(state: leafI) {
         const { spriteDir, id } = linkState.value;
-        if (!(spriteDir && id)) return null;
+        if (!(spriteDir && id)) {
+          return null;
+        }
         const frame = await state.$.fromFrame();
         return frame ? frameToPoint(frame, spriteDir) : null
       },
-      async toPoint(state: leafI) {
+      async genToPoint(state: leafI) {
         const { spriteDir, id } = linkState.child('target')!.value;
-        if (!(spriteDir && id)) return null;
+        if (!(spriteDir && id)) {
+          return null;
+        }
         const frame = await state.$.toFrame();
         return frame ? frameToPoint(frame, spriteDir) : null
       }
@@ -79,20 +92,28 @@ const LineViewState = (props, linkState) => {
 
     actions: {
       init(state: leafType) {
+        return linkState.select((summary) => {
+          state.value = { ...state.value, ...summary }
+        }, (value) => {
+          const { id, spriteDir, target } = value;
+          const { id: targetId, spriteDir: targetSpriteDir } = target;
+          return { id, spriteDir, targetSpriteDir, targetId }
+        })
       },
       setRef(state: leafType, e: HTMLDivElement) {
         element = e;
+        console.log('setting ref to', e);
+        state.value = { ...state.value }
       },
       async draw(state: leafType) {
-        if (!state.$.canDraw()) {
-          return
+        const { fromPoint, toPoint } = state.value;
+        if (!(fromPoint && toPoint && element)) {
+          console.log('cannot draw -- ', fromPoint, toPoint, element);
+          return null;
         }
         element!.innerHTML = '';
 
-        const fromPoint = state.$.fromPoint();
-        const toPoint = state.$.toPoint();
-
-        const draw = SVG().addTo(element!).size('100%', '100%');
+        const draw = SVG().addTo(element!).size('100vw', '100vh');
         draw.line(
           fromPoint.x,
           fromPoint.y,

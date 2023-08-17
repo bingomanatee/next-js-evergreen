@@ -45,7 +45,7 @@ function avg(a: number, b: number) {
   return Math.round(((a + b) / 2))
 }
 
-function areaDirToPoint(size: Area, dir: Direction) {
+export function areaDirToPoint(size: Area, dir: Direction) {
   let x = 0;
   let y = 0;
   switch (dir.y) {

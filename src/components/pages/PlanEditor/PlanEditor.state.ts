@@ -18,6 +18,7 @@ export enum planEditorMode {
 }
 
 export type PlanEditorStateValue = {
+  planId: string,
   loaded: boolean,
   keys: Set<string>,
   mode: planEditorMode,
@@ -42,6 +43,7 @@ const PlanEditorState = (id, planContainerRef) => {
     moveDir: null,
     markdownStyles: '',
     modeTarget: null,
+    planId: id,
   };
   return {
     name: "PlanEditor",

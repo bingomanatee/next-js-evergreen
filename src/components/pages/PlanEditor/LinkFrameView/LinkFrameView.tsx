@@ -10,6 +10,7 @@ import stateFactory from './LinkFrame.state.ts';
 import { TargetView } from '~/components/pages/PlanEditor/LinkFrameView/TargetView'
 import { X_DIR, Y_DIR } from '~/types'
 import LineView from '~/components/pages/PlanEditor/LinkFrameView/LineView/LineView'
+import { sub } from 'three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements'
 
 type LinkFrameProps = {}
 
@@ -18,18 +19,11 @@ export const LinkFrameStateContext = createContext<leafI | null>(null)
 export default function LinkFrameView() {
   const planEditorState = useContext(PlanEditorStateCtx);
 
-  const [value, state] = useForest([stateFactory]);
+  const [value, state] = useForest([stateFactory],
+    (localState) => {
+    localState.do.init(planEditorState);
+    });
   const { loaded, id, target } = value;
-
-  useEffect(() => {
-    if (planEditorState && state) {
-      const sub = state.do.init(planEditorState);
-
-      return () => {
-        sub?.unsubscribe();
-      }
-    }
-  }, [state, planEditorState])
 
   useEffect(() => {
     if (!loaded || target.locked) {
@@ -52,11 +46,13 @@ export default function LinkFrameView() {
     }
   }, [loaded, id, state, target.locked])
 
-  return !(planEditorState && loaded) ? null : (
+  console.log('LinkFrameView: ', loaded, id);
+
+  return !loaded ? null : (
     <LinkFrameStateContext.Provider value={state}>
       <TargetView data-role="frame-link-target"/>
 
-      <LineView />
+      <LineView/>
       <LinkFrameSprite dir={{ x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_T }}/>
       <LinkFrameSprite dir={{ x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_M }}/>
       <LinkFrameSprite dir={{ x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_B }}/>

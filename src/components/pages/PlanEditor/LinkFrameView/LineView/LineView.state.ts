@@ -58,21 +58,21 @@ const LineViewState = (props, linkState) => {
     $value,
 
     selectors: {
-      canDraw(state: leafI) {
+      canDraw(state: leafType) {
         const { id, spriteDir, targetId, targetSpriteDir } = state.value;
         const out = !!(id && spriteDir && targetSpriteDir && targetId && element);
         console.log('canDraw: ', id, targetId, 'ele = ', element, '>>> ', out);
         return out;
       },
-      async fromFrame(state: leafI) {
+      async fromFrame(state: leafType) {
         const { id } = linkState.value;
         return cache(state, 'fromFrame', retriever(id), validator(id));
       },
-      async toFrame(state: leafI) {
+      async toFrame(state: leafType) {
         const { id } = linkState.child('target')!.value;
         return cache(state, 'toFrame', retriever(id), validator(id));
       },
-      async genFromPoint(state: leafI) {
+      async genFromPoint(state: leafType) {
         const { spriteDir, id } = linkState.value;
         if (!(spriteDir && id)) {
           return null;
@@ -91,6 +91,12 @@ const LineViewState = (props, linkState) => {
     },
 
     actions: {
+      save(state: leafType) {
+        linkState.do.save(state.value);
+      },
+      cancel(state: leafType) {
+        linkState.do.cancel(state.value);
+      },
       init(state: leafType) {
         return linkState.select((summary) => {
           state.value = { ...state.value, ...summary }

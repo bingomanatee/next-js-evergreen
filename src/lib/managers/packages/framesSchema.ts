@@ -1,11 +1,10 @@
 import { v4 } from 'uuid'
 import { BehaviorSubject, switchMap } from 'rxjs'
-import { ID_PROP, LINK_POINT, sampleId, STYLE } from '~/lib/utils/schemaUtils'
+import { ID_PROP, STRING, sampleId, STYLE, INT } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
-import { Direction, Frame, X_DIR, Y_DIR } from '~/types'
+import { Direction, dirToString, Frame, LFSummary, X_DIR, Y_DIR } from '~/types'
 import { Vector2 } from 'three'
-import px, { vectorToStyle } from '~/lib/utils/px'
-import { boolean } from 'zod'
+import { vectorToStyle } from '~/lib/utils/px'
 
 function projectIdToPanId(oldDoc) {
   if ('project_id' in oldDoc) {
@@ -21,6 +20,10 @@ function projectIdToProject_id(oldDoc) {
     delete oldDoc.project_id;
   }
   return oldDoc;
+}
+
+function migrationNoOp(oldDoc) {
+  return oldDoc
 }
 
 export default function framesSchema(dataManager) {
@@ -183,7 +186,7 @@ export default function framesSchema(dataManager) {
     },
     links: {
       schema: {
-        version: 2,
+        version: 4,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -194,16 +197,37 @@ export default function framesSchema(dataManager) {
           plan_id: ID_PROP,
           start_frame: ID_PROP,
           end_frame: ID_PROP,
-          start_point: LINK_POINT,
-          end_point: LINK_POINT,
-          style: STYLE,
+          start_at: STRING,
+          end_at: STRING   ,
+          start_label: STRING,
+          end_label: STRING,
+          label: STRING,
+          link_style: STRING,
+          line_type: STRING,
+          line_color: STRING,
+          line_size: INT
         },
         required: ['id', 'plan_id', 'start_frame', 'end_frame'],
-
       },
       migrationStrategies: {
         1: projectIdToProject_id,
-        2: projectIdToPanId
+        2: projectIdToPanId,
+        3: migrationNoOp,
+        4: migrationNoOp
+      },
+      statics: {
+        async addLink(planId: string, params: LFSummary) {
+          const newLink = {
+            id: v4(),
+            plan_id: planId,
+            start_frame: params.id,
+            end_frame: params.targetId,
+            start_at: dirToString(params.spriteDir!),
+            end_at: dirToString(params.targetSpriteDir!),
+          }
+
+          return this.incrementalUpsert(newLink);
+        }
       }
     },
     /**

@@ -125,37 +125,32 @@ const dataManager: DataManager = {
   },
   async poll(id: string) {
     await dataManager.endPoll();
-    const db = await dataManager.db();
-    const frames = await db.frames.find().where('plan_id').eq(id).$;
-    const links = await db.links.find().where('plan_id').eq(id).$;
-    const plans = await db.plans.findByIds([id]).$;
-    dataManager._productSub = combineLatest([
-      frames,
-      links,
-      plans
-    ])
-      .pipe(
-        // convert documents to POJO
-        map(([frames, links, plan]) => {
-          const planJson = plan.has(id) ? plan.get(id).toJSON() : null;
-          //@ts-ignore
-          return ({ plan: planJson, frames: asJson(frames), links: asJson(links) })
-        }),
-      )
-      .subscribe(async (data) => {
-        if (data.plan?.user_id === userManager.$.currentUserId()) {
-          dataManager.planStream.next(data);
-        } else {
-          console.log(
-            '--- dataManager; poll -- terminating, user id not current user id ',
-            data.plan?.user_id,
-            '!==',
-            userManager.$.currentUserId()
-          );
+    dataManager.do(async (db) => {
+      const frames = await db.frames.find().where('plan_id').eq(id).$;
+      const links = await db.links.find().where('plan_id').eq(id).$;
+      const plans = await db.plans.findByIds([id]).$;
+      dataManager._productSub = combineLatest([
+        frames,
+        links,
+        plans
+      ])
+        .pipe(
+          // convert documents to POJO
+          map(([frames, links, plan]) => {
+            const planJson = plan.has(id) ? plan.get(id).toJSON() : null;
+            //@ts-ignore
+            return ({ plan: planJson, frames: asJson(frames), links: asJson(links) })
+          }),
+        )
+        .subscribe(async (data) => {
+          if (data.plan?.user_id === userManager.$.currentUserId()) {
+            dataManager.planStream.next(data);
+          } else {
+            dataManager.endPoll();
+          }
+        });
+    })
 
-          dataManager.endPoll();
-        }
-      });
   },
   planStream: new BehaviorSubject({ plan: null, frames: [], links: [] }),
   async db() {

@@ -18,16 +18,10 @@ const MoveFrameViewState = (props) => {
     actions: {
       init(state: leafType) {
         // load in the current frame every time the id and mode changes
-
-        return blockManager.select(state.do.updateId, (value) => {
-          const { type, data } = value;
-
-          console.log('---- block editor watch:', value);
-          if (type === planEditorMode.MOVING_FRAME) {
-            return data.frameId;
-          }
-          return null;
-        });
+        const { type, data } = blockManager.value;
+        //@TODO: validate move state?
+        console.log('---- block moving:', blockManager.value);
+        state.do.updateId(data.frameId);
       },
 
       ... DIMENSION_ACTIONS

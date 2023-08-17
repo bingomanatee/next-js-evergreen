@@ -1,0 +1,13 @@
+@import '~/utils.scss';
+
+.container {
+  position: absolute;
+  pointer-events: none;
+  @include no-select();
+  overflow: visible;
+  > svg {
+    pointer-events: none;
+    @include no-select();
+    overflow: visible;
+  }
+}

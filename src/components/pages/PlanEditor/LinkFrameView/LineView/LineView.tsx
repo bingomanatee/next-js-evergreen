@@ -12,14 +12,13 @@ import { Vector2 } from 'three'
 
 type LineViewProps = {}
 
-function SaveButton(props: {
+function SavePanel(props: {
   state: leafI,
   fromPoint: Vector2
 } & LFSummary) {
   const { state, fromPoint } = props;
 
   if (!(state.$.canDraw() && fromPoint)) {
-    console.log('no save button');
     return null;
   }
 
@@ -29,8 +28,8 @@ function SaveButton(props: {
     style={vectorToStyle(fromPoint!)}
     layerStyle="line-view-button"
   >
-    <Button colorScheme="blue">Save Line</Button>
-    <Button>Cancel</Button>
+    <Button colorScheme="blue" onClick={state.do.save}>Save Line</Button>
+    <Button onClick={state.do.cancel}>Cancel</Button>
   </HStack>
 }
 
@@ -86,6 +85,6 @@ export default function LineView(props: LineViewProps) {
     <div className={styles.container} ref={state.do.setRef} style={{ visibility }}>
 
     </div>
-    <SaveButton state={state} {...value} />
+    <SavePanel state={state} {...value} />
   </>);
 }

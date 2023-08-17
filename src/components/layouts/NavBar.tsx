@@ -47,7 +47,7 @@ export function NavBar({ user, pathName }) {
     return /plans\/[\w\-]{12,}/.test(pathName);
   }, [pathName])
 
-  return <Flex layerStyle="nav-fame">
+  return <Flex layerStyle="nav-frame">
     <Menu zIndex={100000}>
       <MenuButton as={Button} leftIcon={<HamburgerIcon boxSize={6}/>} backgroundColor="transparent">
         Menu

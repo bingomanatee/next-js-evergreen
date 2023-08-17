@@ -27,8 +27,10 @@ export type Plan = {
 export type Link = {
   id: string,
   project_id: number,
-  from_frame: string,
-  to_frame: string
+  start_frame: string,
+  end_frame: string,
+  start_at: string,
+  end_at: string,
 }
 
 export const isPromise = (input: any): input is Promise<any> => {

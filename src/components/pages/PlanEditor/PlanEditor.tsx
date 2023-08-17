@@ -1,5 +1,5 @@
 "use client"
-import { createContext, memo, useEffect, useRef } from 'react';
+import { createContext, memo, useEffect, useRef, useState } from 'react';
 import { Box2 } from 'three'
 import { Box } from '@chakra-ui/react'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
@@ -19,6 +19,8 @@ import FrameAnchorView from './FrameAnchorView/FrameAnchorView'
 import stateFactory, { planEditorMode } from './PlanEditor.state.ts';
 import styles from './PlanEditor.module.scss';
 import LinkFrameView from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameView'
+import blockManager from '~/lib/managers/blockManager'
+import LinkView from '~/components/pages/PlanEditor/LinkView/LinkView'
 
 type PlanEditorProps = { id: string, managers: ManagerMap }
 export const PlanEditorStateCtx = createContext<leafI | null>(null);
@@ -57,18 +59,25 @@ function PlanEditor(props: PlanEditorProps) {
         sub?.unsubscribe()
         keySub?.unsubscribe();
       };
-    }, 'PLAN EDITOR ');
+    });
+  const [blocker, setBlocker] = useState('');
 
-  const { newFrame, frames, keys, markdownStyles, mode } = value;
+  useEffect(() => {
+    const sub = blockManager.select((type) => setBlocker(type), (value) => value.type);
+    return () => sub.unsubscribe();
+  }, [])
+
+  const { newFrame, frames, keys, markdownStyles } = value;
 
   return (<div className={styles.container} ref={planContainerRef}>
     <style dangerouslySetInnerHTML={{ __html: markdownStyles }}/>
     <PlanEditorStateCtx.Provider value={state}>
       <FrameAnchorView>
         <GridView/>
+        <LinkView under />
         <FramesList frames={frames}/>
-        <MoveFrameView />
-        <LinkFrameView />
+        {blocker === planEditorMode.MOVING_FRAME ? <MoveFrameView/> : null}
+        {blocker === planEditorMode.LINKING_FRAME ? <LinkFrameView/> : null}
       </FrameAnchorView>
     </PlanEditorStateCtx.Provider>
     <NewFrame box={newFrame}/>

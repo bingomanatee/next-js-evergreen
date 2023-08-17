@@ -2,14 +2,15 @@ import { leafI } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
 import { Vector2 } from 'three'
 import { leafType } from '~/components/Dialogs/FrameDetail/StyleEditor/types'
-import { DimensionValue, Direction, Frame, isDirection, X_DIR, Y_DIR } from '~/types'
+import { DimensionValue, Direction, dirToString, Frame, isDirection, X_DIR, Y_DIR } from '~/types'
 import blockManager from '~/lib/managers/blockManager'
+import { string } from 'zod'
 
 export const DIMENSION_ACTIONS = {
-  updateId(state: leafI, id: string) {
+  async updateId(state: leafI, id: string) {
     state.do.set_id(id);
+    await state.do.readFrame(id);
     state.do.set_loaded(!!id);
-    state.do.readFrame(id);
   },
   fromFrame(state: leafI, frame: Frame) {
     state.do.set_left(frame.left);
@@ -21,6 +22,10 @@ export const DIMENSION_ACTIONS = {
     console.log('loaded mfv from frame:', state.value);
   },
 
+  /**
+   * save the frame with the dimensions' information
+   * @param state
+   */
   async updateFrame(state: leafI) {
     if (!state.value.id) {
       return;
@@ -32,11 +37,12 @@ export const DIMENSION_ACTIONS = {
       height: state.$.height()
     }
     const frame = await state.$.frame();
+    await frame?.incrementalPatch(update);
     blockManager.do.finish();
+    // may not be necessary
     state.do.updateId(null);
     state.do.set_loaded(false);
     state.do.set_deltas(new Map());
-    frame?.incrementalPatch(update);
   },
 
   async readFrame(state: leafI, id: string | null) {
@@ -138,4 +144,21 @@ export function sameDir(d1: any, d2: any) {
     return (d1.x === d2.x) && (d1.y === d2.y);
   }
   return false;
+}
+
+const stdMap = new Map();
+[X_DIR.X_DIR_C, X_DIR.X_DIR_L, X_DIR.X_DIR_R]
+  .forEach((x) => {
+    [Y_DIR.Y_DIR_B, Y_DIR.Y_DIR_M, Y_DIR.Y_DIR_T]
+      .forEach((y) => {
+        const dir = {x, y};
+        const str = dirToString(dir);
+        stdMap.set(str, dir);
+      })
+  })
+export function stringToDir(name: string) {
+  if (!stdMap.has(name)) {
+    throw new Error('cannot find dir ' + name);
+  }
+  return stdMap.get(name);
 }

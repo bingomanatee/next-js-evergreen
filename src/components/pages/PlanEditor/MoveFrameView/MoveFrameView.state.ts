@@ -20,7 +20,6 @@ const MoveFrameViewState = (props) => {
         // load in the current frame every time the id and mode changes
         const { type, data } = blockManager.value;
         //@TODO: validate move state?
-        console.log('---- block moving:', blockManager.value);
         state.do.updateId(data.frameId);
       },
 

@@ -8,6 +8,7 @@ import messageManager from '~/lib/managers/messageManager'
 import useForestFiltered from '~/lib/useForestFiltered'
 import planEditorState from '~/components/pages/PlanEditor/PlanEditor.state'
 import planEditor, { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
+import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 
 export function FrameControls(props: {
    frameId: string, frameName: string | undefined
@@ -20,7 +21,7 @@ export function FrameControls(props: {
     return state.$.isBlocked();
   });
 
-  const {currentFrameId} = useForestFiltered(planEditorState!, ['currentFrameId'])
+  const {clicked} = useForestFiltered(frameListHoverManager, ['clicked'])
 
   if (isBlocked) {
     return null;
@@ -30,8 +31,8 @@ export function FrameControls(props: {
             top={'20px'}
             spacing="4"
             className={styles['frame-nav-popup']}>
-      <Checkbox layerStyle="frame-select-checkbox" isChecked={currentFrameId === frameId} onChange={() => {
-        planEditorState.do.set_currentFrameId(frameId === currentFrameId ? null : frameId);
+      <Checkbox layerStyle="frame-select-checkbox" isChecked={clicked === frameId} onChange={() => {
+        frameListHoverManager.do.set_clicked(frameId === clicked ? null : frameId);
       }} />
       <IconButton
         variant="frame-control-icon"

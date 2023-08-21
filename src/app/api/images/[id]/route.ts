@@ -19,16 +19,7 @@ export async function GET(
   }
 
   const user = sessionData?.session?.user;
-
   const { id } = params;
-
-  console.log('user: ', user, 'params', params)
-
-  if (!('storage' in supabase)) {
-    console.log('no storage');
-    return NextResponse.json({ error: 'no storage' })
-
-  }
 
   const { data, error } = await supabase.storage
     .from('images')
@@ -38,7 +29,6 @@ export async function GET(
       search: id
     })
 
-  console.log('file data', data, 'error:', error);
   const fileData = (Array.isArray(data) ? data[0] : null);
   if (fileData) {
     const {data: urlData, error: urlError} = await supabase
@@ -75,8 +65,6 @@ export async function POST(req, { params }) {
       upsert: true,
       contentType: req.headers['file-type'],
     })
-
-  console.log('result of upload: ', data, error);
 
   return NextResponse.json(
     {

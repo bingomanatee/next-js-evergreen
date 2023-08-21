@@ -41,7 +41,6 @@ const LinkViewState = (props: {inBack: boolean}) => {
         const fromPoint = state.$.toPoint(fromFrame, start_at);
         const toPoint = state.$.toPoint(toFrame, end_at);
 
-        console.log('drawing link:',  link, fromPoint, toPoint);
 
           draw.line(
             fromPoint.x,
@@ -54,7 +53,6 @@ const LinkViewState = (props: {inBack: boolean}) => {
         const {links, frames} = state.value;
         if (! (element && frames.size && links.size)) return;
 
-        console.log('drawing links:', links);
         element.innerHTML = '';
         const draw = SVG().addTo(element).size('100vw', '100vh');
 
@@ -67,7 +65,6 @@ const LinkViewState = (props: {inBack: boolean}) => {
           const toFrame = frames.get(end_frame);
 
           if (!(fromFrame && toFrame)) {
-            console.log('cannot find ', start_frame, 'and/or', end_frame, 'in', frames);
             return;
           }
           state.$.drawLine(draw, link, fromFrame, toFrame);

@@ -85,7 +85,6 @@ function resizeManagerFactory(id: string): leafConfig {
         if (state.value.dragId) { // dragging already
           return;
         }
-        console.log('-------------- dragging', targetId);
         const startPoint = new Vector2(e.pageX, e.pageY);
         state.do.set_startPoint(startPoint);
         state.do.set_dragId(targetId);
@@ -95,9 +94,6 @@ function resizeManagerFactory(id: string): leafConfig {
       },
       spriteMouseMoveListener(state: leafI, e: MouseEvent) {
         e.stopPropagation();
-        if (state.value.targetId) {
-          console.log('dragging ', state.value.targetId, e.pageX, e.pageY);
-        }
         /*//@ts-ignore
         const { name } = e.target.dataset;
         console.log('sprite move of ', name);
@@ -112,7 +108,6 @@ function resizeManagerFactory(id: string): leafConfig {
 
         window.removeEventListener('mousemove', state.do.spriteMouseMoveListener);
         window.removeEventListener('mouseup', state.do.spriteMouseUpListener);
-        console.log('--- terminating drag of ', state.value.dragId);
       },
       updateId(state: leafI, id: string) {
         state.do.set_id(id);

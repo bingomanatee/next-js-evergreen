@@ -13,7 +13,6 @@ const frameListHoverManager = new Forest({
   },
   actions: {
     clear(state: leafI) {
-      console.log('--- clearing FLHM');
       state.do.set_clicked(null);
       state.do.set_hover(null);
     }

@@ -55,6 +55,7 @@ export function FrameView(props: { frame: Frame }) {
   const { clicked, hover } = useForestFiltered(frameListHoverManager, ['clicked', 'hover']);
 
   const layerStyle = useMemo(() => {
+
     if (frame) {
       const { id } = frame;
       if (clicked === id && hover === id) {
@@ -85,8 +86,8 @@ export function FrameView(props: { frame: Frame }) {
       className={styles['frame-view']}
       data-frame-container={frame.id}
     >
-      {<FrameControls planEditorState={planEditorState!} frameId={frame.id} frameName={frame.name}/>}
-      <Box as="div" layerStyle={"frameDetailWrapper"} data-id="frame-detail-wrapper">
+      {<FrameControls frameId={frame.id} frameName={frame.name}/>}
+      <Box as="div" layerStyle={'frame-detail-wrapper'} data-id="frame-detail-wrapper">
         <DetailView frame={frame}/>
       </Box>
     </Box>

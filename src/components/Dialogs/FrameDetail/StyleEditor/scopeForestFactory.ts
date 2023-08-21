@@ -27,9 +27,7 @@ export function scopeForestFactory(scope: string, dialogState: leafI): leafConfi
           state.value = value;
         },
         listenForCommit(state: leafType) {
-          console.log('---- listening to save style scope ', scope);
           dialogState.select((event) => {
-            console.log('dialog event (in scope)', event);
               if (event.mode === 'save') {
                 if (state.getMeta('loaded') && !state.getMeta('saving')) {
                   state.do.save();
@@ -51,7 +49,6 @@ export function scopeForestFactory(scope: string, dialogState: leafI): leafConfi
           // @TODO: delete existing keys that are not in the state
           dataManager.do(async (db) => {
             state.value.forEach((style, tag) => {
-              console.log('--- saving ', scope, style, tag);
               db.style.incrementalUpsert({
                 scope, style, tag
               });

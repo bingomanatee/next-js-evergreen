@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 import { BehaviorSubject, switchMap } from 'rxjs'
-import { ID_PROP, STRING, sampleId, STYLE, INT } from '~/lib/utils/schemaUtils'
+import { ID_PROP, STRING, STYLE, INT } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
 import { Direction, dirToString, Frame, LFSummary, X_DIR, Y_DIR } from '~/types'
 import { Vector2 } from 'three'
@@ -48,7 +48,6 @@ export default function framesSchema(dataManager) {
             return ub.pipe(
               switchMap(({ user }) => {
                 const userId = user.id ?? dataManager.anonUserId;
-                console.log('looking for user id', userId, 'for user', user);
                 return db.plans.find()
                   .where('user_id').eq(userId).$
               })
@@ -262,60 +261,4 @@ export default function framesSchema(dataManager) {
       }
     }
   });
-}
-
-/**
- * the location of a side/corner of a frame box;
- */
-export function corner(frame: Frame, dir: Direction): Vector2 {
-  const pt = new Vector2(frame.left, frame.top);
-  console.log('corner is', pt, 'from', frame);
-  return pt.add(
-    new Vector2(xOffset(frame, dir.x), yOffset(frame, dir.y))
-  )
-}
-
-export function yOffset(frame: Frame, y: Y_DIR) {
-  switch (y) {
-    case Y_DIR.Y_DIR_M:
-      return frame.height / 2;
-      break;
-
-    case Y_DIR.Y_DIR_B:
-      return frame.height;
-      break;
-  }
-  return 0;
-}
-
-export function xOffset(frame: Frame, x: X_DIR) {
-  switch (x) {
-    case X_DIR.X_DIR_C:
-      return frame.width / 2;
-      break;
-
-    case X_DIR.X_DIR_R:
-      return frame.width;
-      break;
-  }
-
-  return 0;
-}
-
-/**
- * the position of a "drag box" relative to the frame
- */
-export function cornerStyle(frame: Frame, dir: Direction, offset: Vector2 | null, asStyle?: boolean) {
-  if (!frame) {
-    return asStyle ? {} : new Vector2()
-  }
-
-  const basePoint = corner(frame, dir);
-  console.log('base point is ', basePoint);
-  const pt = offset ? basePoint.add(offset) : basePoint //@TODO - constrain
-
-  return asStyle ? {
-    position: 'absolute',
-    ...vectorToStyle(pt)
-  } : pt
 }

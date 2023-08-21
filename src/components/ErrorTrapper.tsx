@@ -13,7 +13,7 @@ type Props = { boundry: string,     children: ReactNode }
 
   componentDidCatch(error, info) {
     // Log the error to an error reporting service
-    console.log(error, info);
+    console.error(error, info);
   }
 
   render() {

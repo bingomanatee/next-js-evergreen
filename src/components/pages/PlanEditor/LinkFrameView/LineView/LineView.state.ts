@@ -61,7 +61,6 @@ const LineViewState = (props, linkState) => {
       canDraw(state: leafType) {
         const { id, spriteDir, targetId, targetSpriteDir } = state.value;
         const out = !!(id && spriteDir && targetSpriteDir && targetId && element);
-        console.log('canDraw: ', id, targetId, 'ele = ', element, '>>> ', out);
         return out;
       },
       async fromFrame(state: leafType) {
@@ -108,13 +107,11 @@ const LineViewState = (props, linkState) => {
       },
       setRef(state: leafType, e: HTMLDivElement) {
         element = e;
-        console.log('setting ref to', e);
         state.value = { ...state.value }
       },
       async draw(state: leafType) {
         const { fromPoint, toPoint } = state.value;
         if (!(fromPoint && toPoint && element)) {
-          console.log('cannot draw -- ', fromPoint, toPoint, element);
           return null;
         }
         element!.innerHTML = '';

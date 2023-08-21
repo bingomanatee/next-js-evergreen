@@ -17,7 +17,7 @@ const ImageEditorState = (props) => {
   const { frameState } = props;
   const id = frameState.value.id;
   const IMAGE_API_URL = `/api/images/${id}`;
-  console.log('image props:', props);
+
   const $value: ImageEditorStateValue = {
     imageData: null,
     imageUrl: null,

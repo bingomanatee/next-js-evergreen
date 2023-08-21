@@ -76,7 +76,6 @@ const messageManager = {
   },
 
   listFrames(id?: string) {
-    console.log('---- listFrames');
     frameListHoverManager.do.set_clicked(id || null);
     const sub = messageManager.notifySubject.subscribe((value) => {
       if (value.type === 'close-dialog') {

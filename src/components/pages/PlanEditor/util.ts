@@ -19,7 +19,6 @@ export const DIMENSION_ACTIONS = {
     state.do.set_bottom(frame.top + frame.height);
     state.do.set_type(frame.type);
     state.do.set_loaded(true);
-    console.log('loaded mfv from frame:', state.value);
   },
 
   /**

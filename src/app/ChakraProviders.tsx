@@ -1,9 +1,10 @@
 'use client'
-import { createMultiStyleConfigHelpers, extendTheme } from '@chakra-ui/react'
+import { createMultiStyleConfigHelpers, defineStyle, extendTheme } from '@chakra-ui/react'
 import { CacheProvider } from '@chakra-ui/next-js'
 import { ChakraProvider } from '@chakra-ui/react'
 import { checkboxAnatomy } from '@chakra-ui/anatomy'
 import { baseStyle } from '@chakra-ui/avatar/dist/avatar'
+import { h } from '@chakra-ui/toast/dist/toast.types-f226a101'
 
 const FRAMES_LIST = {
   fontSize: '0.8em',
@@ -13,13 +14,6 @@ const FRAMES_LIST = {
   py: 0.5,
   noOfLines: 1
 };
-
-const EDIT_LINK = {
-  color: 'editLink',
-  _hover: {
-    textDecoration: 'underline'
-  }
-}
 
 const FRAME_VIEW = {
   overflow: "visible",
@@ -145,12 +139,17 @@ const LAYER_STYLES = {
   'frameView-clicked': {
     ...FRAME_VIEW,
     borderColor: "frame-view-clicked-border",
+    boxSizing: 'border-box',
+    borderWidth: '3px',
+    borderStyle: 'dashed'
   },
   'frameView-clicked-hover': {
     ...FRAME_VIEW,
     borderColor: "frame-view-clicked-hover-border",
+    borderWidth: '3px',
+    borderStyle: 'dashed'
   },
-  frameDetailWrapper: {
+  'frame-detail-wrapper': {
     display: "block",
     width: "100%",
     height: "100%",
@@ -204,8 +203,8 @@ const COLORS = {
   'hover-row': 'hsl(60,100%,85%)',
 
   'frame-view-hover-border': 'hsla(30,100%,50%,0.5)',
-  'frame-view-clicked-border': 'hsla(90,100%,50%,0.5)',
-  'frame-view-clicked-hover-border': 'hsl(90,100%,50%)',
+  'frame-view-clicked-border': 'hsla(280,100%,50%,0.5)',
+  'frame-view-clicked-hover-border': 'hsl(280,100%,66%)',
 
   'form-title': 'hsl(244,50%,25%)',
   'nav-x-light': 'hsl(200,100%,90%)',
@@ -303,13 +302,13 @@ const TEXT_STYLES = {
 };
 
 const BUTTONS = {
-  'pagination-button': {
+  'pagination-button': defineStyle({
     size: 'sm',
     p: 1,
     h: 'auto',
-    backgroundColor: 'transparent',
+    background: 'white',
     borderRadius: 0,
-  },
+  }),
   'frame-control-icon': {
     ml: 1,
     p: 2,
@@ -394,7 +393,7 @@ const CheckboxBaseStyle = definePartsStyle({
   },
 })
 
-export const checkboxTheme = defineMultiStyleConfig({ baseStyle: CheckboxBaseStyle})
+export const checkboxTheme = defineMultiStyleConfig({ baseStyle: CheckboxBaseStyle })
 
 const theme = extendTheme({
   layerStyles: LAYER_STYLES,

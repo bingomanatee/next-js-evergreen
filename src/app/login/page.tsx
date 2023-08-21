@@ -14,14 +14,6 @@ const LoginPage = () => {
   const user = useUser();
   const router = useRouter();
 
-  // may not be necessary - no state management on this page
-  //const { globalState } = useContext(GlobalStateContext);
-  useEffect(() => {
-    console.log('login page user set to', user);
-    // globalState.do.set_user(user);
-    // globalState.setMeta('supabaseClient', supabaseClient, true);
-  }, [user])
-
   useEffect(() => {
     // Only run query once user is logged in.
     if (user) {
@@ -34,14 +26,12 @@ const LoginPage = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      console.log('buttons:', authContainer.current?.getElementsByTagName('button'))
       const button = authContainer.current?.getElementsByTagName('button')[0] || [];
       if (button) {
         const wrapper = document.createElement('div');
         wrapper.appendChild(signInButton.current.cloneNode(true));
         wrapper.className=styles.wrapper;
         button.parentNode.replaceChild(wrapper, button );
-        console.log('replaced button')
       }
     }, 50)
 

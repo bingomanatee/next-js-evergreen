@@ -5,8 +5,6 @@ import { Box2, Vector2 } from 'three'
 import { userManager } from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
 import keyManager from '~/lib/managers/keyManager'
-import { mode } from '@chakra-ui/theme-tools'
-import { string } from 'zod'
 import { Direction } from '~/types'
 
 export enum planEditorMode {
@@ -28,7 +26,6 @@ export type PlanEditorStateValue = {
   frames: [],
   links: [],
   markdownStyles: string,
-  currentFrameId: string | null,
 };
 
 type leafType = typedLeaf<PlanEditorStateValue>;
@@ -45,7 +42,6 @@ const PlanEditorState = (id, planContainerRef) => {
     markdownStyles: '',
     modeTarget: null,
     planId: id,
-    currentFrameId: null,
   };
   return {
     name: "PlanEditor",
@@ -71,6 +67,7 @@ const PlanEditorState = (id, planContainerRef) => {
         if (planContainerRef.current) {
           planContainerRef.current.addEventListener('contextmenu', (e) => {
             if (!e.shiftKey) {
+              e.preventDefault();
               state.do.onMouseDown(e, true)
             }
           });
@@ -84,7 +81,6 @@ const PlanEditorState = (id, planContainerRef) => {
     actions: {
       keys(state: leafType, keys: Set<string>) {
         state.do.set_keys(keys);
-        console.log('keys: ', keys);
         if ((!blockManager.$.isBlocked()) && keys.has(' ')) {
           state.do.pan();
         }
@@ -106,11 +102,19 @@ const PlanEditorState = (id, planContainerRef) => {
         });
       },
       onMouseDown(state: leafType, e: MouseEvent, fromContextMenu = false) {
+        if (blockManager.$.isBlocked()) {
+          return;
+        }
+        if(e.target?.dataset['role'] !== 'plan-editor-main') {
+          console.warn('bad target:', e.target?.dataset);
+          return;
+        };
         e.preventDefault();
         e.stopPropagation();
 
         if (!e.shiftKey) {
           if (fromContextMenu || e.button === 2 || state.value.keys.has('f')) {
+
             state.do.onRightMouseDown(e);
           }
         }
@@ -126,7 +130,6 @@ const PlanEditorState = (id, planContainerRef) => {
         if (start && end) {
           const frame = state.$.offsetBox(start, end); //@TODO: handle reverse drags
           const size = frame.getSize(new Vector2());
-          console.log('size:', size, 'points', start, end);
           if (size.x >= 150 && size.y >= 150) {
             dataManager.addFrame(id, frame);
           } else {
@@ -230,8 +233,13 @@ const PlanEditorState = (id, planContainerRef) => {
        */
       onRightMouseDown(state: leafType, e: MouseEvent) {
         if (blockManager.$.isBlocked()) {
+          console.warn('not right mousing - blocked');
           return;
         }
+        e.stopPropagation();
+        e.preventDefault();
+        console.log('target:', e.target);
+
         keyManager.init();
         let keySub = keyManager.stream.subscribe((keys) => {
           if (keys.has('Escape')) {

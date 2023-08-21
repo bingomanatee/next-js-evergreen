@@ -12,9 +12,9 @@ import { asJson } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
 import { anonUserId } from '~/constants'
 import { Frame, Link, Plan } from '~/types'
-import {sortBy} from 'lodash';
-import * as frameMover from '~/lib/utils/frameMover';
-import { link } from 'fs'
+import { sortBy } from 'lodash';
+import frameMover, { ShufflePos } from '~/lib/utils/frameMover'
+import { string } from 'zod'
 
 addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBQueryBuilderPlugin);
@@ -51,7 +51,7 @@ type DataManager = {
   do(action: Action)
   deleteFrame(id): Promise<void>
   deleteState(scope: string, tagName: string): void
-  moveFrame(currentFrameId: string, direction: string): any
+  moveFrame(currentFrameId: string, direction: ShufflePos): any
 }
 
 type Action = (db: RxDatabase<any>) => Promise<any> | Promise<void>
@@ -70,19 +70,20 @@ const planStream: BehaviorSubject<DataStreamItem> = new BehaviorSubject(
   })
 
 const dataManager: DataManager = {
-  moveFrame(frameId: string, direction: string): any {
+  moveFrame(frameId: string, direction: ShufflePos): any {
     dataManager.do(async (db) => {
-      const {frames, framesMap} = dataManager.planStream.value;
+      const { frames, framesMap } = dataManager.planStream.value;
       const frame = framesMap.get(frameId);
       if (!frame) {
         return;
       }
       let sorted = sortBy(frames, 'order');
-      let newFrames = frameMover[direction](sorted, frameId);
+      let newFrames = frameMover(frameId, sorted, direction);
 
-      newFrames.forEach((frame, index) => {
+      newFrames.forEach(async (frame, index) => {
         if (frame.order !== index + 1) {
-          db.frames.incrementalPatch({id: frame.id, order: index + 1})
+          const doc = await db.frames.fetch(frame.id);
+          await doc?.incrementalPatch({ order: index + 1 })
         }
       })
     });

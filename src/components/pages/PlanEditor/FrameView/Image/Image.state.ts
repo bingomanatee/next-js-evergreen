@@ -26,7 +26,6 @@ const ImageState = (props) => {
         const id = props.frame?.id;
         if (id) {
           const {data} = await axios.get('/api/images/' + id);
-          console.log('data for ', id, 'is', data);
           let url = data?.url || '';
           state.do.set_url(url);
           state.do.loadImageSize();

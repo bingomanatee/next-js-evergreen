@@ -41,7 +41,6 @@ const LinkFrameState = () => {
 
     actions: {
       async save(state: leafType, params: LFSummary) {
-        console.log('saving line:', params, 'with', state.value.planId);
         const { id, spriteDir, targetId, targetSpriteDir } = params;
         if (id && spriteDir && targetId && targetSpriteDir) {
           await dataManager.do(async (db) => {
@@ -51,11 +50,9 @@ const LinkFrameState = () => {
         blockManager.do.finish();
       },
       clearLock(state: leafType) {
-        console.log('clearing lock');
         state.do.set_lockedTarget(null);
       },
       lockTarget(state: leafType) {
-        console.log('locking target');
         state.child('target')!.do.set_locked(true);
       },
       spriteClicked(state: leafType, dir: Direction, onEnd?: boolean) {
@@ -70,7 +67,6 @@ const LinkFrameState = () => {
         //@ts-ignore
         const targetId = e.target.dataset['frameContainer'];
         const target = state.child('target')!;
-        console.log('onMouseEnter:', targetId, target.value);
 
         if (target.value.locked) {
           return;
@@ -105,8 +101,6 @@ const LinkFrameState = () => {
      async init(state: leafType, planEditorState: leafI) {
         // load in the current frame every time the id and mode changes
         const frameId = blockManager.value.data.frameId;
-        console.log('line editor initializing in plan ',
-          planEditorState.value.planId, 'for frame', frameId);
         state.do.set_planId(planEditorState.value.planId);
         await state.do.updateId(frameId);
         state.do.set_loaded(true);

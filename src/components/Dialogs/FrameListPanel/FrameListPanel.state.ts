@@ -247,7 +247,7 @@ const FrameListPanelState = (props: FrameListProps, gridRef, bodyRef) => {
           pos.sub(boundsPos);
           state.do.set_mousePos(pos);
         } else {
-          console.log('no parent for ', bodyRef.current, '==', bodyRef.current.parentElement)
+          console.warn('no parent for ', bodyRef.current, '==', bodyRef.current.parentElement)
         }
       },
       init(state: leafType) {

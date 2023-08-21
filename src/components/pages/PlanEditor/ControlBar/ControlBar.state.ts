@@ -23,7 +23,6 @@ const ControlBarState = (props) => {
       async addFrame(state: leafType) {
         const {newFrame} = state.value;
         const planId = dataManager.planStream.value.plan?.id;
-        console.log('new frame with newFrame', newFrame, 'plan id', planId);
         if (!planId) {
           return messageManager.notify('New Frame', 'Cannot identify plan', 'error');
         }
@@ -48,7 +47,6 @@ const ControlBarState = (props) => {
             type,
             order
           }
-          console.log('adding frame', newFrame);
           await db.frames.incrementalUpsert(newFrame);
           messageManager.notify('New Frame', `Created new ${type} ${id} `)
           messageManager.editFrame(id);

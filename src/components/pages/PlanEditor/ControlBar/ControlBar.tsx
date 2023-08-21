@@ -1,7 +1,7 @@
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import stateFactory from './ControlBar.state.ts';
 import useForest from '~/lib/useForest'
-import { Box, Button, HStack, Menu, IconButton, MenuButton, MenuItem, MenuList, Text } from '@chakra-ui/react'
+import { Box, Button, HStack, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from '@chakra-ui/react'
 import Image from 'next/image';
 import messageManager from '~/lib/managers/messageManager'
 import FrameIcon from '~/components/icons/FrameIcon'
@@ -9,6 +9,9 @@ import { frameTypeNames } from '~/constants'
 import useForestFiltered from '~/lib/useForestFiltered'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import dataManager from '~/lib/managers/dataManager'
+import { ShufflePos } from '~/lib/utils/frameMover'
+import stopPropagation from '~/lib/utils/stopPropagation'
+import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 
 type ControlBarProps = {}
 
@@ -26,16 +29,11 @@ export default function ControlBar(props: ControlBarProps) {
     messageManager.listFrames();
   }, [])
 
-  const { currentFrameId } = useForestFiltered(planEditorState!, ['currentFrameId']);
+  const { clicked } = useForestFiltered(frameListHoverManager!, ['clicked']);
 
-  const frame = currentFrameId ? ((id) => {
-    if (!id) {
-      return null;
-    }
-    return dataManager.planStream.value.framesMap?.get(id) || null;
-  })(currentFrameId) : null;
+  const frame = useMemo(() => clicked ? dataManager.planStream.value.framesMap?.get(clicked) : null, [clicked]);
 
-  return (<Box layerStyle="control-bar" as="nav" data-role="control-bar" h="3em">
+  return (<Box layerStyle="control-bar" as="nav" data-role="control-bar" h="3em" onMouseDown={stopPropagation}>
     <HStack justify="center" spacing={[1, 2, 3]} alignItems="center">
 
       <HStack spacing={0}>
@@ -88,7 +86,7 @@ export default function ControlBar(props: ControlBarProps) {
                 pl={2} spacing={1}>
           <Text fontSize="xs" w={40} noOfLines={1}>Frame <b>{frame.name || frame.id}</b></Text>
           <IconButton
-            onClick={() => dataManager.moveFrame(currentFrameId, 'top')}
+            onClick={() => dataManager.moveFrame(clicked,  ShufflePos.top0)}
             variant="pagination-button"
             icon={<Image src="/img/icons/to-top.svg"
                          width={MOVE_ICON_SIZE}
@@ -98,7 +96,7 @@ export default function ControlBar(props: ControlBarProps) {
             aria-label="move-frame-to-top"/>
           <IconButton
             variant="pagination-button"
-            onClick={() => dataManager.moveFrame(currentFrameId, 'up')}
+            onClick={() => dataManager.moveFrame(clicked, ShufflePos.before2)}
             icon={<Image src="/img/icons/to-up.svg"
                          width={MOVE_ICON_SIZE}
                          height={MOVE_ICON_SIZE}
@@ -107,7 +105,7 @@ export default function ControlBar(props: ControlBarProps) {
             aria-label="move-frame-up"/>
           <IconButton
             variant="pagination-button"
-            onClick={() => dataManager.moveFrame(currentFrameId, 'down')}
+            onClick={() => dataManager.moveFrame(clicked, ShufflePos.after4)}
             icon={<Image src="/img/icons/to-down.svg"
                          width={MOVE_ICON_SIZE}
                          height={MOVE_ICON_SIZE}
@@ -115,7 +113,7 @@ export default function ControlBar(props: ControlBarProps) {
             size="sm" aria-label="move-frame-down"/>
           <IconButton
             variant="pagination-button"
-            onClick={() => dataManager.moveFrame(currentFrameId, 'bottom')}
+            onClick={() => dataManager.moveFrame(clicked, ShufflePos.bottom6)}
             icon={<Image src="/img/icons/to-bottom.svg"
                          width={MOVE_ICON_SIZE}
                          height={MOVE_ICON_SIZE}

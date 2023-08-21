@@ -48,7 +48,6 @@ const StyleEditorState = (props, dialogState) => {
       },
       addStyle(state: leafType, scope) {
         const tagName: string = state.value.tagName;
-        console.log('add style scope', scope, tagName);
         if (!tagName) {
           return;
         }
@@ -63,7 +62,6 @@ const StyleEditorState = (props, dialogState) => {
         }
       },
       async save(state: leafType) {
-        console.log('----- styleEditor - save');
         const children = state.children;
         for (const { child } of children) {
          await child.do.save();

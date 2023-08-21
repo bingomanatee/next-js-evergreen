@@ -70,7 +70,7 @@ function PlanEditor(props: PlanEditorProps) {
 
   const { newFrame, frames, keys, markdownStyles } = value;
 
-  return (<><div className={styles.container} ref={planContainerRef}>
+  return (<main data-role="plan-editor-main" className={styles.container} ref={planContainerRef}>
     <style dangerouslySetInnerHTML={{ __html: markdownStyles }}/>
     <PlanEditorStateCtx.Provider value={state}>
       <FrameAnchorView>
@@ -85,8 +85,7 @@ function PlanEditor(props: PlanEditorProps) {
     <NewFrame box={newFrame}/>
     <HelpPrompt/>
     <KeyFeedback keys={keys}/>
-  </div>
-  </>);
+  </main>);
 }
 
 export default memo(PlanEditor)

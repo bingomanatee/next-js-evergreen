@@ -56,5 +56,5 @@ export function DragFrameSprite() {
   </div>
 }
 
-const CENTER_SPRITE_SIZE = 20;
+const CENTER_SPRITE_SIZE = 40;
 const POINT_OFFSET = new Vector2(-CENTER_SPRITE_SIZE / 2, -CENTER_SPRITE_SIZE / 2);

@@ -17,7 +17,7 @@ export default function NavLayout({ children }) {
     <VStack w="100%" h="100%" overflow="hidden" align="stretch" as="main">
       <NavBar pathName={pathname} user={user}/>
 
-      <Box flex="1" background="blackAlpha.50" overflow="auto">
+      <Box flex="1" backgroundColor="blackAlpha.50" overflow="hidden">
         {children}
       </Box>
 

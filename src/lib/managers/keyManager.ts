@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject } from 'rxjs'
 const keyManager = {
   stream: null,
   seq: new Subject(),
-  init() { // can be called more than once; will only execute the first time
+  init() { // can be called more than once; will only execute once
     if (keyManager.stream) {
       return;
     }

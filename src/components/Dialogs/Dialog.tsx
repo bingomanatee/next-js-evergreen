@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, Suspense } from 'react';
-import styles from './Dialog.module.scss';
+import { Suspense } from 'react';
 import stateFactory from './Dialog.state.ts';
 import useForest from '~/lib/useForest';
 import { MessageTypeValue } from '~/lib/managers/types'
@@ -8,9 +7,8 @@ import dynamic from 'next/dynamic'
 import {
   Button,
   Drawer,
-  DrawerBody,
   DrawerCloseButton,
-  DrawerContent, DrawerFooter,
+  DrawerContent,
   DrawerHeader,
   DrawerOverlay, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay,
   Spinner
@@ -49,7 +47,7 @@ export default function Dialog(props: DialogProps) {
           break;
 
         case 'frame-list':
-          views.set(view, dynamic(() => import ( '~/components/Dialogs/FramesEditPanel/FramesEditPanel'), {
+          views.set(view, dynamic(() => import ( '~/components/Dialogs/FrameListPanel/FrameListPanel'), {
             suspense: true
           }))
           break;

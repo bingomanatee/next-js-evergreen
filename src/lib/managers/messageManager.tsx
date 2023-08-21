@@ -75,12 +75,11 @@ const messageManager = {
     );
   },
 
-  listFrames(id: string) {
-    frameListHoverManager.do.set_clicked(id);
+  listFrames(id?: string) {
+    console.log('---- listFrames');
+    frameListHoverManager.do.set_clicked(id || null);
     const sub = messageManager.notifySubject.subscribe((value) => {
-      console.log('listFrames - observed', value);
       if (value.type === 'close-dialog') {
-        console.log('got close dialog');
         frameListHoverManager.do.clear();
         sub.unsubscribe();
       }
@@ -90,8 +89,8 @@ const messageManager = {
         view: 'frame-list',
         title: `Frames`,
         actionPrompt: 'Done',
-        cancelPrompt: '',
-        value: { size: 'sm', id }
+        cancelPrompt: 'Close',
+        value: { size: ['md', 'md', 'lg'], id: id | null }
       }
     );
   }

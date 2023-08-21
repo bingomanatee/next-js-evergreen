@@ -1,11 +1,10 @@
 import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
-import { Frame, Link } from '~/types'
+import { Frame, LFSummary, Link, X_DIR, Y_DIR } from '~/types'
 import { throttle } from 'lodash'
 import { Vector2 } from 'three'
 
 // local
-import px from '~/lib/utils/px'
 import sortByOrder from '~/lib/utils/SortByOrder'
 import messageManager from '~/lib/managers/messageManager'
 
@@ -19,7 +18,10 @@ export type FrameListStateValue = {
   mousePos: Vector2,
   overId: string | null,
   activeId: string
-  clickedId: string | null
+  clickedId: string | null,
+  search: string,
+  offset: 0,
+  linkTarget: string | null
 };
 type leafType = typedLeaf<FrameListStateValue>;
 const THROTTLED = 'mouseMoveThrottled';
@@ -28,32 +30,126 @@ function describeFramesIter(f) {
   return `${f.id} - ${f.order}`
 }
 
-const FramesEditPanelState = (props: FrameListProps, gridRef, bodyRef) => {
-  const value : {id?: string} = props.value.value;
+export const MAX_FRAMES = 30;
+
+const FrameListPanelState = (props: FrameListProps, gridRef, bodyRef) => {
+  const value: { id?: string } = props.value.value;
 
   const $value: FrameListStateValue = {
     overId: null,
     frames: [],
     links: [],
+    linkTarget: null,
     mousePos: new Vector2(),
     activeId: value.id ?? '',
-    clickedId: null
+    clickedId: null,
+    offset: 0,
+    search: '',
   };
   return {
     name: "FrameList",
     $value,
 
     selectors: {
-      flyoverStyle(state: leafType) {
-        const { mousePos, clickedId } = state.value;
-        if (!clickedId) {
-          return { display: 'none' };
+      links(state: leafType, id: string) {
+        const { links } = state.value;
+
+        return links.filter((link: Link) => link.start_frame === id || link.end_frame === id).length;
+      },
+      targetLinks(state: leafType) {
+        const { links, linkTarget } = state.value;
+        if (!linkTarget) {
+          return new Map();
         }
-        return { left: px(mousePos.x + 2), top: px(mousePos.y + 2) }
+        return links.reduce((memo, link: Link) => {
+          if (link.start_frame === linkTarget) {
+            memo.set(link.end_frame, link);
+          }
+          if (link.end_frame === linkTarget) {
+            memo.set(link.start_frame, link);
+          }
+          return memo;
+        }, new Map());
+      },
+      count(state: leafType, index: number) {
+        const { offset } = state.value;
+
+        return index + (offset * MAX_FRAMES) + 1;
+      },
+      population(state: leafType) {
+        const { frames, search, linkTarget } = state.value;
+        let frameSet = frames.sort(sortByOrder).reverse();
+        if (search || linkTarget) {
+          const linkedTo = state.$.targetLinks();
+          const searchStr = search.toLowerCase();
+          return frameSet.filter((frame: Frame) => {
+            const { name, content, id } = frame;
+            if (linkTarget === id) {
+              return false;
+            }
+
+            if (linkedTo.has(id)) {
+              return true;
+            }
+            if (search) {
+              return [name, content, id].some((text) => `${text}`.toLowerCase().includes(searchStr));
+            }
+
+            return true;
+          });
+        }
+        return frameSet
+      },
+      framesList(state: leafType) {
+        const { offset } = state.value;
+        return state.$.population().slice(offset * MAX_FRAMES, (offset + 1) * MAX_FRAMES);
+      },
+      atEnd(state: leafType) {
+        const { offset } = state.value;
+        return state.$.population().length <= (offset + 1) * MAX_FRAMES;
+      },
+      atStart(state: leafType) {
+        const { offset } = state.value;
+        return offset === 0;
       }
     },
 
     actions: {
+      clearSearch(state: leafType) {
+        state.do.set_search('');
+      },
+      addLink(state: leafType, id: string) {
+        const { linkTarget, frames } = state.value;
+        if (!(linkTarget && id && id !== linkTarget)) {
+          return;
+        }
+        const config: LFSummary = {
+          id: linkTarget,
+          targetId: id,
+          spriteDir: { x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M },
+          targetSpriteDir: { x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M },
+        };
+
+        const baseFrame = frames.find(fr => fr.id === id);
+
+        dataManager.do((db) => {
+          return db.links.addLink(baseFrame.plan_id, config);
+        })
+      },
+      next(state: leafType) {
+        const { offset } = state.value;
+        if (state.$.atEnd()) {
+          return;
+        }
+        state.do.set_offset(offset + 1);
+      },
+      prev(state: leafType) {
+        const { offset } = state.value;
+        if (state.$.atStart()) {
+          return;
+        }
+        state.do.set_offset(offset - 1);
+      },
       gridMouseDown(state: leafType, e: MouseEvent) {
         e.stopPropagation();
         //@ts-ignore
@@ -61,7 +157,6 @@ const FramesEditPanelState = (props: FrameListProps, gridRef, bodyRef) => {
         if (id === 'header') {
           return;
         }
-        console.log('grid mouse down', id);
         state.do.set_clickedId(id);
         const moveListener = (e) => state.do.mouseMove(e);
 
@@ -78,8 +173,8 @@ const FramesEditPanelState = (props: FrameListProps, gridRef, bodyRef) => {
         bodyRef.current?.addEventListener('mouseleave', moveUnListener, { once: true });
       },
       editFrame(state: leafType, id: string, e: MouseEvent) {
-        e.stopPropagation()
-        props.close();
+        e.stopPropagation();
+        props.cancel();
         frameListHoverManager.do.clear();
 
         setTimeout(async () => {
@@ -87,7 +182,6 @@ const FramesEditPanelState = (props: FrameListProps, gridRef, bodyRef) => {
         }, 500)
       },
       async moveFrame(state: leafType, fromId: string, toId: string) {
-        console.log('moving frame ', fromId, 'to after', toId);
         const { frames } = state.value;
         const orderedFrames = frames.sort(sortByOrder)
         const frameFrom = frames.find((frame) => frame.id === fromId);
@@ -105,7 +199,6 @@ const FramesEditPanelState = (props: FrameListProps, gridRef, bodyRef) => {
           }
           return frame;
         }).flat().filter((n) => !!n);
-        console.log('... to', reorderedFrames.map(describeFramesIter));
         const ids = [];
         const byId = reorderedFrames.reduce((memo, frame, index) => {
           frame.order = index + 1;
@@ -130,16 +223,10 @@ const FramesEditPanelState = (props: FrameListProps, gridRef, bodyRef) => {
       },
       mouseEnter(state: leafType, id) {
         frameListHoverManager.do.set_hover(id);
-        if (state.value.clickedId) {
-          state.do.set_overId(id);
-        }
       },
 
       mouseLeave(state: leafType) {
         frameListHoverManager.do.set_hover(null);
-        if (state.value.overId) {
-          state.do.set_overId(null);
-        }
       },
 
       mouseMove(state: leafType, e: MouseEvent) {
@@ -175,4 +262,4 @@ const FramesEditPanelState = (props: FrameListProps, gridRef, bodyRef) => {
   };
 };
 
-export default FramesEditPanelState;
+export default FrameListPanelState;

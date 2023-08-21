@@ -1,0 +1,81 @@
+@import '~/utils.scss';
+
+.container {
+  position: relative;
+}
+
+.flyover {
+  padding: 1em;
+  position: absolute;
+  border: 2px solid orange;
+  width: 200px;
+  font-size: 0.5em;
+  background: rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+.grid {
+  @include no-select();
+  display: grid;
+  grid-template-columns: [id] 2fr [name] 1fr [order] 3em [widget] auto [end];
+  grid-row-gap: 4px;
+}
+
+.active-frame {
+  color: hsl(330, 100%, 60%) !important;
+}
+.frame-table {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+  border-image-width: 0 !important;
+
+  td, th {
+    margin: 0 !important;
+    border: none !important;
+    padding: 1px 0;
+
+    &.count-cell {
+      width: 50px;
+      text-align: center;
+      color: var(--chakra-colors-blackAlpha-400)
+    }
+
+    &.type-cell {
+      width: 50px;
+      color: white
+  }
+
+    &.link-cell {
+      width: 50px;
+      text-align: right;
+      padding: 0 4px;
+    }
+
+    &.link-ctrl {
+      width: 50px;
+      text-align: right;
+      padding: 0 4px;
+    }
+
+    &.edit-cell {
+      width: 60px;
+      text-align: right;
+    }
+
+    &.id-cell {
+      width: 100px;
+    }
+
+    &.link-cell-2{
+      width: 100px;
+    }
+  }
+
+  tr:hover td {
+    background-color: var(--chakra-colors-hover-row)
+  }
+}
+

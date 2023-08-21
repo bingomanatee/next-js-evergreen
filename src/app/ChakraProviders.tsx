@@ -1,15 +1,16 @@
 'use client'
-import { extendTheme } from '@chakra-ui/react'
+import { createMultiStyleConfigHelpers, extendTheme } from '@chakra-ui/react'
 import { CacheProvider } from '@chakra-ui/next-js'
 import { ChakraProvider } from '@chakra-ui/react'
+import { checkboxAnatomy } from '@chakra-ui/anatomy'
+import { baseStyle } from '@chakra-ui/avatar/dist/avatar'
 
 const FRAMES_LIST = {
-  as: 'div',
   fontSize: '0.8em',
   overflow: 'hidden',
   fontWeight: 400,
-  px: 3,
-  py: 1,
+  px: 2,
+  py: 0.5,
   noOfLines: 1
 };
 
@@ -40,10 +41,47 @@ const LINK_FRAME = {
 }
 
 const LAYER_STYLES = {
+  'frame-control-checkbox': {
+    backgroundColor: 'white',
+    mx: 3,
+    my: 2,
+  },
+  'control-bar': {
+    position: 'fixed',
+    bottom: 0,
+    right: 0,
+    left: 0,
+    width: '100%',
+    backgroundColor: 'white',
+    shadow: 'base',
+    zIndex: 10000000,
+    py: 1,
+    px: 3,
+    Button: {
+      backgroundColor: 'blackAlpha.50',
+      color: 'black',
+      textTransform: 'none',
+      fontSize: '0.8em',
+      _hover: {
+        fontWeight: 600,
+      }
+    }
+  },
+  'popup-item': {
+    w: '100%',
+    px: 2,
+    py: 1,
+    _hover: {
+      backgroundColor: 'hover-row',
+    },
+    _active: {
+      backgroundColor: 'accent',
+    }
+  },
   'link-frame-target-locked': {
     ...LINK_FRAME,
     borderColor: 'nav-dark',
-    backgroundColor: 'nav-alpha',
+    backgroundColor: 'nav-alpha-lt',
     pointerEvents: 'all',
   }, 'link-frame-target': {
     ...LINK_FRAME,
@@ -77,7 +115,7 @@ const LAYER_STYLES = {
   'nav-frame': {
     direction: "row",
     justifyContent: "space-between",
-    align: "center",
+    alignItems: "center",
     pb: 0,
     pt: 2,
     px: 4,
@@ -163,6 +201,7 @@ const COLORS = {
   'x-dark-accent': 'hsl(30,50%,25%)',
   'light-accent': 'hsl(30,100%,75%)',
   'x-light-accent': 'hsl(30,100%,85%)',
+  'hover-row': 'hsl(60,100%,85%)',
 
   'frame-view-hover-border': 'hsla(30,100%,50%,0.5)',
   'frame-view-clicked-border': 'hsla(90,100%,50%,0.5)',
@@ -172,17 +211,28 @@ const COLORS = {
   'nav-x-light': 'hsl(200,100%,90%)',
   'nav-light': 'hsl(200,86%,80%)',
   'nav': 'hsl(200,55%,50%)',
-  'nav-alpha': 'hsla(200,55%,50%, 0.15)',
+  'nav-alpha-lt': 'hsla(200,55%,50%, 0.10)',
+  'nav-alpha': 'hsla(200,55%,50%, 0.4)',
   'nav-dark': 'hsl(200,100%,25%)',
+  'nav-dark-alpha': 'hsla(200,100%,25%, 0.333)',
   'nav-x-dark': 'hsl(200,100%,12.5%)',
   'editLink': 'hsl(228,70%,50%)',
   'active-button-back': 'hsl(30,50%,25%)',
   'button-back': 'hsl(30,0%,85%)',
   'active-button': 'hsl(30,100%,75%)',
-  'inactive-button': 'hsl(150,20%,33%)',
+  'active-button-bg': 'hsl(30,100%,33%)',
+  'inactive-button': 'hsl(150,20%,50%)',
+  'inactive-button-bg': 'hsl(150,20%,25%)',
 };
 
 const TEXT_STYLES = {
+  'popup-item': {
+    fontSize: '0.8em',
+    noOfLines: 1,
+  },
+  'pagination-number': {
+    fontSize: '0.8em'
+  },
   'link-frame-target': {
     color: 'nav-x-dark',
     fontSize: 'lg',
@@ -203,40 +253,16 @@ const TEXT_STYLES = {
       color: 'black'
     }
   },
-  framesListItem: FRAMES_LIST,
-  'framesListItem-hover': {
+  'frame-list-item': FRAMES_LIST,
+  'frame-list-item-edit': {
     ...FRAMES_LIST,
-    backgroundColor: 'light-accent'
+    color: 'nav-dark-alpha',
+    _hover: {
+      color: 'nav-dark',
+      textDecoration: 'underline'
+    }
   },
-  'framesListItem-clicked-hover': {
-    ...FRAMES_LIST,
-    backgroundColor: 'accent'
-  },
-  'framesListItem-clicked': {
-    ...FRAMES_LIST,
-    backgroundColor: 'light-accent'
-  },
-  'framesListItem-edit': {
-    ...FRAMES_LIST,
-    ...EDIT_LINK
-  },
-  'framesListItem-edit-hover': {
-    ...FRAMES_LIST,
-    ...EDIT_LINK,
-    backgroundColor: 'light-accent',
-  },
-  'framesListItem-edit-clicked': {
-    ...FRAMES_LIST,
-    ...EDIT_LINK,
-    backgroundColor: 'light-accent',
-  },
-  'framesListItem-edit-clicked-hover': {
-    ...FRAMES_LIST,
-    ...EDIT_LINK,
-    backgroundColor: 'accent',
-  },
-
-  framesListHead: {
+  'frames-list-head': {
     ...FRAMES_LIST,
     color: 'blackAlpha.700',
     borderBottom: '1px solid gray',
@@ -249,9 +275,14 @@ const TEXT_STYLES = {
     lineHeight: '100%'
   },
   info: {
-    fontSize: 'sm',
-    color: 'gray.700',
-    padding: 3
+    fontSize: '0.85em',
+    color: 'blackAlpha.600',
+    fontWeight: 300,
+  },
+  'info-sm': {
+    fontSize: '0.8em',
+    color: 'blackAlpha.500',
+    fontWeight: 300,
   },
   'info-dropzone': {
     color: 'nav-dark',
@@ -271,16 +302,113 @@ const TEXT_STYLES = {
   }
 };
 
+const BUTTONS = {
+  'pagination-button': {
+    size: 'sm',
+    p: 1,
+    h: 'auto',
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+  },
+  'frame-control-icon': {
+    ml: 1,
+    p: 2,
+    w: "36px",
+    h: "36px",
+    backgroundColor: "white",
+    isRound: true,
+    border: "1px solid black",
+    borderColor: "blackAlpha.500"
+  },
+  controlIcon: {
+    size: 'sm',
+    isRound: true,
+    backgroundColor: 'rgba(0,0,0,0)',
+    _hover: {
+      backgroundColor: 'rgba(0,0,0,0)',
+    }
+  },
+  'frame-link-locker': {
+    pointerEvents: 'all',
+    colorScheme: 'teal',
+    size: 'sm',
+    fontWeight: 600
+  },
+  nav: {
+    borderColor: 'nav-x-light',
+    background: 'white',
+    _hover: {
+      color: 'nav-dark',
+      backgroundColor: 'nav-x-light',
+    }
+  },
+  delete: {
+    borderColor: 'red.100',
+    color: 'red.500',
+    background: 'white',
+    _hover: {
+      color: 'red.800',
+      backgroundColor: 'red.50',
+    }
+  },
+  submit: {
+    borderWidth: '1px',
+    borderColor: 'light-accent',
+    backgroundColor: 'white',
+    _hover: {
+      color: 'x-dark-accent',
+      backgroundColor: 'x-light-accent'
+    }
+  },
+  'frame-list-button': {
+    h: 'auto',
+    isRound: true,
+    w: '100%',
+    p: 0.5,
+    backgroundColor: 'nav-alpha-lt',
+    textAlign: 'center',
+    fontSize: '0.8em',
+    borderRadius: '8px',
+    textTransform: 'none',
+    _hover: {
+      backgroundColor: 'nav-alpha',
+      fontWeight: 800
+    }
+  }
+};
+
+const { definePartsStyle, defineMultiStyleConfig } =
+  createMultiStyleConfigHelpers(checkboxAnatomy.keys)
+
+const CheckboxBaseStyle = definePartsStyle({
+  // define the part you're going to style
+
+  control: {
+    padding: 1, // change the padding of the control
+    borderRadius: 0, // change the border radius of the control
+    backgroundColor: 'white',
+    borderColor: 'black',
+    borderWidth: 2,
+    mx: 2,
+    shadow: 'md'
+  },
+})
+
+export const checkboxTheme = defineMultiStyleConfig({ baseStyle: CheckboxBaseStyle})
+
 const theme = extendTheme({
   layerStyles: LAYER_STYLES,
   colors: COLORS,
   components: {
+    IconButton: {
+      variants: BUTTONS
+    },
     Button: {
       baseStyle: {
         textTransform: 'uppercase',
         fontWeight: 300,
-        px: '8px',
-        py: '2px',
+        px: 2,
+        py: 0.5,
         borderRadius: '0.333em',
         lineHeight: '100%',
         _hover: {
@@ -288,58 +416,7 @@ const theme = extendTheme({
         }
       },
 
-      variants: {
-        'frame-control-icon': {
-          ml: 1,
-          p: 2,
-          w: "36px",
-          h: "36px",
-          backgroundColor: "white",
-          isRound: true,
-          border: "1px solid black",
-          borderColor: "blackAlpha.500"
-        },
-        controlIcon: {
-          size: 'sm',
-          isRound: true,
-          backgroundColor: 'rgba(0,0,0,0)',
-          _hover: {
-            backgroundColor: 'rgba(0,0,0,0)',
-          }
-        },
-        'frame-link-locker': {
-          pointerEvents: 'all',
-          colorScheme: 'teal',
-          size: 'sm',
-          fontWeight: 600
-        },
-        nav: {
-          borderColor: 'nav-x-light',
-          background: 'white',
-          _hover: {
-            color: 'nav-dark',
-            backgroundColor: 'nav-x-light',
-          }
-        },
-        delete: {
-          borderColor: 'red.100',
-          color: 'red.500',
-          background: 'white',
-          _hover: {
-            color: 'red.800',
-            backgroundColor: 'red.50',
-          }
-        },
-        submit: {
-          borderWidth: '1px',
-          borderColor: 'light-accent',
-          backgroundColor: 'white',
-          _hover: {
-            color: 'x-dark-accent',
-            backgroundColor: 'x-light-accent'
-          }
-        }
-      }
+      variants: BUTTONS
     },
     FormLabel: {
       baseStyle: {
@@ -350,6 +427,7 @@ const theme = extendTheme({
         mb: '2px'
       }
     },
+    Checkbox: checkboxTheme,
     Card: {
       variants: {
         ['form-card']: {

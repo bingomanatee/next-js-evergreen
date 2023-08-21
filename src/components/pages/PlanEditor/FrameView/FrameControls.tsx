@@ -1,21 +1,26 @@
 import { leafI } from '@wonderlandlabs/forest/lib/types'
-import { HStack, IconButton, useBoolean } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { Checkbox, HStack, IconButton, useBoolean } from '@chakra-ui/react'
+import { useContext, useEffect, useState } from 'react'
 import blockManager from '~/lib/managers/blockManager'
-import styles from '~/components/pages/PlanEditor/FramesView/FramesView.module.scss'
+import styles from '~/components/pages/PlanEditor/FrameView/FramesView.module.scss'
 import Image from 'next/image'
 import messageManager from '~/lib/managers/messageManager'
 import useForestFiltered from '~/lib/useForestFiltered'
+import planEditorState from '~/components/pages/PlanEditor/PlanEditor.state'
+import planEditor, { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 
 export function FrameControls(props: {
-  planEditorState: leafI, frameId: string, frameName: string | undefined
+   frameId: string, frameName: string | undefined
 }) {
 
-  const { planEditorState, frameId, frameName } = props;
+  const { frameId, frameName } = props;
+  const planEditorState = useContext(PlanEditorStateCtx);
 
   const isBlocked = useForestFiltered(blockManager, (_, state) => {
     return state.$.isBlocked();
-  })
+  });
+
+  const {currentFrameId} = useForestFiltered(planEditorState!, ['currentFrameId'])
 
   if (isBlocked) {
     return null;
@@ -25,6 +30,9 @@ export function FrameControls(props: {
             top={'20px'}
             spacing="4"
             className={styles['frame-nav-popup']}>
+      <Checkbox layerStyle="frame-select-checkbox" isChecked={currentFrameId === frameId} onChange={() => {
+        planEditorState.do.set_currentFrameId(frameId === currentFrameId ? null : frameId);
+      }} />
       <IconButton
         variant="frame-control-icon"
         aria-label="move"
@@ -36,12 +44,6 @@ export function FrameControls(props: {
         icon={<Image alt="edit-icon" src="/img/icons/frame-edit.svg" width="30" height="30"/>}
         aria-label="edit"
         onClick={() => messageManager.editFrame(frameId, frameName)}
-      />
-      <IconButton
-        variant="frame-control-icon"
-        aria-label="list"
-        onClick={() => messageManager.listFrames(frameId)}
-        icon={<Image alt="edit-icon" src="/img/icons/frame-list.svg" width="30" height="30"/>}
       />
       <IconButton
         variant="frame-control-icon"

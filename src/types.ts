@@ -33,6 +33,13 @@ export type Link = {
   end_at: string,
 }
 
+export enum FrameTypes {
+  markdown='markdown',
+  image='image',
+  map='map',
+  unknown='unknown'
+}
+
 export const isPromise = (input: any): input is Promise<any> => {
   return input && (typeof input.then === 'function')
     && (typeof input.catch === 'function')
@@ -45,7 +52,7 @@ export type DialogEvt = {
 }
 
 export type DialogView = {
-  close: GenFunction;
+  cancel: GenFunction;
   save: GenFunction;
   dialogState: leafI
   value: MessageTypeValue

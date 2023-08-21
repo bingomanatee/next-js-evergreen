@@ -14,13 +14,14 @@ import { ManagerMap } from '~/lib/managers/types'
 import HelpPrompt from './HelpPrompt/HelpPrompt'
 import { KeyFeedback } from './KeyFeedback'
 import MoveFrameView from './MoveFrameView/MoveFrameView'
-import FramesList from './FramesView/FramesList'
+import FramesList from './FrameView/FramesList'
 import FrameAnchorView from './FrameAnchorView/FrameAnchorView'
 import stateFactory, { planEditorMode } from './PlanEditor.state.ts';
 import styles from './PlanEditor.module.scss';
 import LinkFrameView from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameView'
 import blockManager from '~/lib/managers/blockManager'
 import LinkView from '~/components/pages/PlanEditor/LinkView/LinkView'
+import ControlBar from '~/components/pages/PlanEditor/ControlBar/ControlBar'
 
 type PlanEditorProps = { id: string, managers: ManagerMap }
 export const PlanEditorStateCtx = createContext<leafI | null>(null);
@@ -69,7 +70,7 @@ function PlanEditor(props: PlanEditorProps) {
 
   const { newFrame, frames, keys, markdownStyles } = value;
 
-  return (<div className={styles.container} ref={planContainerRef}>
+  return (<><div className={styles.container} ref={planContainerRef}>
     <style dangerouslySetInnerHTML={{ __html: markdownStyles }}/>
     <PlanEditorStateCtx.Provider value={state}>
       <FrameAnchorView>
@@ -79,11 +80,13 @@ function PlanEditor(props: PlanEditorProps) {
         {blocker === planEditorMode.MOVING_FRAME ? <MoveFrameView/> : null}
         {blocker === planEditorMode.LINKING_FRAME ? <LinkFrameView/> : null}
       </FrameAnchorView>
+      <ControlBar />
     </PlanEditorStateCtx.Provider>
     <NewFrame box={newFrame}/>
     <HelpPrompt/>
     <KeyFeedback keys={keys}/>
-  </div>);
+  </div>
+  </>);
 }
 
 export default memo(PlanEditor)

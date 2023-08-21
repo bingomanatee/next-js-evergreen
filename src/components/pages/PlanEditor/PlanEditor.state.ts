@@ -27,7 +27,8 @@ export type PlanEditorStateValue = {
   newFrame: Box2 | null,
   frames: [],
   links: [],
-  markdownStyles: string
+  markdownStyles: string,
+  currentFrameId: string | null,
 };
 
 type leafType = typedLeaf<PlanEditorStateValue>;
@@ -44,13 +45,14 @@ const PlanEditorState = (id, planContainerRef) => {
     markdownStyles: '',
     modeTarget: null,
     planId: id,
+    currentFrameId: null,
   };
   return {
     name: "PlanEditor",
     $value,
 
     selectors: {
-      offsetBox(state: leafType, start: Vector2, end: Vector2) {
+      offsetBox(state: leafType, start: Vector2, end: Vector2) : Box2 {
         const box = new Box2(start.clone(), end.clone())
         const rect = planContainerRef.current.getBoundingClientRect();
         const offset = new Vector2(rect.x, rect.y).multiplyScalar(-1);
@@ -89,33 +91,6 @@ const PlanEditorState = (id, planContainerRef) => {
       },
 
       pan(state: leafType) {
-        console.log('---- panning');
-        const observable = blockManager.do.block(planEditorMode.PANNING);
-
-        const sub = observable.subscribe({
-          next(value) {
-            console.log('pan observed:', value)
-          },
-          error(_err) {
-            console.error('pan error', _err);
-            keySub.unsubscribe();
-          },
-          complete() {
-            console.log('pan complete');
-            keySub.unsubscribe();
-          }
-        });
-
-        let keySub = keyManager.stream.subscribe((keys) => {
-          if (!keys.has(' ')) {
-            // @TODO: finish panning
-            sub.unsubscribe()
-          }
-        });
-
-        /**
-         * TODO: observe mouse, pan POV
-         */
       },
 
       async loadMarkdownStyles(state: leafType) {
@@ -142,7 +117,6 @@ const PlanEditorState = (id, planContainerRef) => {
       },
 
       drawPendingFrame(state: leafType, start: Vector2, end: Vector2) {
-        console.log('drawPendingFrame: ', start.toArray(), end.toArray());
         if (start && end) {
           state.do.set_newFrame(state.$.offsetBox(start, end));
         }
@@ -150,8 +124,10 @@ const PlanEditorState = (id, planContainerRef) => {
 
       createFrame(state: leafType, start: Vector2, end: Vector2) {
         if (start && end) {
-          const frame = state.$.offsetBox(start, end);
-          if (frame.width >= 150 && frame.height >= 150) {
+          const frame = state.$.offsetBox(start, end); //@TODO: handle reverse drags
+          const size = frame.getSize(new Vector2());
+          console.log('size:', size, 'points', start, end);
+          if (size.x >= 150 && size.y >= 150) {
             dataManager.addFrame(id, frame);
           } else {
             blockManager.do.finish();
@@ -209,7 +185,8 @@ const PlanEditorState = (id, planContainerRef) => {
         if (frame.type === 'image') {
           messageManager.notify(
             'Resize Frame',
-            'cannot resize frame -- image frame sizes are based on their content. You can still move the frame though.'
+            'You cannot resize image frames; You CAN move the frame.',
+            'warning'
           );
         }
 
@@ -255,14 +232,29 @@ const PlanEditorState = (id, planContainerRef) => {
         if (blockManager.$.isBlocked()) {
           return;
         }
+        keyManager.init();
+        let keySub = keyManager.stream.subscribe((keys) => {
+          if (keys.has('Escape')) {
+            blockManager.do.finish();
+          }
+        });
+
+        let sub = blockManager.subscribe((value) => {
+          if (value.type !== planEditorMode.ADDING_FRAME) {
+            sub.unsubscribe();
+            keySub.unsubscribe();
+            planContainerRef.current?.removeEventListener('mousemove', onMove);
+            state.do.set_newFrame(null);
+          }
+        });
+
         try {
-          const [_blockId, subject] = blockManager.do.block(planEditorMode.ADDING_FRAME);
-          state.getMeta('rightDownSub')?.complete();
-          state.setMeta('rightDownSub', subject, true);
+          blockManager.do.block(planEditorMode.ADDING_FRAME);
         } catch (_err) {
           console.warn('right click while blocked');
           return;
         }
+
         let end = null;
         const start = new Vector2(e.x, e.y);
 
@@ -271,18 +263,14 @@ const PlanEditorState = (id, planContainerRef) => {
           state.do.drawPendingFrame(start, end);
         };
 
-        const finish = () => {
-          planContainerRef.current.removeEventListener('mousemove', onMove);
-          state.do.set_newFrame(null);
-        }
         planContainerRef.current?.addEventListener('mousemove', onMove);
         planContainerRef.current?.addEventListener('mouseup', () => {
-          state.getMeta('rightDownSub')?.complete();
-          state.setMeta('rightHandSub', null, true)
-          finish();
-          state.do.createFrame(start, end);
+          if (blockManager.value.type === planEditorMode.ADDING_FRAME) {
+            state.do.createFrame(start, end);
+          }
+          blockManager.do.finish();
         }, { once: true })
-        state.do.initMode(planEditorMode.ADDING_FRAME)
+        state.do.initMode(planEditorMode.ADDING_FRAME) //deprecate
       },
 
       async init(state: leafType) {

@@ -63,19 +63,10 @@ export default function framesSchema(dataManager) {
         primaryKey: 'id',
         type: 'object',
         properties: {
-          id: {
-            type: 'string',
-            maxLength: sampleId.length,
-          },
-          name: {
-            type: 'string'
-          },
-          user_id: {
-            type: 'string'
-          },
-          created: {
-            type: 'integer'
-          }
+          id: ID_PROP,
+          name: STRING,
+          user_id: STRING,
+          created: INT
         },
         required: ['id', 'name', 'user_id']
       },
@@ -97,24 +88,18 @@ export default function framesSchema(dataManager) {
         type: 'object',
         properties: {
           id: ID_PROP,
-          name: {
-            type: 'string'
-          },
-          plan_id: {
-            type: 'string'
-          },
+          name: STRING,
+          plan_id: STRING,
           created: {
             type: 'integer'
           },
           type: {
-            type: 'string',
+            ...STRING,
             defaultValue: 'markdown'
           },
-          value: {
-            type: 'string'
-          },
+          value: STRING,
           linkMode: {
-            type: 'string',
+            ...STRING,
             default: 'corner or side'
           },
           order: {
@@ -181,6 +166,18 @@ export default function framesSchema(dataManager) {
           const map = await this.findByIds([id]).exec();
           return map.get(id);
         },
+      async nextFrameOrder(planId): number {
+          // returns a number 1 larger than all the current orders of the frames in the given plan.
+          try {
+            const frames = await this.find()
+              .where('plan_id').eq(planId).exec();
+            return frames.reduce((max, fr) => {
+              return Math.max(max, fr.order);
+            }, 0) + 1;
+          } catch (err) {
+            return 1;
+          }
+        },
       },
       methods: {}
     },
@@ -191,9 +188,7 @@ export default function framesSchema(dataManager) {
         type: 'object',
         properties: {
           id: ID_PROP,
-          name: {
-            type: 'string',
-          },
+          name: STRING,
           plan_id: ID_PROP,
           start_frame: ID_PROP,
           end_frame: ID_PROP,
@@ -250,20 +245,18 @@ export default function framesSchema(dataManager) {
         },
         properties: {
           id: {
-            type: 'string',
+            ...STRING,
             maxLength: 100
           },
           scope: {
-            type: 'string',
+            ...STRING,
             maxLength: 50
           },
           tag: {
-            type: 'string',
+            ...STRING,
             maxLength: 50
           },
-          style: {
-            type: 'string'
-          }
+          style: STRING
         },
         required: ['id', 'scope', 'tag', 'style']
       }

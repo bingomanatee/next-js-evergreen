@@ -1,5 +1,5 @@
 "use client"
-import { addRxPlugin, createRxDatabase, RxDatabase } from 'rxdb';
+import { addRxPlugin, createRxDatabase, RxDatabase, RxDocument } from 'rxdb';
 import { wrappedValidateZSchemaStorage } from 'rxdb/plugins/validate-z-schema';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
@@ -11,7 +11,10 @@ import { v4 } from 'uuid';
 import { asJson } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
 import { anonUserId } from '~/constants'
-import { Frame, Plan } from '~/types'
+import { Frame, Link, Plan } from '~/types'
+import {sortBy} from 'lodash';
+import * as frameMover from '~/lib/utils/frameMover';
+import { link } from 'fs'
 
 addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBQueryBuilderPlugin);
@@ -25,14 +28,17 @@ const dbPromise: Promise<RxDatabase<any>> = createRxDatabase(
     storage: wrappedValidateZSchemaStorage({ storage: getRxStorageDexie() })
   });
 
+type DataStreamItem = {
+  frames: any[];
+  links: any[];
+  framesMap: Map<string, Frame>
+  planId: string | null,
+  plan: Plan | null
+}
 type DataManager = {
   userOwnsPlan(id): Promise<boolean>;
   addCollections(colls: Record<string, any>): Promise<void>;
-  planStream: BehaviorSubject<{
-    frames: any[];
-    links: any[];
-    plan: Plan | null
-  }>;
+  planStream: BehaviorSubject<DataStreamItem>;
   initPlan(id: string): Promise<void>;
   addCollection(name: string, colls: Record<string, any>): Promise<any>;
   anonUserId: any;
@@ -45,11 +51,42 @@ type DataManager = {
   do(action: Action)
   deleteFrame(id): Promise<void>
   deleteState(scope: string, tagName: string): void
+  moveFrame(currentFrameId: string, direction: string): any
 }
 
 type Action = (db: RxDatabase<any>) => Promise<any> | Promise<void>
 
+const framesMap: Map<string, Frame> = new Map();
+const frames: Frame[] = [];
+const links: Link[] = [];
+
+const planStream: BehaviorSubject<DataStreamItem> = new BehaviorSubject(
+  {
+    plan: null,
+    planId: null,
+    framesMap,
+    frames: frames,
+    links: links
+  })
+
 const dataManager: DataManager = {
+  moveFrame(frameId: string, direction: string): any {
+    dataManager.do(async (db) => {
+      const {frames, framesMap} = dataManager.planStream.value;
+      const frame = framesMap.get(frameId);
+      if (!frame) {
+        return;
+      }
+      let sorted = sortBy(frames, 'order');
+      let newFrames = frameMover[direction](sorted, frameId);
+
+      newFrames.forEach((frame, index) => {
+        if (frame.order !== index + 1) {
+          db.frames.incrementalPatch({id: frame.id, order: index + 1})
+        }
+      })
+    });
+  },
   deleteState(scope: string, tagName: string) {
     dataManager.do(async (db) => {
       const style = await db.style.findOne({
@@ -123,23 +160,36 @@ const dataManager: DataManager = {
     console.error(plan?.toJSON(), 'plan is not owned by user:', userManager.value.user);
     return false;
   },
-  async poll(id: string) {
+  async poll(planId: string) {
     await dataManager.endPoll();
     dataManager.do(async (db) => {
-      const frames = await db.frames.find().where('plan_id').eq(id).$;
-      const links = await db.links.find().where('plan_id').eq(id).$;
-      const plans = await db.plans.findByIds([id]).$;
+      const frames = await db.frames.find().where('plan_id').eq(planId).$;
+      const links = await db.links.find().where('plan_id').eq(planId).$;
+      const plans = await db.plans.findByIds([planId]).$;
       dataManager._productSub = combineLatest([
         frames,
         links,
-        plans
+        plans,
+        planId
       ])
         .pipe(
           // convert documents to POJO
-          map(([frames, links, plan]) => {
-            const planJson = plan.has(id) ? plan.get(id).toJSON() : null;
-            //@ts-ignore
-            return ({ plan: planJson, frames: asJson(frames), links: asJson(links) })
+          map(([frames, links, plans]) => {
+            const planJson = plans.get(planId)?.toJSON();
+
+            const framesMap = new Map();
+            frames.forEach((frame: Frame) => {
+              framesMap.set(frame.id, frame);
+            })
+
+            const data: DataStreamItem = {
+              plan: planJson,
+              frames: asJson(frames as RxDocument[]),
+              framesMap,
+              links: asJson(links as RxDocument[]),
+              planId
+            }
+            return (data)
           }),
         )
         .subscribe(async (data) => {
@@ -152,7 +202,7 @@ const dataManager: DataManager = {
     })
 
   },
-  planStream: new BehaviorSubject({ plan: null, frames: [], links: [] }),
+  planStream,
   async db() {
     return dbPromise;
   },

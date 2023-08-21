@@ -36,7 +36,6 @@ function PlanListItem({ id, name, orientation, onDelete }: {
         </HStack>
       </CardHeader>
       <CardFooter>
-        {deleteBtn}
         {openBtn}
       </CardFooter>
     </Card>
@@ -48,7 +47,6 @@ function PlanListItem({ id, name, orientation, onDelete }: {
             {heading}
           </HStack>
           <HStack>
-            {deleteBtn}
             {openBtn}
           </HStack>
         </Flex>

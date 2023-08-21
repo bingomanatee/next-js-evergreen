@@ -1,6 +1,6 @@
 import styles from './FramesView.module.scss';
 import { Frame } from '~/types'
-import { FrameView } from '~/components/pages/PlanEditor/FramesView/FrameView'
+import { FrameView } from '~/components/pages/PlanEditor/FrameView/FrameView'
 
 type FramesViewProps = { frames: Frame[] }
 

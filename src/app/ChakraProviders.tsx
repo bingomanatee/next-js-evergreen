@@ -40,6 +40,13 @@ const LAYER_STYLES = {
     mx: 3,
     my: 2,
   },
+  'outline': {
+    borderWidth: '1px',
+    borderColor: 'blackAlpha.300',
+    px: [1, 2, 2],
+    py: 0,
+    borderRadius: 2
+  },
   'control-bar': {
     position: 'fixed',
     bottom: 0,
@@ -52,8 +59,6 @@ const LAYER_STYLES = {
     py: 1,
     px: 3,
     Button: {
-      backgroundColor: 'blackAlpha.50',
-      color: 'black',
       textTransform: 'none',
       fontSize: '0.8em',
       _hover: {
@@ -117,6 +122,11 @@ const LAYER_STYLES = {
     w: "100%",
     as: "header",
     zIndex: 100000,
+    backgroundColor: 'whiteAlpha.600',
+    position: 'fixed',
+    l: 0,
+    r: 0,
+    t: 0
   },
   'text-document': {
     px: 16,

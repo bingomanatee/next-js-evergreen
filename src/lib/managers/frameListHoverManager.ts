@@ -15,6 +15,9 @@ const frameListHoverManager = new Forest({
     clear(state: leafI) {
       state.do.set_clicked(null);
       state.do.set_hover(null);
+    },
+    clearClicked(state: leafI) {
+      state.do.set_clicked(null);
     }
   }
 });

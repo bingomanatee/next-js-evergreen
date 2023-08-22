@@ -41,13 +41,20 @@ function NewFrame(props: { box: Box2 | null }) {
   >New Frame</Box>
 }
 
+function UnZoom({zoom, children}) {
+  return (
+    <div style={{transform: `scale(${1/zoom})`}}>
+      {children}
+    </div>
+  )
+}
+
 function PlanEditor(props: PlanEditorProps) {
   const { id } = props;
   const planContainerRef = useRef(null);
   useEffect(() => {
     keyManager.init();
   }, [])
-
 
   const [value, state] = useForest([stateFactory, id, planContainerRef],
     async (localState) => {
@@ -68,13 +75,15 @@ function PlanEditor(props: PlanEditorProps) {
     return () => sub.unsubscribe();
   }, [])
 
-  const { newFrame, frames, keys, markdownStyles } = value;
+  const { newFrame, frames, keys, markdownStyles, zoom } = value;
 
   return (<main data-role="plan-editor-main" className={styles.container} ref={planContainerRef}>
     <style dangerouslySetInnerHTML={{ __html: markdownStyles }}/>
     <PlanEditorStateCtx.Provider value={state}>
       <FrameAnchorView>
-        <GridView/>
+        <UnZoom zoom={zoom}>
+        <GridView zoom={zoom} />
+        </UnZoom>
         <LinkView under />
         <FramesList frames={frames}/>
         {blocker === planEditorMode.MOVING_FRAME ? <MoveFrameView/> : null}

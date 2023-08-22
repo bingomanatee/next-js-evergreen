@@ -6,6 +6,7 @@ import { userManager } from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
 import keyManager from '~/lib/managers/keyManager'
 import { Direction } from '~/types'
+import { scale } from '@chakra-ui/tooltip/dist/tooltip.transition'
 
 export enum planEditorMode {
   NONE = 'none',
@@ -42,13 +43,14 @@ const PlanEditorState = (id, planContainerRef) => {
     markdownStyles: '',
     modeTarget: null,
     planId: id,
+    zoom: 1
   };
   return {
     name: "PlanEditor",
     $value,
 
     selectors: {
-      offsetBox(state: leafType, start: Vector2, end: Vector2) : Box2 {
+      offsetBox(state: leafType, start: Vector2, end: Vector2): Box2 {
         const box = new Box2(start.clone(), end.clone())
         const rect = planContainerRef.current.getBoundingClientRect();
         const offset = new Vector2(rect.x, rect.y).multiplyScalar(-1);
@@ -105,10 +107,11 @@ const PlanEditorState = (id, planContainerRef) => {
         if (blockManager.$.isBlocked()) {
           return;
         }
-        if(e.target?.dataset['role'] !== 'plan-editor-main') {
+        if (e.target?.dataset['role'] !== 'plan-editor-main') {
           console.warn('bad target:', e.target?.dataset);
           return;
-        };
+        }
+        ;
         e.preventDefault();
         e.stopPropagation();
 
@@ -297,10 +300,32 @@ const PlanEditorState = (id, planContainerRef) => {
             userManager.getMeta('router')?.push('/');
           })
         state.do.loadMarkdownStyles();
+
+        state.do.watchWheel();
         return sub;
+      },
+
+      zoomOut(state: leafType) {
+        const {zoom} = state.value;
+        const nextZoom = Math.floor(zoom * 10) + 1
+        state.do.set_zoom(nextZoom / 10);
+      },
+      zoomIn(state: leafType) {
+        const {zoom} = state.value;
+        const nextZoom = Math.floor(zoom * 10) - 1;
+        state.do.set_zoom(nextZoom / 10);
+      },
+      zoom(state: leafType, event) {
+        let { zoom } = state.value;
+        zoom += event.deltaY * -0.001;
+        // Restrict scale
+        state.do.set_zoom(Math.min(Math.max(0.125, zoom), 4))
+      },
+      watchWheel(state) {
+        window.addEventListener('wheel', state.do.zoom);
       }
     }
-  };
+  }
 };
 
 export default PlanEditorState;

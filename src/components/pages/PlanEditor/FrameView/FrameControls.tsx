@@ -11,7 +11,7 @@ import planEditor, { PlanEditorStateCtx } from '~/components/pages/PlanEditor/Pl
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 
 export function FrameControls(props: {
-   frameId: string, frameName: string | undefined
+  frameId: string, frameName: string | undefined
 }) {
 
   const { frameId, frameName } = props;
@@ -21,19 +21,24 @@ export function FrameControls(props: {
     return state.$.isBlocked();
   });
 
-  const {clicked} = useForestFiltered(frameListHoverManager, ['clicked'])
+  const { clicked } = useForestFiltered(frameListHoverManager, ['clicked']);
+
+  const { zoom } = useForestFiltered(planEditorState!, ['zoom'])
 
   if (isBlocked) {
     return null;
   }
   return (
-    <HStack pad={8}
-            top={'20px'}
-            spacing="4"
-            className={styles['frame-nav-popup']}>
+    <HStack
+      pad={8}
+      top={'20px'}
+      spacing="4"
+      className={styles['frame-nav-popup']}
+      style={{ transform: `scale(${1 / zoom})` }}
+    >
       <Checkbox layerStyle="frame-select-checkbox" isChecked={clicked === frameId} onChange={() => {
         frameListHoverManager.do.set_clicked(frameId === clicked ? null : frameId);
-      }} />
+      }}/>
       <IconButton
         variant="frame-control-icon"
         aria-label="move"

@@ -49,7 +49,9 @@ export function NavBar({ user, pathName }) {
 
   return <Flex layerStyle="nav-frame">
     <Menu zIndex={100000}>
-      <MenuButton as={Button} leftIcon={<HamburgerIcon boxSize={6}/>} backgroundColor="transparent">
+      <MenuButton as={Button}
+                  leftIcon={<HamburgerIcon boxSize={6}/>}
+                  backgroundColor="transparent">
         Menu
       </MenuButton>
       <MenuList>

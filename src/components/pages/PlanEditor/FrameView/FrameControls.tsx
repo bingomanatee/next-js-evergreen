@@ -34,7 +34,7 @@ export function FrameControls(props: {
       top={'20px'}
       spacing="4"
       className={styles['frame-nav-popup']}
-      style={{ transform: `scale(${1 / zoom})` }}
+      style={{ transform: `scale(${100 / zoom})` }}
     >
       <Checkbox layerStyle="frame-select-checkbox" isChecked={clicked === frameId} onChange={() => {
         frameListHoverManager.do.set_clicked(frameId === clicked ? null : frameId);

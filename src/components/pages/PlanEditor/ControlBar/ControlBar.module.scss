@@ -2,3 +2,16 @@
 .container {
 
 }
+
+.pan-context {
+  z-index: 100000;
+  position: fixed;
+  left: 50vw;
+  top: 50vh;
+  overflow: visible;
+  > section {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+  }
+}

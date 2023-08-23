@@ -43,7 +43,7 @@ function NewFrame(props: { box: Box2 | null }) {
 
 function UnZoom({zoom, children}) {
   return (
-    <div style={{transform: `scale(${1/zoom})`}}>
+    <div style={{transform: `scale(${100/zoom})`}}>
       {children}
     </div>
   )

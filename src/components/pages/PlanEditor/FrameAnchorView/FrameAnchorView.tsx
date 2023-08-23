@@ -15,10 +15,14 @@ export default function FrameAnchorView(props: FrameAnchorViewProps) {
   const {} = value;*/
 
   const planEditorState = useContext(PlanEditorStateCtx);
-  const { zoom } = useForestFiltered(planEditorState!, ['zoom']);
+  const { zoom, pan} = useForestFiltered(planEditorState!, ['zoom', 'pan']);
 
-  return (<div className={styles.container} style={{
-    transform: 'scale(' + zoom + ')',
+  const transform = `scale(${zoom / 100}) translate(${pan.x}px, ${pan.y}px)`;
+  console.log('transform:', transform);
+  return (<div
+    data-role="anchor"
+    className={styles.container} style={{
+    transform: transform,
   }}>
     {props.children}
   </div>);

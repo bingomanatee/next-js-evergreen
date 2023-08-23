@@ -1,10 +1,14 @@
 import { useCallback, useContext, useMemo } from 'react';
 import stateFactory from './ControlBar.state.ts';
-import useForest from '~/lib/useForest'
+import useForest from '~/lib/useForest';
+import styles from './ControlBar.module.scss';
+import {GrClear} from 'react-icons/gr';
+
 import {
   Box,
   Button,
   CloseButton,
+  Flex,
   HStack,
   IconButton,
   Menu,
@@ -12,62 +16,65 @@ import {
   MenuItem,
   MenuList,
   Text,
-  Flex,
+  Portal,
+  Kbd
 } from '@chakra-ui/react'
 import Image from 'next/image';
 import messageManager from '~/lib/managers/messageManager'
 import FrameIcon from '~/components/icons/FrameIcon'
 import { frameTypeNames } from '~/constants'
 import useForestFiltered from '~/lib/useForestFiltered'
-import planEditor, { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import dataManager from '~/lib/managers/dataManager'
 import { ShufflePos } from '~/lib/utils/frameMover'
 import stopPropagation from '~/lib/utils/stopPropagation'
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
-import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'
+import { ZoomControl } from '~/components/pages/PlanEditor/ControlBar/ZoomControl'
+import { createPortal } from 'react-dom'
+import { vectorToStyle } from '~/lib/utils/px'
+import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 
 type ControlBarProps = {}
 
 const MOVE_ICON_SIZE = 18;
 
-function percent(n) {
-  return Math.round(100 * n) + '%'
+function Panner({ state, panPosition }) {
+  const pos = vectorToStyle(panPosition);
+  return (<div className={styles['pan-context']}
+  >
+    <section style={pos}
+    >
+      <Image ref={state.do.onPanImage} src="/img/icons/page-move.svg" alt="panner" style={{
+        width: '80px', height: '80px',
+      }}
+             width="20" height="20"/>
+    </section>
+  </div>)
 }
 
-function ZoomControl() {
-  const planEditorState = useContext(PlanEditorStateCtx);
-  const { zoom } = useForestFiltered(planEditorState!, ['zoom']);
-
-  return (
-    <HStack>
-      <Text textStyle="info-sm" size="xs">Zoom</Text>
-      <IconButton
-        size="sm"
-        background="white"
-        aria-label="zoomIn"
-        icon={<ChevronLeftIcon/>}
-        onClick={planEditorState.do.zoomIn}
-      />
-      <Text size="xs">
-        {percent(zoom)}
-      </Text>
-      <IconButton
-        size="sm"
-        background="white"
-        aria-label="zoomOut"
-        onClick={planEditorState.do.zoomOut}
-        icon={<ChevronRightIcon/>}/>
-    </HStack>
-  )
-
+function PanControl({ state }) {
+  const {panning} = useForestFiltered(state, ['panning'])
+  return <Button
+    size="sm"
+    onClick={state.do.pan}
+    leftIcon={
+      <Image
+        width={20}
+        height={20}
+        alt="pan-icon"
+        src="/img/icons/page-move.svg"/>
+    }>
+    <Text size="xs">Pan</Text>
+    {panning ? (<Text textStyle="info-sm"><Kbd>Esc</Kbd> to cancel</Text>) : null}
+  </Button>
 }
 
 export default function ControlBar(props: ControlBarProps) {
-  const [value, state] = useForest([stateFactory, props],
+  const planEditorState = useContext(PlanEditorStateCtx);
+  const [value, state] = useForest([stateFactory, props, planEditorState],
     (localState) => {
     });
 
-  const { newFrame } = value;
+  const { newFrame, panning, panPosition } = value;
 
   const listFrames = useCallback(() => {
     messageManager.listFrames();
@@ -75,7 +82,9 @@ export default function ControlBar(props: ControlBarProps) {
 
   const { clicked } = useForestFiltered(frameListHoverManager!, ['clicked']);
 
-  const frame = useMemo(() => clicked ? dataManager.planStream.value.framesMap?.get(clicked) : null, [clicked]);
+  const frame = useMemo(() => {
+    return clicked ? dataManager.planStream.value.framesMap?.get(clicked) : null
+  }, [clicked]);
 
   return (
     <Box
@@ -83,9 +92,9 @@ export default function ControlBar(props: ControlBarProps) {
       as="nav"
       data-role="control-bar"
       h="3em"
-      onMouseDown={stopPropagation}>
+      onMouseDown={stopPropagation}
+    >
       <HStack justify="space-between" spacing={[1, 2, 3]} alignItems="center">
-
         <HStack spacing={2}>
           <Flex>
             <Button
@@ -100,10 +109,9 @@ export default function ControlBar(props: ControlBarProps) {
               Add
             </Button>
             <Menu placement="top">
-              <MenuButton width={'100px'} backgroundColor="blackAlpha.100" px={2}>
+              <MenuButton width={'36px'} backgroundColor="blackAlpha.100" px={2}>
                 <HStack>
                   <FrameIcon active={true} type={newFrame.type} size={16}/>
-                  <Text>{newFrame.type}</Text>
                 </HStack>
               </MenuButton>
               <MenuList>
@@ -124,7 +132,6 @@ export default function ControlBar(props: ControlBarProps) {
           </Flex>
           <Button
             onClick={listFrames}
-            background="white"
             leftIcon={
               <Image
                 src="/img/icons/frame-list.svg" alt="frame-list-icon"
@@ -134,7 +141,13 @@ export default function ControlBar(props: ControlBarProps) {
             Frames
           </Button>
 
-          <ZoomControl/>
+          <ZoomControl state={state}/>
+          <PanControl state={state}/>
+          <IconButton size="sm" onClick={planEditorState.do.clearTransform}
+                      variant="controlIcon"
+                      aria-label="reset" icon={
+            <GrClear />
+          } />
         </HStack>
         {frame ?
           <HStack
@@ -192,5 +205,9 @@ export default function ControlBar(props: ControlBarProps) {
               size="sm" aria-label="move-frame-back"/>
           </HStack> : null}
       </HStack>
-    </Box>);
+      {
+        panning ? <Portal><Panner state={state} panPosition={panPosition}/></Portal> : null
+      }
+    </Box>
+  );
 }

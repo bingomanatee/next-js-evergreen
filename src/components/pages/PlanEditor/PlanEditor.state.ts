@@ -26,6 +26,7 @@ export type PlanEditorStateValue = {
   newFrame: Box2 | null,
   frames: [],
   links: [],
+  pan: Vector2,
   markdownStyles: string,
 };
 
@@ -43,7 +44,8 @@ const PlanEditorState = (id, planContainerRef) => {
     markdownStyles: '',
     modeTarget: null,
     planId: id,
-    zoom: 1
+    pan : new Vector2(),
+    zoom: 100
   };
   return {
     name: "PlanEditor",
@@ -81,6 +83,10 @@ const PlanEditorState = (id, planContainerRef) => {
     },
 
     actions: {
+      clearTransform(state: leafType) {
+        state.do.set_zoom(100);
+        state.do.set_pan(new Vector2());
+      },
       keys(state: leafType, keys: Set<string>) {
         state.do.set_keys(keys);
         if ((!blockManager.$.isBlocked()) && keys.has(' ')) {
@@ -307,19 +313,19 @@ const PlanEditorState = (id, planContainerRef) => {
 
       zoomOut(state: leafType) {
         const {zoom} = state.value;
-        const nextZoom = Math.floor(zoom * 10) + 1
-        state.do.set_zoom(nextZoom / 10);
+        const nextZoom = Math.floor(zoom/10) + 1;
+        state.do.set_zoom(nextZoom * 10);
       },
       zoomIn(state: leafType) {
         const {zoom} = state.value;
-        const nextZoom = Math.floor(zoom * 10) - 1;
-        state.do.set_zoom(nextZoom / 10);
+        const nextZoom = Math.floor(zoom/10) - 1;
+        state.do.set_zoom(nextZoom * 10);
       },
       zoom(state: leafType, event) {
         let { zoom } = state.value;
-        zoom += event.deltaY * -0.001;
+        zoom += event.deltaY * -0.1;
         // Restrict scale
-        state.do.set_zoom(Math.min(Math.max(0.125, zoom), 4))
+        state.do.set_zoom(Math.round(Math.min(Math.max(12.5, zoom), 400)))
       },
       watchWheel(state) {
         window.addEventListener('wheel', state.do.zoom);

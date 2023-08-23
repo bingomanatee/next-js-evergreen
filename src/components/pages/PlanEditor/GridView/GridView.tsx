@@ -9,7 +9,7 @@ export class GridView extends SVGComponent {
   private drawGrid() {
     this.draw.clear();
     const {zoom} = this.props;
-    let gridSize = GRID_SIZE * zoom;
+    let gridSize = GRID_SIZE * zoom/100;
     while(gridSize < 8) gridSize *= 2;
     let width = Math.max(window.screen.width, 1000);
     width -= width % gridSize;

@@ -65,11 +65,17 @@ export async function POST(req, { params }) {
       upsert: true,
       contentType: req.headers['file-type'],
     })
+  const {data: urlData, error: urlError} = await supabase
+    .storage
+    .from('images')
+    .createSignedUrl(`files/${id}`, 60 * 60 * 4) // expires in 4 hours;
 
   return NextResponse.json(
     {
       uploaded: true,
-      data, error
+      data,
+      urlData,
+      error
     }
   );
 

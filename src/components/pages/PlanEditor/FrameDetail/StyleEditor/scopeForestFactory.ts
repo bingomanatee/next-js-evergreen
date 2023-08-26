@@ -1,8 +1,8 @@
 import { leafConfig, leafI } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
-import { leafType } from '~/components/Dialogs/FrameDetail/StyleEditor/types'
+import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
 
-export function scopeForestFactory(scope: string, dialogState: leafI): leafConfig {
+export function scopeForestFactory(scope: string): leafConfig {
   try {
     return {
       $value: new Map(),
@@ -25,16 +25,6 @@ export function scopeForestFactory(scope: string, dialogState: leafI): leafConfi
           // @TODO: delay deletion of store
           dataManager.deleteState(scope, tagName)
           state.value = value;
-        },
-        listenForCommit(state: leafType) {
-          dialogState.select((event) => {
-              if (event.mode === 'save') {
-                if (state.getMeta('loaded') && !state.getMeta('saving')) {
-                  state.do.save();
-                }
-              }
-            }
-            , ({ closed }) => closed)
         },
         addStyles(state: leafI, styles: any[]) {
           const value = new Map(state.value);

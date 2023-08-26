@@ -1,7 +1,7 @@
 import { leafI } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
 import { Vector2 } from 'three'
-import { leafType } from '~/components/Dialogs/FrameDetail/StyleEditor/types'
+import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
 import { DimensionValue, Direction, dirToString, Frame, isDirection, X_DIR, Y_DIR } from '~/types'
 import blockManager from '~/lib/managers/blockManager'
 import { string } from 'zod'

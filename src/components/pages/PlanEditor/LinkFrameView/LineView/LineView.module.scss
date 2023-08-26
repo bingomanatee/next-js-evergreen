@@ -8,4 +8,7 @@ position: absolute;
   overflow: visible;
   z-index: 1000000000;
   pointer-events: none;
+  > svg {
+    overflow: visible
+  }
 }

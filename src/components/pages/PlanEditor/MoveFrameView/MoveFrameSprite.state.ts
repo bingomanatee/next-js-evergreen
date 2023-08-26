@@ -45,10 +45,12 @@ export default function MoveFrameSpriteState(props: MFSProps, planEditorState: l
         if (!state.value.start) {
           return;
         }
+        const {zoom} = planEditorState.value;
         state.do.set_offset(
           new Vector2(
             e.pageX, e.pageY
           ).sub(state.value.start)
+            .multiplyScalar(100/zoom)
         );
         moveState.do.set_deltas(state.$.deltas())
       },

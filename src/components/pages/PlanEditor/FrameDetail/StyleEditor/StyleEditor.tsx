@@ -6,20 +6,27 @@ import { Box, Button, Checkbox, HStack, IconButton, Select, Text } from '@chakra
 import useForestInput from '~/lib/useForestInput'
 import { DeleteIcon } from '@chakra-ui/icons'
 import DialogStateCtx from '~/components/Dialogs/DialogStateCtx'
-import { StyleItem } from '~/components/Dialogs/FrameDetail/StyleEditor/StyleItem'
+import { StyleItem } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/StyleItem'
+import { FrameStateContext } from '~/components/pages/PlanEditor/FrameDetail/FrameStateContext'
+import useForestFiltered from '~/lib/useForestFiltered'
 
-type StyleEditorProps = { id: string }
+export type StyleEditorProps = { id: string }
 
 export default function StyleEditor(props: StyleEditorProps) {
-  const dialogState = useContext(DialogStateCtx);
+  const { id } = props;
 
-  const [value, state] = useForest([stateFactory, props, dialogState],
+  const frameDetailState = useContext(FrameStateContext);
+
+  const [value, state] = useForest([stateFactory, props],
     (localState) => {
-      localState.do.init();
+       return localState.do.init(frameDetailState);
     });
 
-  const frameId = props.id;
   const [tagName, setTagName] = useForestInput<HTMLSelectElement>(state, 'tagName')
+
+  if (!id) {
+    return;
+  }
 
   return (
     <section className={cssStyles.container}>
@@ -32,7 +39,7 @@ export default function StyleEditor(props: StyleEditorProps) {
 
         {state.$.invert().map(([tag, def]) => {
           const globalStyle = def.get('global') ?? '';
-          const localStyle = def.get(frameId) ?? '';
+          const localStyle = def.get(id) ?? '';
           return (
             <Fragment key={tag}>
               <span className={cssStyles.id}>
@@ -58,7 +65,7 @@ export default function StyleEditor(props: StyleEditorProps) {
               >
                 <StyleItem
                   id={tag}
-                  scope={frameId}
+                  scope={id}
                   state={state}
                 />
               </Box>
@@ -87,10 +94,10 @@ export default function StyleEditor(props: StyleEditorProps) {
           <option value="h2" label="heading 2"/>
           <option value="h3" label="heading 3"/>
           <option value="p" label="paragraph"/>
-          <option value="ol" label="ordered list" />
-          <option value="ul" label="unordered list" />
-          <option value="strong" label="bold/strong" />
-          <option value="em" label="italic/emphasis" />
+          <option value="ol" label="ordered list"/>
+          <option value="ul" label="unordered list"/>
+          <option value="strong" label="bold/strong"/>
+          <option value="em" label="italic/emphasis"/>
           <option value="code" label="code (inline)"/>
           <option value="pre > code" label="code (block)"/>
           <option value="*" label="other / style class:"/>

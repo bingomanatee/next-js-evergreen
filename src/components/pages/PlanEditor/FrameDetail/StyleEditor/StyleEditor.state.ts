@@ -1,6 +1,8 @@
 import { c } from '@wonderlandlabs/collect'
-import { scopeForestFactory } from '~/components/Dialogs/FrameDetail/StyleEditor/scopeForestFactory'
-import { leafType } from '~/components/Dialogs/FrameDetail/StyleEditor/types'
+import { scopeForestFactory } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/scopeForestFactory'
+import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
+import { StyleEditorProps } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/StyleEditor'
+import { leafI } from '@wonderlandlabs/forest/lib/types'
 
 export type StyleEditorStateValue = {
   tagName: string, id: string,
@@ -11,9 +13,8 @@ export type StyleEditorStateValue = {
  * there should be (up to) two scopes - one global scope for all the frames
  * and one
  */
-const StyleEditorState = (props, dialogState) => {
-  const { id } = props
-  const $value: StyleEditorStateValue = { tagName: 'p', id: id };
+const StyleEditorState = (props: StyleEditorProps) => {
+  const $value: StyleEditorStateValue = { tagName: 'p', id: props.id };
 
   return {
     name: "StyleEditor",
@@ -44,7 +45,7 @@ const StyleEditorState = (props, dialogState) => {
         state.do.addStyle('global');
       },
       addLocalStyle(state: leafType) {
-        state.do.addStyle(id);
+        state.do.addStyle(props.id);
       },
       addStyle(state: leafType, scope) {
         const tagName: string = state.value.tagName;
@@ -56,7 +57,7 @@ const StyleEditorState = (props, dialogState) => {
       },
       upsertScope(state: leafType, scope: string) {
         if (!state.child(scope)) {
-          const def = scopeForestFactory(scope, dialogState)
+          const def = scopeForestFactory(scope)
           state.addChild(def, scope);
           return state.child(scope)!.do.init();
         }
@@ -67,13 +68,22 @@ const StyleEditorState = (props, dialogState) => {
          await child.do.save();
         }
       },
-      async init(state: leafType) {
-        await state.do.upsertScope(id);
-        await state.do.upsertScope('global');
+      init(state: leafType, frameState: leafI) {
+        state.do.upsertScope(props.id);
+        state.do.upsertScope('global');
+        const sub = frameState.select((saving) => {
+          if (saving) {
+            state.do.save();
+            sub.unsubscribe();
+          }
+        }, (value) => value.saving)
+
+
+          return () => sub?.unsubscribe();
       },
       async delete(state: leafType, tag, scope) {
         if (scope === 'local') {
-         return state.child(id)!.do.delete(tag);
+         return state.child(props.id)!.do.delete(tag);
         } else {
          return state.child(scope)!.do.delete(tag);
         }

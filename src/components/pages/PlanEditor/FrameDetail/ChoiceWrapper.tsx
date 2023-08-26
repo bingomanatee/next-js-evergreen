@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
 import useForestFiltered from '~/lib/useForestFiltered'
 import { Box, Heading, VStack } from '@chakra-ui/react'
-import { FrameStateContext } from '~/components/Dialogs/FrameDetail/FrameStateContext'
+import { FrameStateContext } from '~/components/pages/PlanEditor/FrameDetail/FrameStateContext'
 
 export function ChoiceWrapper({ target, children, title }) {
 

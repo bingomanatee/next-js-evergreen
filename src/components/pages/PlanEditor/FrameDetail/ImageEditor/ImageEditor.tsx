@@ -10,11 +10,7 @@ import { leafI } from '@wonderlandlabs/forest/lib/types'
 
 type ImageEditorProps = {}
 
-function Preview({state, frameState}: {state: leafI, frameState?: leafI}) {
-  const id = useMemo(() => {
-    frameState?.value.id
-  }, [frameState?.value.id])
-
+function Preview({state}: {state: leafI, frameState?: leafI}) {
   const scaledSize = state.$.scaledSize();
 
   const { size, imageUrl } = state.value;
@@ -39,7 +35,7 @@ export default function ImageEditor(props: ImageEditorProps) {
       localState.do.init();
     });
 
-  const { loaded, imageData, imageUrl, size } = value;
+  const {  imageUrl, size } = value;
 
   return (<Box className={styles.container}>
     {imageUrl && size ? (<Preview state={state} frameState={props.frameState} />) : null}

@@ -1,6 +1,6 @@
 import { distinctUntilChanged, map, Subject, takeUntil, takeWhile, } from 'rxjs'
 import { genFn, typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import { leafType } from '~/components/Dialogs/FrameDetail/StyleEditor/types'
+import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
 import { Forest } from '@wonderlandlabs/forest'
 import { v4 as uuidV4 } from 'uuid'
 import { historyStream } from '~/lib/managers/historyStream'
@@ -12,7 +12,7 @@ import { string } from 'zod'
  * you can either submit a subject or allow one to spawn in its absence
  */
 
-type BlockManagerValue = {
+export type BlockManagerValue = {
   id: string,
   type: string,
   data: any,
@@ -20,7 +20,7 @@ type BlockManagerValue = {
 }
 type leafTType = typedLeaf<BlockManagerValue>
 
-const INITIAL: BlockManagerValue = {
+export const INITIAL: BlockManagerValue = {
   id: '',
   type: '',
   data: {},

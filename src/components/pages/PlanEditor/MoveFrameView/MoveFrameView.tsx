@@ -19,7 +19,7 @@ export const MoveFrameStateContext = createContext<leafI>(null);
 export default function MoveFrameView() {
   const planEditorState = useContext(PlanEditorStateCtx);
 
-  const [value, state] = useForest([stateFactory]);
+  const [value, state] = useForest([stateFactory, planEditorState]);
   const { id, loaded, type} = value;
   useEffect(() => {
     if (planEditorState && state) {

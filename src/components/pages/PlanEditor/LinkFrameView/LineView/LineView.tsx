@@ -7,8 +7,9 @@ import useForestFiltered from '~/lib/useForestFiltered'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
 import { LFSummary } from '~/types'
 import { vectorToStyle } from '~/lib/utils/px'
-import { Button, HStack } from '@chakra-ui/react'
+import { Button, HStack, Box } from '@chakra-ui/react'
 import { Vector2 } from 'three'
+import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 
 type LineViewProps = {}
 
@@ -17,20 +18,28 @@ function SavePanel(props: {
   fromPoint: Vector2
 } & LFSummary) {
   const { state, fromPoint } = props;
+  const planEditorState = useContext(PlanEditorStateCtx);
 
   if (!(state.$.canDraw() && fromPoint)) {
     return null;
   }
+  const { zoom } = planEditorState!.value;
 
-  return <HStack
-    data-role="line-view-buttons"
-    spacing={3}
-    style={vectorToStyle(fromPoint!)}
+  return <Box
     layerStyle="line-view-button"
-  >
-    <Button colorScheme="blue" onClick={state.do.save}>Save Line</Button>
-    <Button onClick={state.do.cancel}>Cancel</Button>
-  </HStack>
+    style={vectorToStyle(fromPoint!)}>
+    <div style={{
+      transform: `scale(${100 / zoom})`
+    }}>
+      <HStack
+        data-role="line-view-buttons"
+        spacing={3}
+        layerStyle="line-view-flex">
+        <Button colorScheme="blue" onClick={state.do.save}>Save Line</Button>
+        <Button onClick={state.do.cancel}>Cancel</Button>
+      </HStack>
+    </div>
+  </Box>
 }
 
 export default function LineView(props: LineViewProps) {
@@ -82,7 +91,9 @@ export default function LineView(props: LineViewProps) {
   const visibility = (spriteDir && id && targetSpriteDir && targetId) ? 'visible' : 'hidden';
 
   return (<>
-    <div className={styles.container} ref={state.do.setRef} style={{ visibility }}>
+    <div data-role="preview-line" className={styles.container} ref={state.do.setRef} style={{
+      visibility,
+    }}>
 
     </div>
     <SavePanel state={state} {...value} />

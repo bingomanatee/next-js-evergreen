@@ -13,6 +13,7 @@ export enum planEditorMode {
   ADDING_FRAME = 'adding-frame',
   MOVING_FRAME = 'moving-frame',
   LINKING_FRAME = 'linking-frame',
+  EDIT_FRAME = 'edit-frame',
   PANNING = 'panning'
 }
 

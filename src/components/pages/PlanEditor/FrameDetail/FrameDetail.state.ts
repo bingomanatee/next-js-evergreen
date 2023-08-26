@@ -2,7 +2,8 @@ import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
 import { Frame } from '~/types'
 import searchFrames from '~/lib/utils/searchFrames'
-import {sortBy} from 'lodash';
+import { sortBy } from 'lodash';
+import blockManager from '~/lib/managers/blockManager'
 
 export type FrameDetailStateValue = {
   loaded: boolean;
@@ -13,7 +14,7 @@ export type FrameDetailStateValue = {
 };
 type leafType = typedLeaf<FrameDetailStateValue>;
 
-const FrameDetailState = (id: string, dialogState: leafI) => {
+const FrameDetailState = (id: string) => {
   const $value: FrameDetailStateValue = {
     loaded: false,
     saving: false,
@@ -27,7 +28,7 @@ const FrameDetailState = (id: string, dialogState: leafI) => {
 
     selectors: {
       afterChoices(state: leafType) {
-        const {search, frames} = state.value;
+        const { search, frames } = state.value;
 
         return sortBy(searchFrames(frames, search), 'order');
       }
@@ -35,50 +36,48 @@ const FrameDetailState = (id: string, dialogState: leafI) => {
 
     actions: {
       reorder(state: leafType, order: string, frameId: string) {
-        state.do.set_move({order, frameId})
+        state.do.set_move({ order, frameId })
       },
 
       async initData(state: leafType) {
-        dataManager.do(async (db) => {
-          const frame = await db.frames.findByIds([id]).exec();
-          const myFrame = frame.get(id);
-          const data = { ...myFrame.toJSON() };
-          state.do.set_loaded(true);
-          state.child('frame')!.value = data;
+        const { data } = blockManager.value;
+        const frame = await dataManager.fetchFrame(data.frameId);
+        if (!frame) {
+          blockManager.do.finish();
+          return;
+        }
+        state.child('frame')!.value = frame.toJSON();
+        state.do.set_loaded(true);
+
+        const sub = dataManager.planStream.subscribe(({ frames }) => {
+          state.do.set_frames(frames);
         });
 
-      const sub = dataManager.planStream.subscribe(({frames}) => {
-        state.do.set_frames(frames);
-      });
-
-      return () => sub.unsubscribe()
+        return () => sub.unsubscribe()
       },
-      listenForCommit(state: leafType) {
-        dialogState.select(({ mode }) => {
-          if (mode === 'save') {
-            if (!state.value.loaded || state.value.saving) {
-              return;
-            }
-            state.do.set_saving(true);
-            state.do.saveFrame();
-          }
-        }, ({ closed }) => closed)
-      },
-      async saveFrame(state: leafType) {
-          dataManager.do(async(db) => {
-            const frameData = state.child('frame')!.value;
-            await db.frames.incrementalUpsert(frameData);
-          })
+      async save(state: leafType) {
+        console.log('saving frame');
+        state.do.set_saving(true);
+        await dataManager.do(async (db) => {
+          const frameData = state.child('frame')!.value;
+          console.log('saving frameData:', frameData);
+          await db.frames.incrementalUpsert(frameData);
+        });
+        console.log('closing');
+        blockManager.do.finish();
       },
 
       deleteFrame(state: leafType) {
         dataManager.deleteFrame(state.value.frame.id);
-        dialogState.do.cancel();
+        state.do.cancel();
+      },
+
+      cancel() {
+        blockManager.do.finish();
       },
 
       init(state: leafType) {
         state.do.initData();
-        state.do.listenForCommit();
       },
       updateSize(state: leafType, leafType, width, height) {
         state.child('frame')!.do.updateSize(width, height);

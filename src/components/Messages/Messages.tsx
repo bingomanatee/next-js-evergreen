@@ -23,6 +23,7 @@ export default function Messages(props: MessagesProps) {
 
   const { dialog, shelf } = value;
 
+/*
   if (dialog) {
    return (<div className={styles.container}>
         <Dialog value={dialog} closeDialog={state.do.closeDialog}/>
@@ -31,6 +32,7 @@ export default function Messages(props: MessagesProps) {
   if (shelf) return (<div className={styles.container}>
     <Dialog value={shelf} form="shelf" closeDialog={state.do.closeShelf} />
   </div>);
+*/
 
   return <div className={styles.container}>&nbsp;</div>
 }

@@ -13,15 +13,13 @@ import { ManagerMap } from '~/lib/managers/types'
 // ----- local
 import HelpPrompt from './HelpPrompt/HelpPrompt'
 import { KeyFeedback } from './KeyFeedback'
-import MoveFrameView from './MoveFrameView/MoveFrameView'
 import FramesList from './FrameView/FramesList'
 import FrameAnchorView from './FrameAnchorView/FrameAnchorView'
-import stateFactory, { planEditorMode } from './PlanEditor.state.ts';
+import stateFactory from './PlanEditor.state.ts';
 import styles from './PlanEditor.module.scss';
-import LinkFrameView from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameView'
-import blockManager from '~/lib/managers/blockManager'
 import LinkView from '~/components/pages/PlanEditor/LinkView/LinkView'
 import ControlBar from '~/components/pages/PlanEditor/ControlBar/ControlBar'
+import BlockerSwitch from '~/components/pages/PlanEditor/BlockerSwitch/BlockerSwitch'
 
 type PlanEditorProps = { id: string, managers: ManagerMap }
 export const PlanEditorStateCtx = createContext<leafI | null>(null);
@@ -68,12 +66,6 @@ function PlanEditor(props: PlanEditorProps) {
         keySub?.unsubscribe();
       };
     });
-  const [blocker, setBlocker] = useState('');
-
-  useEffect(() => {
-    const sub = blockManager.select((type) => setBlocker(type), (value) => value.type);
-    return () => sub.unsubscribe();
-  }, [])
 
   const { newFrame, frames, keys, markdownStyles, zoom } = value;
 
@@ -86,11 +78,11 @@ function PlanEditor(props: PlanEditorProps) {
         </UnZoom>
         <LinkView under />
         <FramesList frames={frames}/>
-        {blocker === planEditorMode.MOVING_FRAME ? <MoveFrameView/> : null}
-        {blocker === planEditorMode.LINKING_FRAME ? <LinkFrameView/> : null}
+        <BlockerSwitch inline />
       </FrameAnchorView>
       <ControlBar />
     </PlanEditorStateCtx.Provider>
+    <BlockerSwitch inline={false} />
     <NewFrame box={newFrame}/>
     <HelpPrompt/>
     <KeyFeedback keys={keys}/>

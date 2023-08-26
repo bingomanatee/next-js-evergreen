@@ -18,7 +18,7 @@ export default function FrameAnchorView(props: FrameAnchorViewProps) {
   const { zoom, pan} = useForestFiltered(planEditorState!, ['zoom', 'pan']);
 
   const transform = `scale(${zoom / 100}) translate(${pan.x}px, ${pan.y}px)`;
-  console.log('transform:', transform);
+
   return (<div
     data-role="anchor"
     className={styles.container} style={{

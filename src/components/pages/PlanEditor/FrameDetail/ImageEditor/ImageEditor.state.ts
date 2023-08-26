@@ -1,6 +1,7 @@
 import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import axios from 'axios';
 import { Vector2 } from 'three'
+import dataManager from '~/lib/managers/dataManager'
 
 export type ImageEditorStateValue = {
   imageData: Record<string, any> | null,
@@ -59,10 +60,8 @@ const ImageEditorState = (props) => {
         frameState.do.updateSize(size.x, size.y);
       },
 
-      async upload(state: leafType, files: File[], config) {
+      async upload(state: leafType, files: File[]) {
         const [file] = files;
-        console.log('uploading: ', file, config);
-
         const { name, type, size } = file;
 
        await axios.post(IMAGE_API_URL, file, {
@@ -77,10 +76,9 @@ const ImageEditorState = (props) => {
         return state.do.init();
       },
       async init(state: leafType) {
-        const { data } = await axios.get(IMAGE_API_URL);
-        state.do.set_imageData(data?.fileData);
-        state.do.set_imageUrl(data?.url);
 
+        const data = await dataManager.getImageUrl(id);
+        state.do.set_imageUrl(data?.url);
         if (data?.url) {
           state.do.sizeImage();
         }

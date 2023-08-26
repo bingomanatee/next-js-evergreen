@@ -90,8 +90,9 @@ const LAYER_STYLES = {
   'line-view-button': {
     position: 'absolute',
     zIndex: 1000002000,
+  },
+  'line-view-flex': {
     pointerEvents: 'all',
-    width: '250px',
     p: 4,
     backgroundColor: 'whiteAlpha.500'
   },

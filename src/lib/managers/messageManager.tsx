@@ -58,7 +58,7 @@ const messageManager = {
     })
   },
 
-  async editFrame(id: string, name?: string) {
+/*  async editFrame(id: string, name?: string) {
     const frame = await dataManager.do((db) => db.frames.fetch(id));
     if (!frame) {
       console.error('cannot edit/find frame ', id);
@@ -73,7 +73,7 @@ const messageManager = {
         cancelPrompt: 'Close'
       }
     );
-  },
+  },*/
 
   listFrames(id?: string) {
     frameListHoverManager.do.set_clicked(id || null);

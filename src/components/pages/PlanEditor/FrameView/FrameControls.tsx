@@ -6,7 +6,7 @@ import styles from '~/components/pages/PlanEditor/FrameView/FramesView.module.sc
 import Image from 'next/image'
 import messageManager from '~/lib/managers/messageManager'
 import useForestFiltered from '~/lib/useForestFiltered'
-import planEditorState from '~/components/pages/PlanEditor/PlanEditor.state'
+import planEditorState, { planEditorMode } from '~/components/pages/PlanEditor/PlanEditor.state'
 import planEditor, { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 
@@ -49,7 +49,7 @@ export function FrameControls(props: {
         variant="frame-control-icon"
         icon={<Image alt="edit-icon" src="/img/icons/frame-edit.svg" width="30" height="30"/>}
         aria-label="edit"
-        onClick={() => messageManager.editFrame(frameId, frameName)}
+        onClick={() => blockManager.do.block(planEditorMode.EDIT_FRAME, {frameId: props.frameId})}
       />
       <IconButton
         variant="frame-control-icon"

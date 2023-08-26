@@ -8,7 +8,7 @@ import { DIMENSION_ACTIONS, DIMENSION_SELECTORS, dimensionValue } from '~/compon
 
 type leafType = typedLeaf<DimensionValue>;
 
-const MoveFrameViewState = (props) => {
+const MoveFrameViewState = (props, planEditorState) => {
   const $value: DimensionValue = {
     ...dimensionValue()
   };
@@ -27,6 +27,9 @@ const MoveFrameViewState = (props) => {
     },
     selectors: {
       ...DIMENSION_SELECTORS
+    },
+    meta: {
+      planEditorState
     }
   }
 };

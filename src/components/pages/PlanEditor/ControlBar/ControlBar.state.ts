@@ -1,10 +1,9 @@
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import { FrameTypes } from '~/types'
+import { BlockMode, FrameTypes } from '~/types'
 import { v4 } from 'uuid'
 import dataManager from '~/lib/managers/dataManager'
 import messageManager from '~/lib/managers/messageManager'
 import blockManager from '~/lib/managers/blockManager'
-import { planEditorMode } from '~/components/pages/PlanEditor/PlanEditor.state'
 import keyManager from '~/lib/managers/keyManager'
 import { Vector2 } from 'three'
 
@@ -96,7 +95,7 @@ const ControlBarState = (props, planEditorState) => {
             keySub.unsubscribe();
           }
         });
-        blockManager.do.block(planEditorMode.PANNING)[1]
+        blockManager.do.block(BlockMode.PANNING)[1]
           .subscribe({
             error(err) {
               keySub.unsubscribe();

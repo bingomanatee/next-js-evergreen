@@ -5,23 +5,13 @@ import { Box2, Vector2 } from 'three'
 import { userManager } from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
 import keyManager from '~/lib/managers/keyManager'
-import { Direction } from '~/types'
-import { scale } from '@chakra-ui/tooltip/dist/tooltip.transition'
-
-export enum planEditorMode {
-  NONE = 'none',
-  ADDING_FRAME = 'adding-frame',
-  MOVING_FRAME = 'moving-frame',
-  LINKING_FRAME = 'linking-frame',
-  EDIT_FRAME = 'edit-frame',
-  PANNING = 'panning'
-}
+import { BlockMode, Direction } from '~/types'
 
 export type PlanEditorStateValue = {
   planId: string,
   loaded: boolean,
   keys: Set<string>,
-  mode: planEditorMode,
+  mode: BlockMode,
   modeTarget: string | null;
   moveDir: Direction | null,
   newFrame: Box2 | null,
@@ -39,7 +29,7 @@ const PlanEditorState = (id, planContainerRef) => {
     links: [],
     keys: new Set(),
     loaded: false,
-    mode: planEditorMode.NONE,
+    mode: BlockMode.NONE,
     newFrame: null,
     moveDir: null,
     markdownStyles: '',
@@ -160,7 +150,7 @@ const PlanEditorState = (id, planContainerRef) => {
               keySub.unsubscribe();
             }
           });
-          blockManager.do.block(planEditorMode.LINKING_FRAME, { frameId: id })[1]
+          blockManager.do.block(BlockMode.LINKING_FRAME, { frameId: id })[1]
             .subscribe({
               error(err) {
                 keySub.unsubscribe();
@@ -171,7 +161,7 @@ const PlanEditorState = (id, planContainerRef) => {
                 state.do.clearMode();
               }
             })
-          state.do.initMode(planEditorMode.LINKING_FRAME, id);
+          state.do.initMode(BlockMode.LINKING_FRAME, id);
           //@TODO: migrate 100% to blockManager
         } catch (_err) {
           console.warn('attempt to move frame when blocked', _err);
@@ -211,7 +201,7 @@ const PlanEditorState = (id, planContainerRef) => {
               keySub.unsubscribe();
             }
           });
-          blockManager.do.block(planEditorMode.MOVING_FRAME, { frameId: id })[1]
+          blockManager.do.block(BlockMode.MOVING_FRAME, { frameId: id })[1]
             .subscribe({
               error(err) {
                 keySub.unsubscribe();
@@ -222,7 +212,7 @@ const PlanEditorState = (id, planContainerRef) => {
                 state.do.clearMode();
               }
             })
-          state.do.initMode(planEditorMode.MOVING_FRAME, id);
+          state.do.initMode(BlockMode.MOVING_FRAME, id);
           //@TODO: migrate 100% to blockManager
         } catch (_err) {
           console.warn('attempt to move frame when blocked', _err);
@@ -236,7 +226,7 @@ const PlanEditorState = (id, planContainerRef) => {
 
       clearMode(state: leafType) {
         state.do.set_modeTarget(null);
-        state.do.set_mode(planEditorMode.NONE);
+        state.do.set_mode(BlockMode.NONE);
       },
       /**
        * manage the drag event that creates a new frame
@@ -258,7 +248,7 @@ const PlanEditorState = (id, planContainerRef) => {
         });
 
         let sub = blockManager.subscribe((value) => {
-          if (value.type !== planEditorMode.ADDING_FRAME) {
+          if (value.type !== BlockMode.ADDING_FRAME) {
             sub.unsubscribe();
             keySub.unsubscribe();
             planContainerRef.current?.removeEventListener('mousemove', onMove);
@@ -267,7 +257,7 @@ const PlanEditorState = (id, planContainerRef) => {
         });
 
         try {
-          blockManager.do.block(planEditorMode.ADDING_FRAME);
+          blockManager.do.block(BlockMode.ADDING_FRAME);
         } catch (_err) {
           console.warn('right click while blocked');
           return;
@@ -283,12 +273,12 @@ const PlanEditorState = (id, planContainerRef) => {
 
         planContainerRef.current?.addEventListener('mousemove', onMove);
         planContainerRef.current?.addEventListener('mouseup', () => {
-          if (blockManager.value.type === planEditorMode.ADDING_FRAME) {
+          if (blockManager.value.type === BlockMode.ADDING_FRAME) {
             state.do.createFrame(start, end);
           }
           blockManager.do.finish();
         }, { once: true })
-        state.do.initMode(planEditorMode.ADDING_FRAME) //deprecate
+        state.do.initMode(BlockMode.ADDING_FRAME) //deprecate
       },
 
       async init(state: leafType) {

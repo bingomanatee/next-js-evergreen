@@ -24,7 +24,6 @@ function NullView({ frame: frame }) {
 export function FrameView(props: { frame: Frame }) {
   const { frame } = props;
   const boxRef = useRef(null);
-  const planEditorState = useContext(PlanEditorStateCtx);
   /**
    * edit on click handler
    */
@@ -55,7 +54,6 @@ export function FrameView(props: { frame: Frame }) {
   const { clicked, hover } = useForestFiltered(frameListHoverManager, ['clicked', 'hover']);
 
   const layerStyle = useMemo(() => {
-
     if (frame) {
       const { id } = frame;
       if (clicked === id && hover === id) {
@@ -85,8 +83,8 @@ export function FrameView(props: { frame: Frame }) {
       zIndex={frame.order}
       className={styles['frame-view']}
       data-frame-container={frame.id}
+      onMouseDown={() => frameListHoverManager.do.set_clicked(frame.id)}
     >
-      {<FrameControls frameId={frame.id} frameName={frame.name}/>}
       <Box as="div" layerStyle={'frame-detail-wrapper'} data-id="frame-detail-wrapper">
         <DetailView frame={frame}/>
       </Box>

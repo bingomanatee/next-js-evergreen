@@ -3,7 +3,7 @@ import { memo } from 'react'
 import styles from '~/components/pages/PlanEditor/PlanEditor.module.scss'
 import useForestFiltered from '~/lib/useForestFiltered'
 import blockManager from '~/lib/managers/blockManager'
-import { planEditorMode } from '~/components/pages/PlanEditor/PlanEditor.state'
+import { BlockMode } from '~/types'
 
 function KeyFeedbackItem(props: { value: string }) {
   switch (props.value) {
@@ -26,7 +26,7 @@ export function KeyFeedback({ keys }) {
   const {type} = useForestFiltered(blockManager, ['type'])
 
   switch(type) {
-    case planEditorMode.MOVING_FRAME:
+    case BlockMode.MOVING_FRAME:
       return (
         <section className={styles['key-feedback']}>
           Drag the selected frame&apos;s corners to resize it, or the center to move the frame.

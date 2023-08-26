@@ -24,15 +24,10 @@ export type FrameListStateValue = {
   linkTarget: string | null
 };
 type leafType = typedLeaf<FrameListStateValue>;
-const THROTTLED = 'mouseMoveThrottled';
-
-function describeFramesIter(f) {
-  return `${f.id} - ${f.order}`
-}
 
 export const MAX_FRAMES = 30;
 
-const FrameListPanelState = (props: FrameListProps, gridRef, bodyRef) => {
+const FrameListPanelState = (props: FrameListProps) => {
   const value: { id?: string } = props.value.value;
 
   const $value: FrameListStateValue = {
@@ -150,28 +145,6 @@ const FrameListPanelState = (props: FrameListProps, gridRef, bodyRef) => {
         }
         state.do.set_offset(offset - 1);
       },
-      gridMouseDown(state: leafType, e: MouseEvent) {
-        e.stopPropagation();
-        //@ts-ignore
-        const id = e.target.dataset.id;
-        if (id === 'header') {
-          return;
-        }
-        state.do.set_clickedId(id);
-        const moveListener = (e) => state.do.mouseMove(e);
-
-        const moveUnListener = () => {
-          gridRef.current?.removeEventListener('mousemove', moveListener);
-          bodyRef.current?.removeEventListener('mousemove', moveListener);
-          const { clickedId, overId } = state.value
-          if (clickedId && overId && overId !== clickedId) {
-            state.do.moveFrame(clickedId, overId);
-          }
-        };
-        bodyRef.current?.addEventListener('mousemove', moveListener);
-        bodyRef.current?.addEventListener('mouseup', moveUnListener, { once: true });
-        bodyRef.current?.addEventListener('mouseleave', moveUnListener, { once: true });
-      },
       editFrame(state: leafType, id: string, e: MouseEvent) {
         e.stopPropagation();
         props.cancel();
@@ -227,28 +200,6 @@ const FrameListPanelState = (props: FrameListProps, gridRef, bodyRef) => {
 
       mouseLeave(state: leafType) {
         frameListHoverManager.do.set_hover(null);
-      },
-
-      mouseMove(state: leafType, e: MouseEvent) {
-        try {
-          if (!(state.getMeta(THROTTLED))) {
-            state.setMeta(THROTTLED, throttle((e) => state.do.mouseMoveInner(e), 150));
-          }
-          state.getMeta(THROTTLED)(e);
-        } catch (err) {
-          console.error('mousemove error:', err, state, e);
-        }
-      },
-      mouseMoveInner(state: leafType, e: MouseEvent) {
-        const pos = new Vector2(e.clientX, e.clientY);
-        const bounds = bodyRef.current?.parentElement?.getBoundingClientRect();
-        if (bounds) {
-          const boundsPos = new Vector2(bounds.left, bounds.top);
-          pos.sub(boundsPos);
-          state.do.set_mousePos(pos);
-        } else {
-          console.warn('no parent for ', bodyRef.current, '==', bodyRef.current.parentElement)
-        }
       },
       init(state: leafType) {
         const sub = dataManager.planStream.subscribe(({ plan, frames, links }) => {

@@ -1,8 +1,7 @@
 import { Vector2 } from 'three'
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import { planEditorMode } from '~/components/pages/PlanEditor/PlanEditor.state'
 import { MFSProps } from '~/components/pages/PlanEditor/MoveFrameView/types'
-import { Frame, X_DIR, Y_DIR } from '~/types'
+import { BlockMode, Frame, X_DIR, Y_DIR } from '~/types'
 
 type MoveFrameSpriteStateValue = {
   offset: Vector2,
@@ -66,7 +65,7 @@ export default function MoveFrameSpriteState(props: MFSProps, planEditorState: l
 
         const { mode, modeTarget } = planEditorState.value;
 
-        return mode === planEditorMode.MOVING_FRAME && (!!modeTarget);
+        return mode === BlockMode.MOVING_FRAME && (!!modeTarget);
       },
       deltas(state: leafType) {
         const { offset } = state.value;

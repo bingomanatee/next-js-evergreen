@@ -1,8 +1,7 @@
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import { DimensionValue, Direction, Frame, X_DIR, Y_DIR } from '~/types'
+import { BlockMode, DimensionValue, Direction, Frame, X_DIR, Y_DIR } from '~/types'
 import { Vector2 } from 'three'
 import dataManager from '~/lib/managers/dataManager'
-import { planEditorMode } from '~/components/pages/PlanEditor/PlanEditor.state'
 import blockManager from '~/lib/managers/blockManager'
 import { DIMENSION_ACTIONS, DIMENSION_SELECTORS, dimensionValue } from '~/components/pages/PlanEditor/util'
 

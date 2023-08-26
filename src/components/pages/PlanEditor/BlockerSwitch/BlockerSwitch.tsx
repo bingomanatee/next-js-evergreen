@@ -2,16 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 /*import styles from './BlockerSwitch.module.scss';
 import stateFactory from './BlockerSwitch.state.ts';
 import useForest from '~/lib/useForest'*/
-import { planEditorMode } from './../PlanEditor.state'
 import blockManager, { BlockManagerValue, INITIAL } from '~/lib/managers/blockManager'
 import dynamic from 'next/dynamic'
+import { BlockMode } from '~/types'
 
 type InViewBlockersProps = { inline: boolean }
 const views = new Map();
 
 const INLINE_VIEWS = [
-  planEditorMode.MOVING_FRAME,
-  planEditorMode.LINKING_FRAME
+  BlockMode.MOVING_FRAME,
+  BlockMode.LINKING_FRAME
+]
+
+const NON_INLINE_VIEWS = [
+  BlockMode.LIST_FRAMES
 ]
 export default function BlockerSwitch(props: InViewBlockersProps) {
   /*  const [value, state] = useForest([stateFactory, props],
@@ -33,32 +37,36 @@ export default function BlockerSwitch(props: InViewBlockersProps) {
   }
 
   //@ts-ignore
-  if (props.inline && !(INLINE_VIEWS.includes(type))) {
-    return null;
-  }
-  //@ts-ignore
-  if (!props.inline && INLINE_VIEWS.includes(type)) {
+  if (props.inline && !(INLINE_VIEWS.includes(type))
+    || !props.inline && !(NON_INLINE_VIEWS.includes(type))) {
     return null;
   }
 
   if (!views.has(type)) {
     switch (type) {
-      case planEditorMode.MOVING_FRAME:
-        views.set(planEditorMode.MOVING_FRAME,
+      case BlockMode.MOVING_FRAME:
+        views.set(BlockMode.MOVING_FRAME,
           dynamic(() => import ('../MoveFrameView/MoveFrameView'), {
           suspense: true
         }))
         break;
 
-      case planEditorMode.EDIT_FRAME:
-        views.set(planEditorMode.EDIT_FRAME,
+      case BlockMode.EDIT_FRAME:
+        views.set(BlockMode.EDIT_FRAME,
           dynamic(() => import ('../FrameDetail/FrameDetail'), {
           suspense: true
         }))
         break;
 
-      case planEditorMode.LINKING_FRAME:
-        views.set(planEditorMode.LINKING_FRAME,
+      case BlockMode.LIST_FRAMES:
+        views.set(BlockMode.EDIT_FRAME,
+          dynamic(() => import ('../FrameListPanel/FrameListPanel'), {
+            suspense: true
+          }))
+        break;
+
+      case BlockMode.LINKING_FRAME:
+        views.set(BlockMode.LINKING_FRAME,
           dynamic(() => import ('../LinkFrameView/LinkFrameView'), {
           suspense: true
         }))

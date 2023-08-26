@@ -40,17 +40,17 @@ export default function Dialog(props: DialogProps) {
           }))
           break;
 
-        case 'frame-detail':
+/*        case 'frame-detail':
           views.set(view, dynamic(() => import ( '~/components/pages/PlanEditor/FrameDetail/FrameDetail'), {
             suspense: true
           }))
           break;
 
         case 'frame-list':
-          views.set(view, dynamic(() => import ( '~/components/Dialogs/FrameListPanel/FrameListPanel'), {
+          views.set(view, dynamic(() => import ( '~/components/pages/PlanEditor/FrameListPanel/FrameListPanel'), {
             suspense: true
           }))
-          break;
+          break;*/
       }
     }
     ViewComponent = views.get(view);

@@ -30,59 +30,6 @@ import FrameIcon from '~/components/icons/FrameIcon'
 
 const resourceMap = new Map();
 
-function ChooseOrder(props: { state: leafI }) {
-  const { state } = props;
-  const afterChoices = state.$.afterChoices();
-  const [search, setSearch] = useForestInput(state, 'search');
-
-  const { move } = useForestFiltered(state, ['move'])
-
-  if (move) {
-    const { order, frameId } = move;
-
-    return <Box layerStyle="choice">
-      Frame will be moved <b>{order}</b>
-      {frameId ? <FrameTicket id={frameId} size="sm"/> : null}
-    </Box>
-  }
-  return (
-    <>
-      <HStack justify="end" width="100%">
-        <Button leftIcon={<Image src="/img/icons/to-top.svg" alt="top icon" width={18} height={18}/>}
-                size="sm">Top</Button>
-        <Button leftIcon={<Image src="/img/icons/to-bottom.svg" alt="top icon" width={18} height={18}/>}
-                size="sm">Bottom</Button>
-      </HStack>
-
-      <HStack spacing={2} width="100%" justify="stretch">
-        <Box> <Button size="sm">After Frame: </Button></Box>
-        <Input size="sm" value={search} onChange={setSearch}/>
-      </HStack>
-      {afterChoices.length ? (
-        <Box borderColor="blackAlpha.600"
-             borderWidth={1}
-             backgroundColor="white"
-             width="100%"
-             shadow="md" l={0} t={40}>
-          {
-            afterChoices.slice(0, 4).map((frame: Frame) => {
-              return (
-                <Box key={frame.id} layerStyle="popup-item" onClick={() => {
-                  state.do.reorder(frame, 'after')
-                }}>
-                  <Text textStyle="popup-item">
-                    {frame.name ? <><b>{frame.name}</b><br/></> : null}
-                    <small>{frame.id}</small>
-                  </Text>
-                </Box>
-              )
-            })
-          }
-        </Box>) : null}
-    </>
-  )
-}
-
 export default function FrameDetail(props: FrameDetailProps) {
   const [value, state] = useForest([stateFactory],
     (localState) => {
@@ -191,8 +138,6 @@ export default function FrameDetail(props: FrameDetailProps) {
                         <Input value={height} size="sm" onChange={setHeight} textAlign="right" type="number"
                                min={50}/>
                       </InputGroup>
-
-                      <ChooseOrder state={state}/>
                     </VStack>
                   </HStack>
                 </AccordionPanel>

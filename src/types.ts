@@ -125,3 +125,13 @@ export type LFSummary = {
   targetId: string | null,
   targetSpriteDir: Direction | null
 }
+
+export enum BlockMode {
+  NONE = 'none',
+  ADDING_FRAME = 'adding-frame',
+  MOVING_FRAME = 'moving-frame',
+  LINKING_FRAME = 'linking-frame',
+  EDIT_FRAME = 'edit-frame',
+  PANNING = 'panning',
+  LIST_FRAMES = 'list-frames'
+}

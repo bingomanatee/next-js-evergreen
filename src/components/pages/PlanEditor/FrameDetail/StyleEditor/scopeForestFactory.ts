@@ -2,22 +2,30 @@ import { leafConfig, leafI } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
 import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
 
-export function scopeForestFactory(scope: string): leafConfig {
+export function scopeForestFactory(scope: string, frameDetailState): leafConfig {
   try {
     return {
       $value: new Map(),
       name: scope,
       actions: {
         init(state: leafI) {
-          return dataManager.do(async (db) => {
+          dataManager.do(async (db) => {
             const styles = await db.style.find()
               .where('scope')
               .eq(scope)
               .exec();
 
             state.do.addStyles(styles);
-            state.do.listenForCommit();
+
           });
+          const sub = frameDetailState.select((saving) => {
+              if (saving) {
+                state.do.save();
+                sub.unsubscribe();
+              }
+            },
+            (value) => value.saving);
+          return () => sub?.unsubscribe();
         },
         delete(state: leafType, tagName: string) {
           const value = new Map(state.value);

@@ -66,7 +66,7 @@ function FrameControlBar({ frame }) {
 
   const move = useCallback((e: MouseEvent) => {
       swallowEvent(e);
-      blockManager.do.block(BlockMode.EDIT_FRAME, { frameId: frame.id });
+      blockManager.do.block(BlockMode.MOVING_FRAME, { frameId: frame.id });
     },
     [frame.id]) as MouseEventHandler<HTMLButtonElement>
 
@@ -157,6 +157,13 @@ function PanControl({ state }) {
   return <Button
     size="sm"
     onClick={state.do.pan}
+    {
+      ...panning ? {
+          borderColor: 'accent',
+          borderWidth: '1px'
+        }
+        : {}
+    }
     leftIcon={
       <Image
         width={20}

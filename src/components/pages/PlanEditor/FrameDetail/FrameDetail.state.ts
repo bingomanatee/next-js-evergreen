@@ -46,7 +46,7 @@ const FrameDetailState = (id: string) => {
           blockManager.do.finish();
           return;
         }
-        state.child('frame')!.value = frame.toJSON();
+        state.child('frame')!.value = {...frame.toJSON()};
         state.do.set_loaded(true);
 
         const sub = dataManager.planStream.subscribe(({ frames }) => {

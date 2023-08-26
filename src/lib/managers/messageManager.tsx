@@ -95,8 +95,4 @@ const messageManager = {
   }
 }
 
-setTimeout(() => {
-  messageManager.notify('Test Message', 'Test Description')
-}, 1500);
-
 export default messageManager;

@@ -7,25 +7,18 @@ import {
   Box, DrawerBody, DrawerFooter, Heading, Button, Flex,
   HStack, Input, Spinner, Text, VStack, InputGroup, InputLeftAddon, DrawerOverlay, DrawerContent, Drawer,
 } from '@chakra-ui/react'
-import Image from 'next/image';
-import { size, upperFirst } from 'lodash'
+import { upperFirst } from 'lodash'
 // site
 import useForestInput from '~/lib/useForestInput'
 import FieldGrid from '~/components/FieldGrid'
 import DialogButton from '~/components/Dialogs/DialogButton'
-import { DialogButtonProps } from '~/components/Dialogs/Dialog.state'
 
 // local
 import { ChoiceWrapper } from './ChoiceWrapper'
 import { FrameStateContext } from './FrameStateContext'
 import { FrameDetailProps } from './types'
 import StyleEditor from './StyleEditor/StyleEditor'
-import useForestFiltered from '~/lib/useForestFiltered'
-import DialogStateCtx from '~/components/Dialogs/DialogStateCtx'
 import dynamic from 'next/dynamic'
-import { Frame } from '~/types'
-import { leafI } from '@wonderlandlabs/forest/lib/types'
-import FrameTicket from '~/components/FrameTicket/FrameTicket'
 import FrameIcon from '~/components/icons/FrameIcon'
 
 const resourceMap = new Map();
@@ -147,7 +140,7 @@ export default function FrameDetail(props: FrameDetailProps) {
                 <h2>
                   <AccordionButton>
                     <Box as="span" flex='1' textAlign='left'>
-                      <Heading variant="accordionHead">Content</Heading>
+                      <Heading variant="accordionHead">Content ({frame.type})</Heading>
                     </Box>
                     <AccordionIcon/>
                   </AccordionButton>
@@ -158,7 +151,7 @@ export default function FrameDetail(props: FrameDetailProps) {
                       (
                         <ChoiceWrapper
                           key={fType}
-                          target={type}
+                          target={fType}
                           title={upperFirst(fType) + (fType === 'markdown' ? '(text)' : '')}
                         >
                           <FrameIcon type={fType} active={type === fType} size={30}/>

@@ -6,6 +6,7 @@ import { userManager } from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
 import keyManager from '~/lib/managers/keyManager'
 import { BlockMode, Direction } from '~/types'
+import swallowEvent from '~/lib/swallowEvent'
 
 export type PlanEditorStateValue = {
   planId: string,
@@ -105,12 +106,9 @@ const PlanEditorState = (id, planContainerRef) => {
           return;
         }
         if (e.target?.dataset['role'] !== 'plan-editor-main') {
-          console.warn('bad target:', e.target?.dataset);
           return;
         }
-        ;
-        e.preventDefault();
-        e.stopPropagation();
+        swallowEvent(e);
 
         if (!e.shiftKey) {
           if (fromContextMenu || e.button === 2 || state.value.keys.has('f')) {

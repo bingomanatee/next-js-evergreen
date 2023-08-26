@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 /*import styles from './BlockerSwitch.module.scss';
 import stateFactory from './BlockerSwitch.state.ts';
 import useForest from '~/lib/useForest'*/
@@ -15,7 +15,8 @@ const INLINE_VIEWS = [
 ]
 
 const NON_INLINE_VIEWS = [
-  BlockMode.LIST_FRAMES
+  BlockMode.LIST_FRAMES,
+  BlockMode.EDIT_FRAME
 ]
 export default function BlockerSwitch(props: InViewBlockersProps) {
   /*  const [value, state] = useForest([stateFactory, props],

@@ -17,7 +17,7 @@ export default function StyleEditor(props: StyleEditorProps) {
 
   const frameDetailState = useContext(FrameStateContext);
 
-  const [value, state] = useForest([stateFactory, props],
+  const [value, state] = useForest([stateFactory, props, frameDetailState],
     (localState) => {
        return localState.do.init(frameDetailState);
     });

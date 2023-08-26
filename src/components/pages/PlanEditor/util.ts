@@ -36,7 +36,12 @@ export const DIMENSION_ACTIONS = {
       height: state.$.height()
     }
     const frame = await state.$.frame();
-    await frame?.incrementalPatch(update);
+    try {
+      await frame?.incrementalPatch(update);
+    } catch (err) {
+      console.error('cannot incremental update ', update, 'frame', frame, err);
+    }
+
     blockManager.do.finish();
     // may not be necessary
     state.do.updateId(null);
@@ -78,19 +83,19 @@ export const DIMENSION_SELECTORS = {
   },
   left(state: leafType) {
     const { left, deltas } = state.value;
-    return left + (deltas?.get('left') || 0);
+    return Math.round(left + (deltas?.get('left') || 0));
   },
   right(state: leafType) {
     const { right, deltas } = state.value;
-    return right + (deltas?.get('right') || 0);
+    return Math.round(right + (deltas?.get('right') || 0));
   },
   top(state: leafType) {
     const { top, deltas } = state.value;
-    return top + (deltas?.get('top') || 0);
+    return Math.round(top + (deltas?.get('top') || 0));
   },
   bottom(state: leafType) {
     const { bottom, deltas } = state.value;
-    return bottom + (deltas?.get('bottom') || 0);
+    return Math.round(bottom + (deltas?.get('bottom') || 0));
   },
   point(state: leafType, dir: Direction, offset ?: Vector2) {
     let x = 0;
@@ -121,7 +126,7 @@ export const DIMENSION_SELECTORS = {
     if (offset) {
       return point.add(offset);
     }
-    return point;
+    return point.round();
   }
 }
 

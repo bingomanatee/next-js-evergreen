@@ -17,6 +17,8 @@ export function DragFrameSprite() {
 
   const spriteRef = useRef(null);
 
+  const {zoom} = planEditorState.value;
+
   const [value, state] = useForest([stateFactory,
       { dir: CENTER },
       planEditorState,
@@ -47,8 +49,11 @@ export function DragFrameSprite() {
     data-name={dirToString(CENTER)}
     className={styles.center}
     style={
-      vectorToStyle(
-        moveState.$.point(CENTER, POINT_OFFSET))
+      {
+        ...vectorToStyle(
+          moveState.$.point(CENTER, POINT_OFFSET)),
+        transform: `scale(${100/zoom})`
+      }
     }
     ref={spriteRef}
   >

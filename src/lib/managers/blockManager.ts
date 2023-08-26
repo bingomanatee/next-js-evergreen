@@ -45,12 +45,22 @@ const blockManager = new Forest({
 
       state.do._reset();
     },
+    finishSlow(state: leafType) {
+      state.do.finish();
+
+      state.do.set_locked(true);
+      setTimeout(() => {
+        state.do.set_locked(false);
+      }, 500)
+    },
     _reset(state) {
       state.value = {...INITIAL};
       return;
     },
-    block(state: leafType, type, data: any = {}, locked = false) {
-      const { id } = state.value;
+    block(state: leafType, type, data: any = {}, isLocked = false) {
+      const { id, locked } = state.value;
+      if (locked) return;
+
       if (id) {
         throw new Error('already blocking');
       }
@@ -61,7 +71,7 @@ const blockManager = new Forest({
       state.do.set_id(newId);
       state.do.set_type(type);
       state.do.set_data(data);
-      state.do.set_locked(locked);
+      state.do.set_locked(isLocked);
       // returns an observable that completes when the blocking is closed
       return [newId, state.observable.pipe(
         map(({ id }) => id),

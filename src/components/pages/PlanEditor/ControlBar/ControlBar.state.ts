@@ -6,14 +6,17 @@ import messageManager from '~/lib/managers/messageManager'
 import blockManager from '~/lib/managers/blockManager'
 import keyManager from '~/lib/managers/keyManager'
 import { Vector2 } from 'three'
+import swallowEvent from '~/lib/swallowEvent'
 
 export type ControlBarStateValue = { panning: boolean, panPosition: Vector2 };
 
 type leafType = typedLeaf<ControlBarStateValue>;
 
 const ControlBarState = (props, planEditorState) => {
-  const $value: ControlBarStateValue = { panning: false,
-    panPosition: new Vector2(0, 0) };
+  const $value: ControlBarStateValue = {
+    panning: false,
+    panPosition: new Vector2(0, 0)
+  };
   return {
     name: "ControlBar",
     $value,
@@ -59,16 +62,16 @@ const ControlBarState = (props, planEditorState) => {
       init(state: leafType) {
       },
       onPanImage(state: leafType, img: HTMLImageElement) {
-        if (!img) return;
+        if (!img) {
+          return;
+        }
         img.addEventListener('mousedown', (e) => {
-          console.log('pan start', e.x, e.y);
-          const {x, y} = e;
+
+          const { x, y } = e;
           const startPan = planEditorState.value.pan.clone();
           const start = new Vector2(x, y);
           const mover = (e: MouseEvent) => {
-            console.log('moving', e.x, e.y);
             const newPan = new Vector2(e.x, e.y).sub(start).round();
-            console.log('pan is', newPan)
             state.do.set_panPosition(newPan);
             planEditorState.do.set_pan(newPan
               .multiplyScalar(100 / planEditorState.value.zoom)
@@ -82,32 +85,47 @@ const ControlBarState = (props, planEditorState) => {
         });
 
       },
-      pan(state: leafType) {
-        function endPan() {
-          blockManager.do.finish();
+      endPan(state: leafI, e) {
+        // only listen to clicks in the background
+        blockManager.do.finishSlow();
+        swallowEvent(e);
+        window.removeEventListener('mousedown', state.do.endPan);
+      },
+      pan(state: leafType, e) {
+        swallowEvent(e);
+
+        if (blockManager.value.locked) {
+          return;
+        }
+        if (blockManager.$.isBlocked()) {
+          return blockManager.do.finish();
         }
 
-        window.document.addEventListener('mousedown', endPan);
+        window.removeEventListener('mousedown', state.do.endPan);
+        window.document.addEventListener('mousedown', state.do.endPan, { once: true });
+
         keyManager.init();
-        let keySub = keyManager.stream.subscribe((keys) => {
-          if (keys.has('Escape')) {
-            blockManager.do.finish();
-            keySub.unsubscribe();
-          }
-        });
-        blockManager.do.block(BlockMode.PANNING)[1]
-          .subscribe({
+
+        const [id, subject] = blockManager.do.block(BlockMode.PANNING)
+          subject.subscribe({
             error(err) {
-              keySub.unsubscribe();
+              keySub?.unsubscribe();
               console.error('error in blockSub:', err);
             },
             complete() {
-              keySub.unsubscribe();
+              keySub?.unsubscribe();
               state.do.set_panning(false);
-              window.document.removeEventListener('mousedown', endPan);
+              window.removeEventListener('mousedown', state.do.endPan);
             }
           });
 
+        // ---- listen for Esc key
+        let keySub = keyManager.stream.subscribe((keys) => {
+          if (keys.has('Escape')) {
+            blockManager.do.finish(id);
+            keySub.unsubscribe();
+          }
+        });
         state.do.set_panning(true);
       }
     },

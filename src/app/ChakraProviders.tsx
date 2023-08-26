@@ -202,6 +202,16 @@ const LAYER_STYLES = {
     width: 10,
     justifyContent: 'center',
     flexDirection: 'row',
+  },
+
+  'list-item': {
+    px: [2, 3, 3],
+    py: [1, 1, 2],
+    backgroundColor: 'white',
+    _hover: {
+      backgroundColor: 'light-accent',
+      fontWeight: 800
+    }
   }
 };
 

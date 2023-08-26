@@ -1,7 +1,7 @@
 import { c } from '@wonderlandlabs/collect'
-import { scopeForestFactory } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/scopeForestFactory'
-import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
-import { StyleEditorProps } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/StyleEditor'
+import { scopeForestFactory } from './scopeForestFactory'
+import { leafType } from './types'
+import { StyleEditorProps } from './StyleEditor'
 import { leafI } from '@wonderlandlabs/forest/lib/types'
 
 export type StyleEditorStateValue = {
@@ -13,7 +13,7 @@ export type StyleEditorStateValue = {
  * there should be (up to) two scopes - one global scope for all the frames
  * and one
  */
-const StyleEditorState = (props: StyleEditorProps) => {
+const StyleEditorState = (props: StyleEditorProps, frameDetailState) => {
   const $value: StyleEditorStateValue = { tagName: 'p', id: props.id };
 
   return {
@@ -57,7 +57,7 @@ const StyleEditorState = (props: StyleEditorProps) => {
       },
       upsertScope(state: leafType, scope: string) {
         if (!state.child(scope)) {
-          const def = scopeForestFactory(scope)
+          const def = scopeForestFactory(scope, frameDetailState)
           state.addChild(def, scope);
           return state.child(scope)!.do.init();
         }

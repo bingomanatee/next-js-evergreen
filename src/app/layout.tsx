@@ -36,6 +36,13 @@ export default function Layout(
 
   return (
     <html lang="en" className={[ns.variable, sm.variable].join(' ')}>
+    <head>
+      <title>Planboard</title>
+      <link
+        href="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.css"
+        rel="stylesheet"
+      />
+    </head>
     <body className={inter.className}>
     <SessionContextProvider
       supabaseClient={supabaseClient}

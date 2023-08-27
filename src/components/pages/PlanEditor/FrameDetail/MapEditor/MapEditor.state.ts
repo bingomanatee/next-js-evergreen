@@ -3,10 +3,13 @@ import axios from 'axios'
 import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { MarkdownEditorStateValue } from '~/components/pages/PlanEditor/FrameDetail/MarkdownEditor/MarkdownEditor.state'
 import googleMaps from '~/lib/googleMaps'
+import PlaceResult = google.maps.places.PlaceResult
+import QueryAutocompletePrediction = google.maps.places.QueryAutocompletePrediction
 
 export type MapEditorStateValue = {
   lat: number,
   lon: number,
+  zoom: number,
   placeSearch: string,
   pred: Record<string, any>[]
 };
@@ -19,34 +22,68 @@ const MapEditorState = (props: { frameState: leafI }) => {
     lat: 0,
     lon: 0,
     placeSearch: '',
+    description : '',
     pred: [],
+    zoom: 9,
   };
   return {
     name: "MarkdownEditor",
     $value,
 
-    selectors: {},
+    selectors: {
+      async api(state: leafType) {
+        if (!state.getMeta('googleMapService')) {
+          const api = await googleMaps();
+          state.setMeta('googleMapService', api);
+          return api;
+        }
+        return state.getMeta('googleMapService');
+      }
+    },
 
     actions: {
+      async initMapbox(state: leafType, container) {
+        const {lon, lat, zoom} = state.value;
+        const map =  new mapboxgl.Map({
+          container: container,
+          style: 'mapbox://styles/mapbox/streets-v12',
+          center: [lon, lat],
+          zoom: zoom
+        });
+        state.setMeta('map', map,true);
+      },
+      async choosePred(state: leafType, pred: QueryAutocompletePrediction) {
+        const api = await state.$.api();
+        const service = new api.maps.Geocoder();
+
+        const { results: [data] } = await service.geocode({
+          placeId: pred.place_id,
+        });
+        if (data) {
+          try {
+            const {geometry, formatted_address} = data;
+            state.do.set_lat(geometry.location.lat());
+            state.do.set_lon(geometry.location.lng());
+            state.do.set_description(formatted_address);
+            state.do.set_placeSearch('');
+            state.do.set_pred([]);
+          } catch (err) {
+            console.error('cannot get location', err.message);
+          }
+        }
+      },
       async search(state: leafType) {
         const { placeSearch } = state.value;
         if (!placeSearch) {
           return state.do.set_pred([]);
         }
 
-        if (!state.getMeta('googleMapService')) {
-          const api = await googleMaps();
-          console.log('api: ', api);
-          state.setMeta('googleMapService', api);
-        }
-
-        const api = state.getMeta('googleMapService');
+        const api = await state.$.api();
         const mapService = new api.maps.places.AutocompleteService();
         mapService.getQueryPredictions({ input: placeSearch },
           (
-            pred: google.maps.places.QueryAutocompletePrediction[] | null,
+            pred: QueryAutocompletePrediction[] | null,
           ) => {
-            console.log('pred: ', pred);
             if (pred) {
               state.do.set_pred(pred);
             } else {

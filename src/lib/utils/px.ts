@@ -1,11 +1,11 @@
 import { Vector2 } from 'three'
 import { Area, Direction, Frame, X_DIR, Y_DIR } from '~/types'
 
-export default function px(n: number): string {
+export default function px(n: number, decimal?: boolean): string {
   if (!(n && (typeof n === 'number'))) {
     return '0';
   }
-  return `${Math.round(n)}px`
+  return decimal ? `${n.toFixed(4)}px` : `${Math.round(n)}px`
 }
 
 export function vectorToStyle(p: Vector2) {

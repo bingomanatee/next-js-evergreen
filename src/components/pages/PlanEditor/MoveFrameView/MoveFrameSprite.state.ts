@@ -12,20 +12,21 @@ type MoveFrameSpriteStateValue = {
 type leafType = typedLeaf<MoveFrameSpriteStateValue>;
 
 export default function MoveFrameSpriteState(props: MFSProps, planEditorState: leafI, moveState: leafI) {
+
   const { dir } = props;
   const $value: MoveFrameSpriteStateValue = {
     offset: new Vector2(),
     start: null,
     frame: null,
-    frameId: null,
+    frameId: moveState.value.id,
   }
 
   return {
     $value,
     actions: {
-      init(state, element: HTMLDivElement) {
+      init(state: leafI, element: HTMLDivElement) {
         if (!element) {
-          console.error('cannot initialize MoveFrameSprite - no element');
+      //    console.error('cannot initialize MoveFrameSprite - no element');
           return;
         }
         element.addEventListener('mousedown', state.do.onMouseDown);
@@ -128,12 +129,6 @@ export default function MoveFrameSpriteState(props: MFSProps, planEditorState: l
         }
         return map;
       },
-      className(state: leafType, style: Record<string, string>) {
-        if (state.$.isActive(planEditorState)) {
-          return style['move-frame-sprite']
-        }
-        return style['move-frame-sprite-hidden']
-      }
     }
   }
 

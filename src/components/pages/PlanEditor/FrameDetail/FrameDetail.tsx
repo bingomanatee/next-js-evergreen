@@ -146,7 +146,7 @@ export default function FrameDetail(props: FrameDetailProps) {
                   </AccordionButton>
                 </h2>
                 <AccordionPanel pb={4}>
-                  <HStack gap={8} justify="center" fontSize="48px" mb={8}>
+                  <HStack gap={8} justify="center" fontSize="48px" mb={1}>
                     {['image', 'markdown', 'map'].map((fType) =>
                       (
                         <ChoiceWrapper
@@ -154,7 +154,6 @@ export default function FrameDetail(props: FrameDetailProps) {
                           target={fType}
                           title={upperFirst(fType) + (fType === 'markdown' ? '(text)' : '')}
                         >
-                          <FrameIcon type={fType} active={type === fType} size={30}/>
                         </ChoiceWrapper>
                       ))}
                   </HStack>

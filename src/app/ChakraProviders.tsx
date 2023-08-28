@@ -151,14 +151,10 @@ const LAYER_STYLES = {
     ...FRAME_VIEW,
     borderColor: "frame-view-clicked-border",
     boxSizing: 'border-box',
-    borderWidth: '3px',
-    borderStyle: 'dashed'
   },
   'frameView-clicked-hover': {
     ...FRAME_VIEW,
     borderColor: "frame-view-clicked-hover-border",
-    borderWidth: '3px',
-    borderStyle: 'dashed'
   },
   'frame-detail-wrapper': {
     display: "block",

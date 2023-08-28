@@ -1,17 +1,16 @@
-import { Frame } from '~/types'
-import { useContext, useMemo, useRef } from 'react'
+import { BlockMode, Frame } from '~/types'
+import { useCallback, useContext, useMemo, useRef } from 'react'
 import { Box, Heading } from '@chakra-ui/react'
 import px from '~/lib/utils/px'
 import dynamic from 'next/dynamic'
-import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 import useForestFiltered from '~/lib/useForestFiltered'
 
-import { FrameControls } from './FrameControls'
 import styles from './FramesView.module.scss'
+import blockManager from '~/lib/managers/blockManager'
+import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 
 const resourceMap = new Map();
-
 
 function NullView({ frame: frame }) {
   return (<Box>
@@ -23,7 +22,7 @@ function NullView({ frame: frame }) {
 
 export function FrameView(props: { frame: Frame }) {
   const { frame } = props;
-  const boxRef = useRef(null);
+  const boxRef = useRef<HTMLDivElement | null>(null);
   /**
    * edit on click handler
    */
@@ -70,11 +69,28 @@ export function FrameView(props: { frame: Frame }) {
   }, [clicked, frame, hover]);
 
   DetailView = resourceMap.get(frame.type ?? null) || NullView
+
+  const lastClicked = useRef(0);
+  const frameClicked = useCallback(() => {
+    if (frameListHoverManager.value.clicked !== frame.id) {
+      frameListHoverManager.do.set_clicked(frame.id);
+    }
+    if ((Date.now() - lastClicked.current) < 800) {
+      blockManager.do.block(BlockMode.EDIT_FRAME, { frameId: frame.id });
+    }
+    lastClicked.current = Date.now();
+  }, []);
+  const planEditorState = useContext(PlanEditorStateCtx);
+  const { zoom } = useForestFiltered(planEditorState!, ['zoom']);
+  const borderWidth = useMemo(() => {
+      const width = px(((clicked === frame.id) ? 250 : 125) / zoom, true);
+      return width;
+    },
+    [clicked, frame.id, zoom])
   return (
     <Box
       as="section"
       id={`frame:${frame.id}`}
-      ref={boxRef}
       left={px(frame.left)}
       top={px(frame.top)}
       width={px(frame.width)}
@@ -83,9 +99,13 @@ export function FrameView(props: { frame: Frame }) {
       zIndex={frame.order}
       className={styles['frame-view']}
       data-frame-container={frame.id}
-      onMouseDown={() => frameListHoverManager.do.set_clicked(frame.id)}
+      onClick={frameClicked}
+      ref={boxRef}
+      borderWidth={borderWidth}
     >
-      <Box as="div" layerStyle={'frame-detail-wrapper'} data-id="frame-detail-wrapper">
+      <Box as="div" data-clicked={clicked === frame.id ? 1 : undefined}
+           layerStyle={'frame-detail-wrapper'}
+           data-id="frame-detail-wrapper">
         <DetailView frame={frame}/>
       </Box>
     </Box>

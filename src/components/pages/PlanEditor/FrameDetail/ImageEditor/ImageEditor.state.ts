@@ -76,7 +76,6 @@ const ImageEditorState = (props) => {
         return state.do.init();
       },
       async init(state: leafType) {
-
         const data = await dataManager.getImageUrl(id);
         state.do.set_imageUrl(data?.url);
         if (data?.url) {

@@ -17,31 +17,13 @@ export function DragFrameSprite() {
 
   const spriteRef = useRef(null);
 
-  const {zoom} = planEditorState.value;
+  const { zoom } = planEditorState.value;
 
   const [value, state] = useForest([stateFactory,
       { dir: CENTER },
       planEditorState,
       moveState],
     (localState) => {
-      let out = null;
-      const tryInit = () => {
-        out = setTimeout(() => {
-          if (spriteRef.current) {
-            localState.do.init(spriteRef.current);
-          } else {
-            tryInit();
-          }
-        }, 100)
-      }
-
-      tryInit();
-
-      return () => {
-        if (out) {
-          clearTimeout(out);
-        }
-      }
     });
 
   return <div
@@ -52,12 +34,14 @@ export function DragFrameSprite() {
       {
         ...vectorToStyle(
           moveState.$.point(CENTER, POINT_OFFSET)),
-        transform: `scale(${100/zoom})`
+        transform: `scale(${100 / zoom})`
       }
     }
-    ref={spriteRef}
+    ref={state.do.init}
   >
-    <Image src="/img/icons/widget-move.svg" width={CENTER_SPRITE_SIZE} height={CENTER_SPRITE_SIZE} alt="drag icon"/>
+    <Image src="/img/icons/widget-move.svg"
+           width={CENTER_SPRITE_SIZE}
+           height={CENTER_SPRITE_SIZE} alt="drag icon"/>
   </div>
 }
 

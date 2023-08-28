@@ -13,7 +13,6 @@ export function MoveFrameSprite(props: MFSProps) {
   const planEditorState = useContext(PlanEditorStateCtx);
   const moveState = useContext(MoveFrameStateContext);
 
-  const spriteRef = useRef(null);
   const { dir } = props;
 
   const [value, state] = useForest([stateFactory,
@@ -21,29 +20,18 @@ export function MoveFrameSprite(props: MFSProps) {
       planEditorState,
       moveState],
     (localState) => {
-      function tryInit() {
-        setTimeout(() => {
-          if (spriteRef.current) {
-            localState.do.init(spriteRef.current);
-          } else {
-            tryInit();
-          }
-        }, 100)
-      }
-
-      tryInit();
+      console.log('--- moveFrameSprite value:', localState.value);
     });
 
-  const { } = value;
-
+  const {} = value;
+  const point = moveState.$.point(dir, POINT_OFFSET);
+  console.log('making move-frame-sprite', point, dir)
   return <div
     data-role="move-frame-sprite"
     data-name={dirToString(dir)}
-    className={state.$.className(styles)}
-    style={
-      vectorToStyle(moveState.$.point(dir, POINT_OFFSET))
-    }
-    ref={spriteRef}
+    className={styles['move-frame-sprite']}
+    style={vectorToStyle(point)}
+    ref={state.do.init}
   >
     &nbsp;
   </div>

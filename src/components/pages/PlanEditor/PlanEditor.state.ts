@@ -311,6 +311,8 @@ const PlanEditorState = (id, planContainerRef) => {
         state.do.set_zoom(nextZoom * 10);
       },
       zoom(state: leafType, event) {
+        if (blockManager.$.isBlocked()) return;
+
         let { zoom } = state.value;
         zoom += event.deltaY * -0.1;
         // Restrict scale

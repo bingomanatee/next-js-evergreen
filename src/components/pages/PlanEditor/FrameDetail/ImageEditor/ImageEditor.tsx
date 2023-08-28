@@ -50,5 +50,9 @@ export default function ImageEditor(props: ImageEditorProps) {
         </Box>
       )}
     </Dropzone>
+    <Text layerStyle="info">
+      Adding a new image file saves <b>immediately</b>
+      - whether or not you click the save button
+    </Text>
   </Box>);
 }

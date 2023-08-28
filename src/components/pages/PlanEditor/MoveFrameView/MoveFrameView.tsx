@@ -24,7 +24,6 @@ export default function MoveFrameView() {
   useEffect(() => {
     if (planEditorState && state) {
       const sub = state.do.init(planEditorState);
-
       return () => {
         sub?.unsubscribe();
       }

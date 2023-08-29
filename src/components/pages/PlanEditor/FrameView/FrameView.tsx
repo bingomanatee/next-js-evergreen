@@ -1,6 +1,6 @@
 import { BlockMode, Frame } from '~/types'
 import { useCallback, useContext, useMemo, useRef } from 'react'
-import { Box, Heading } from '@chakra-ui/react'
+import { Box, Heading, Text } from '@chakra-ui/react'
 import px from '~/lib/utils/px'
 import dynamic from 'next/dynamic'
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
@@ -9,6 +9,8 @@ import useForestFiltered from '~/lib/useForestFiltered'
 import styles from './FramesView.module.scss'
 import blockManager from '~/lib/managers/blockManager'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
+import { Vector2 } from 'three'
+import frameRelativeSize from '~/lib/utils/frameRelativeSize'
 
 const resourceMap = new Map();
 
@@ -22,6 +24,8 @@ function NullView({ frame: frame }) {
 
 export function FrameView(props: { frame: Frame }) {
   const { frame } = props;
+  const planEditorState = useContext(PlanEditorStateCtx);
+  const { zoom } = useForestFiltered(planEditorState!, ['zoom'])
   const boxRef = useRef<HTMLDivElement | null>(null);
   /**
    * edit on click handler
@@ -52,9 +56,15 @@ export function FrameView(props: { frame: Frame }) {
 
   const { clicked, hover } = useForestFiltered(frameListHoverManager, ['clicked', 'hover']);
 
+  const { tooSmall, place } = useMemo(() =>frameRelativeSize(frame, zoom), [frame, zoom]);
+
   const layerStyle = useMemo(() => {
+    if (tooSmall) {
+      return 'frameView-tooSmall'
+    }
     if (frame) {
       const { id } = frame;
+
       if (clicked === id && hover === id) {
         return "frameView-clicked-hover";
       }
@@ -66,7 +76,7 @@ export function FrameView(props: { frame: Frame }) {
       }
     }
     return "frameView";
-  }, [clicked, frame, hover]);
+  }, [clicked, frame, hover, zoom, tooSmall]);
 
   DetailView = resourceMap.get(frame.type ?? null) || NullView
 
@@ -80,34 +90,36 @@ export function FrameView(props: { frame: Frame }) {
     }
     lastClicked.current = Date.now();
   }, []);
-  const planEditorState = useContext(PlanEditorStateCtx);
-  const { zoom } = useForestFiltered(planEditorState!, ['zoom']);
+
   const borderWidth = useMemo(() => {
-      const width = px(((clicked === frame.id) ? 250 : 125) / zoom, true);
-      return width;
+      if (tooSmall) {
+        return px(300 / zoom, true);
+      }
+      return px(((clicked === frame.id) ? 250 : 125) / zoom, true);
     },
-    [clicked, frame.id, zoom])
+    [clicked, frame.id, zoom, tooSmall])
   return (
     <Box
       as="section"
       id={`frame:${frame.id}`}
-      left={px(frame.left)}
-      top={px(frame.top)}
-      width={px(frame.width)}
-      height={px(frame.height)}
+      left={px(place.left)}
+      top={px(place.top)}
+      width={px(place.width)}
+      height={px(place.height)}
       layerStyle={layerStyle}
       zIndex={frame.order}
-      className={styles['frame-view']}
+      className={tooSmall ? styles['frame-view-hidden'] : styles['frame-view']}
       data-frame-container={frame.id}
       onClick={frameClicked}
       ref={boxRef}
       borderWidth={borderWidth}
     >
-      <Box as="div" data-clicked={clicked === frame.id ? 1 : undefined}
-           layerStyle={'frame-detail-wrapper'}
-           data-id="frame-detail-wrapper">
-        <DetailView frame={frame}/>
-      </Box>
+      <DetailView frame={frame}/>
+      {tooSmall ?
+        <Text textStyle="frame-placeholder" layerStyle="frame-placeholder-text"
+              fontSize={px(1000 / zoom)}>
+          {frame.name || frame.id}
+        </Text> : null}
     </Box>
   )
 }

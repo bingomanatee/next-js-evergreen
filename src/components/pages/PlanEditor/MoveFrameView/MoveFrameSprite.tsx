@@ -24,7 +24,7 @@ export function MoveFrameSprite(props: MFSProps) {
 
   const {} = value;
   const point = moveState.$.point(dir, POINT_OFFSET);
-  console.log('making move-frame-sprite', point, dir)
+
   return <div
     data-role="move-frame-sprite"
     data-name={dirToString(dir)}

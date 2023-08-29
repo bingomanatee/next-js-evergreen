@@ -21,3 +21,10 @@
  @include no-select();
  pointer-events: all;
 }
+.frame-view-hidden {
+ @include no-select();
+ pointer-events: all;
+ & :first-child {
+  visibility: hidden
+ }
+}

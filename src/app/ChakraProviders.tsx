@@ -35,6 +35,13 @@ const LINK_FRAME = {
 }
 
 const LAYER_STYLES = {
+  'frame-placeholder-text': {
+    px: 2,
+    py: 2,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    whiteSpace: 'nowrap',
+    textAlign: 'center',
+  },
   'frame-control-checkbox': {
     backgroundColor: 'white',
     mx: 3,
@@ -143,6 +150,17 @@ const LAYER_STYLES = {
     zIndex: 100000
   },
   frameView: FRAME_VIEW,
+  'frameView-tooSmall': {
+    ...FRAME_VIEW,
+    backgroundColor: 'frame-placeholder',
+    overflow: 'visible',
+    flexWrap: 'nowrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent:'center',
+    borderRadius: '50%',
+    display: 'flex',
+  },
   'frameView-hover': {
     ...FRAME_VIEW,
     borderColor: "frame-view-hover-border",
@@ -222,6 +240,7 @@ const COLORS = {
   'frame-view-hover-border': 'hsla(30,100%,50%,0.5)',
   'frame-view-clicked-border': 'hsla(280,100%,50%,0.5)',
   'frame-view-clicked-hover-border': 'hsl(280,100%,66%)',
+  'frame-placeholder': 'hsl(280,25%,66%)',
 
   'form-title': 'hsl(244,50%,25%)',
   'nav-x-light': 'hsl(200,100%,90%)',

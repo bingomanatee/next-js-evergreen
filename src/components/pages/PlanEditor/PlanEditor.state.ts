@@ -36,7 +36,7 @@ const PlanEditorState = (id, planContainerRef) => {
     markdownStyles: '',
     modeTarget: null,
     planId: id,
-    pan : new Vector2(),
+    pan: new Vector2(),
     zoom: 100
   };
   return {
@@ -301,17 +301,21 @@ const PlanEditorState = (id, planContainerRef) => {
       },
 
       zoomOut(state: leafType) {
-        const {zoom} = state.value;
-        const nextZoom = Math.floor(zoom/10) + 1;
+        const { zoom } = state.value;
+        const nextZoom = Math.floor(zoom / 10) + 1;
         state.do.set_zoom(nextZoom * 10);
       },
       zoomIn(state: leafType) {
-        const {zoom} = state.value;
-        const nextZoom = Math.floor(zoom/10) - 1;
-        state.do.set_zoom(nextZoom * 10);
+        const { zoom } = state.value;
+        const nextZoom = Math.floor(zoom / 10) - 1;
+        if (nextZoom >= 1) {
+          state.do.set_zoom(nextZoom * 10);
+        }
       },
       zoom(state: leafType, event) {
-        if (blockManager.$.isBlocked()) return;
+        if (blockManager.$.isBlocked()) {
+          return;
+        }
 
         let { zoom } = state.value;
         zoom += event.deltaY * -0.1;

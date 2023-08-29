@@ -84,7 +84,6 @@ async function fetchImageData(id): Promise<ImageData> {
   return new Promise<ImageData>(async (done, fail) => {
     const { data } = await axios.get('/api/images/' + id);
     let url = data?.url || '';
-    console.log('got image data:', id, data);
     if (!url) {
       return fail(new Error('cannot get url'))
     }
@@ -96,7 +95,6 @@ async function fetchImageData(id): Promise<ImageData> {
         height: img.height,
         time: Date.now()
       }
-      console.log('image data is', imageData);
       done(imageData);
     }
     img.onerror = fail;
@@ -117,10 +115,8 @@ const dataManager: DataManager = {
     }
   },
   async getImageUrl(id: string) {
-    console.log('getting image data:', id);
     try {
       const frame = await dataManager.fetchFrame(id);
-      console.log('got frame ', frame, 'from', id);
       try {
         const { url, time, error } = JSON.parse(frame.value);
         if (url && time && (!error) && time + ONE_HOUR < Date.now()) {
@@ -131,7 +127,6 @@ const dataManager: DataManager = {
       }
 
       const imageData = await fetchImageData(id);
-      console.log('--- image data for frame', id, 'is', imageData);
       await frame.incrementalPatch({
         value: JSON.stringify(imageData), width: imageData.width, height: imageData.height
       })
@@ -178,7 +173,6 @@ const dataManager: DataManager = {
       }).exec();
 
       if (style) {
-        console.log('removing document ', style);
         return style.remove();
       } else {
         console.log('cannot find style to delete:', scope, tagName);
@@ -325,7 +319,7 @@ const dataManager: DataManager = {
 
       await db.frames.incrementalUpsert(newFrame);
     } catch (err) {
-      console.log('error in adding frame:', err);
+      console.error('error in adding frame:', err);
     }
   },
   async fetchFrame(frameId) {

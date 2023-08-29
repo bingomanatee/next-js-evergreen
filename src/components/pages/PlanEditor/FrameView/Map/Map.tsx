@@ -1,59 +1,67 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, useContext } from 'react';
 import styles from './Map.module.scss';
 import stateFactory from './Map.state.ts';
 import useForest from '~/lib/useForest';
 import { Frame } from '~/types'
 import ReactMapboxGl from 'react-mapbox-gl'
+import px, { vectorToStyle } from '~/lib/utils/px'
+import { Vector2 } from 'three'
+import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
+import useForestFiltered from '~/lib/useForestFiltered'
 
 type MapProps = { frame: Frame }
 const Map = ReactMapboxGl({
   accessToken:
-  process.env.NEXT_PUBLIC_MAPBOOK_API_PUBLIC_TOKEN
+  process.env.NEXT_PUBLIC_MAPBOOK_API_PUBLIC_TOKEN,
+  interactive: false
 });
 
 export default function MapView(props: MapProps) {
-  const [value, state] = useForest([stateFactory, props],
+  const { frame } = props;
+  const planEditorState = useContext(PlanEditorStateCtx);
+  const { zoom } = useForestFiltered(planEditorState!, ['zoom'])
+
+  const [value, state] = useForest([stateFactory, props, planEditorState],
     (localState) => {
+      localState.do.init(props.frame);
     });
 
-  const mapData = useMemo(() => {
-    let data = {
-      lat: 0,
-      lng: 0,
-      placeSearch: '',
-      description: '',
-      zoom: 9,
-    };
-    try {
-      try {
-        const vJson = JSON.parse(props.frame.value);
-        if ('lat' in vJson && 'lng' in vJson) {
-          Object.keys(data).forEach((key) => {
-            if (key in data) {
-              data[key] = vJson[key];
-            }
-          })
-        }
-      } catch (err) {
-        console.warn('cannot jsonify ', props.frame.value);
-      }
-    } catch (err) {
+  useEffect(() => {
+    state.do.mergeFrame(frame);
+  }, [frame])
 
+  const {mapData} = value;
+
+  const size = useMemo(() => new Vector2(frame.width, frame.height).round(),
+    [frame.width, frame.height]);
+
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      setTimeout(() => {
+        mapRef.current.resize();
+        mapRef.current.setCenter(mapData.lng, mapData.lat);
+        mapRef.current.triggerRepaint();
+      }, 100);
     }
-    return data;
-  }, [
-    props.frame.value
-  ])
+  }, [size])
 
+  if (!(mapData.lng && mapData.lat)) return null;
   return (
-    <Map
-      style="mapbox://styles/mapbox/streets-v9"
-      center={[mapData.lng, mapData.lat]}
-      zoom={[mapData.zoom]}
-      interactive={false}
-      containerStyle={{
-        width: '100%',
-        height: '100%'
-      }}>
-    </Map>);
+      <div style={{ width: px(size.x), height: px(size.y) }}>
+        <Map
+          style="mapbox://styles/mapbox/streets-v9"
+          onStyleLoad={(map) => {
+            console.log('map object', map);
+            mapRef.current = map;
+          }}
+          center={[mapData.lng, mapData.lat]}
+          zoom={[mapData.zoom]}
+          containerStyle={{
+            width: '100%',
+            height: '100%'
+          }}/>
+      </div>
+  )
 }

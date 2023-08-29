@@ -38,8 +38,6 @@ const MapEditorState = (props: { frameState: leafI }) => {
     console.warn('cannot jsonify ', value);
   }
 
-  console.log('$value for ', value, 'is', $value);
-
   return {
     name: "MarkdownEditor",
     $value,

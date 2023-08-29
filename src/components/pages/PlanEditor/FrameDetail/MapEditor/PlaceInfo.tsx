@@ -16,7 +16,6 @@ import { formatLatitude, formatLongitude } from 'latlon-formatter';
 import ReactMapboxGl from 'react-mapbox-gl'
 import { useRef } from 'react'
 import useForestInput from '~/lib/useForestInput'
-import { BiSolidZoomIn } from 'react-icons/bi'
 
 export const TO_RAD = Math.PI / 180;
 

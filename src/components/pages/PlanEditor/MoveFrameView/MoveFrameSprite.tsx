@@ -20,7 +20,6 @@ export function MoveFrameSprite(props: MFSProps) {
       planEditorState,
       moveState],
     (localState) => {
-      console.log('--- moveFrameSprite value:', localState.value);
     });
 
   const {} = value;

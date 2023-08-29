@@ -16,7 +16,8 @@ type leafType = typedLeaf<MapEditorStateValue>;
 
 const MapEditorState = (props: { frameState: leafI }) => {
   const { frameState } = props;
-  const $value: MarkdownEditorStateValue = {
+  const {value} = frameState.value;
+  let $value: MarkdownEditorStateValue = {
     lat: 0,
     lng: 0,
     placeSearch: '',
@@ -24,6 +25,21 @@ const MapEditorState = (props: { frameState: leafI }) => {
     pred: [],
     zoom: 9,
   };
+  try {
+    const vJson = JSON.parse(value);
+    if ('lat' in vJson && 'lng' in vJson) {
+      Object.keys($value).forEach((key)  => {
+        if (key in $value) {
+          $value[key] = vJson[key];
+        }
+      })
+    }
+  } catch (err) {
+    console.warn('cannot jsonify ', value);
+  }
+
+  console.log('$value for ', value, 'is', $value);
+
   return {
     name: "MarkdownEditor",
     $value,

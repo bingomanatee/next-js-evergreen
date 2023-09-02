@@ -30,9 +30,9 @@ export default function FrameDetail(props: FrameDetailProps) {
       return () => sub?.unsubscribe();
     }, true);
 
+  console.log('frameDetail value:', value);
   const frameState = state.child('frame')!;
-  const { frame } = value;
-  const { type } = frame;
+  const type = frameState.value.type;
 
   const [left, setLeft] = useForestInput(frameState, 'left', { filter: (n) => Number(n) });
   const [top, setTop] = useForestInput(frameState, 'top', { filter: (n) => Number(n) });
@@ -140,7 +140,7 @@ export default function FrameDetail(props: FrameDetailProps) {
                 <h2>
                   <AccordionButton>
                     <Box as="span" flex='1' textAlign='left'>
-                      <Heading variant="accordionHead">Content ({frame.type})</Heading>
+                      <Heading variant="accordionHead">Content ({type})</Heading>
                     </Box>
                     <AccordionIcon/>
                   </AccordionButton>
@@ -182,7 +182,7 @@ export default function FrameDetail(props: FrameDetailProps) {
                     </AccordionButton>
                   </h2>
                   <AccordionPanel>
-                    <StyleEditor id={frame.id}/>
+                    <StyleEditor id={value.id}/>
                   </AccordionPanel>
                 </AccordionItem>
               )}

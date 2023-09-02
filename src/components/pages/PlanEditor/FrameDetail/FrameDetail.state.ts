@@ -41,12 +41,13 @@ const FrameDetailState = (id: string) => {
 
       async initData(state: leafType) {
         const { data } = blockManager.value;
-        const frame = await dataManager.fetchFrame(data.frameId);
+        const frame = dataManager.getFrame(data.frameId);
         if (!frame) {
+          console.error('cannot get frame', data.frameId);
           blockManager.do.finish();
           return;
         }
-        state.child('frame')!.value = {...frame.toJSON()};
+        state.child('frame')!.value = {...frame};
         state.do.set_loaded(true);
 
         const sub = dataManager.planStream.subscribe(({ frames }) => {
@@ -60,7 +61,8 @@ const FrameDetailState = (id: string) => {
         state.do.set_saving(true);
         await dataManager.do(async (db) => {
           const frameData = state.child('frame')!.value;
-          console.log('saving frameData:', frameData);
+          const oldFrame = await dataManager.fetchFrame(frameData.id)
+          console.log('saving frameData:', frameData, 'over', oldFrame);
           await db.frames.incrementalUpsert(frameData);
         });
         console.log('closing');
@@ -86,6 +88,8 @@ const FrameDetailState = (id: string) => {
 
     children: {
       frame: {
+        type: true,
+
         $value: {
           id: '',
           left: 0,

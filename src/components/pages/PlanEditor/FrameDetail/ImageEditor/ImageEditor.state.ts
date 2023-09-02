@@ -63,21 +63,34 @@ const ImageEditorState = (props) => {
       async upload(state: leafType, files: File[]) {
         const [file] = files;
         const { name, type, size } = file;
+        console.log('uploading', file);
+        try {
+          const { data } = await axios.post(IMAGE_API_URL, file, {
+            headers: {
+              'Content-Type': type,
+              'file-type': type,
+              'file-name': name,
+              'file-size': size
+            }
+          });
+          state.do.set_loaded(false);
+          console.log('------------------- image data saved on server/local', data);
+          return state.do.init();
+        } catch (err) {
+          console.log('error in upload:', err.message);
+        }
 
-       await axios.post(IMAGE_API_URL, file, {
-          headers: {
-            'Content-Type': type,
-            'file-type': type,
-            'file-name': name,
-            'file-size': size
-          }
-        });
-        state.do.set_loaded(false);
-        return state.do.init();
       },
       async init(state: leafType) {
         const data = await dataManager.getImageUrl(id);
-        state.do.set_imageUrl(data?.url);
+        console.log('--------------- updating image data to ', data);
+
+        const imageData = await dataManager.fetchImageData(id);
+        frameState.do.set_value(JSON.stringify(imageData));
+        frameState.do.set_width(imageData.width);
+        frameState.do.set_height(imageData.height);
+
+        state.do.set_imageUrl(imageData.url);
         if (data?.url) {
           state.do.sizeImage();
         }

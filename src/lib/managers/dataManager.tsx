@@ -61,6 +61,8 @@ type DataManager = {
   moveFrame(currentFrameId: string, direction: ShufflePos): any
   getImageUrl(id: string): Promise<ImageData>
   fetchFrame(id: string): Promise<Frame | null>
+  getFrame(frameId): Frame | null
+  fetchImageData(frameId): Promise<ImageData>
 }
 
 type Action = (db: RxDatabase<any>) => Promise<any> | Promise<void>
@@ -80,29 +82,33 @@ const planStream: BehaviorSubject<DataStreamItem> = new BehaviorSubject(
 
 const ONE_HOUR = 60 * 60 * 1000;
 
-async function fetchImageData(id): Promise<ImageData> {
-  return new Promise<ImageData>(async (done, fail) => {
-    const { data } = await axios.get('/api/images/' + id);
-    let url = data?.url || '';
-    if (!url) {
-      return fail(new Error('cannot get url'))
-    }
-    let img = new Image();
-    img.onload = () => {
-      const imageData = {
-        url,
-        width: img.width,
-        height: img.height,
-        time: Date.now()
-      }
-      done(imageData);
-    }
-    img.onerror = fail;
-    img.src = url;
-  });
-}
 
 const dataManager: DataManager = {
+  fetchImageData(id): Promise<ImageData> {
+    return new Promise<ImageData>(async (done, fail) => {
+      const { data } = await axios.get('/api/images/' + id);
+      let url = data?.url || '';
+      if (!url) {
+        return fail(new Error('cannot get url'))
+      }
+      let img = new Image();
+      img.onload = () => {
+        const imageData = {
+          url,
+          width: img.width,
+          height: img.height,
+          time: Date.now()
+        }
+        done(imageData);
+      }
+      img.onerror = fail;
+      img.src = url;
+    });
+  },
+  getFrame(frameId): Frame | null {
+    // returns a frame from the planStream. Synchronous
+    return dataManager.planStream.value.framesMap.get(frameId)?.toJSON()
+  },
   async imageError(id: string, error?: Error) {
     const frame = await dataManager.fetchFrame(id);
     if (frame) {
@@ -114,20 +120,21 @@ const dataManager: DataManager = {
       })
     }
   },
-  async getImageUrl(id: string) {
+  async getImageUrl(id: string, noSave = false) {
     try {
       const frame = await dataManager.fetchFrame(id);
       try {
-        const { url, time, error } = JSON.parse(frame.value);
+        const currentData = JSON.parse(frame.value);
+        const { url, time, error } = currentData;
         if (url && time && (!error) && time + ONE_HOUR < Date.now()) {
-          return;
+          return currentData
         }
       } catch (err) {
         // -- ignore error -- proceed
       }
 
-      const imageData = await fetchImageData(id);
-      await frame.incrementalPatch({
+      const imageData = await dataManager.fetchImageData(id);
+      frame.incrementalPatch({
         value: JSON.stringify(imageData), width: imageData.width, height: imageData.height
       })
       return imageData

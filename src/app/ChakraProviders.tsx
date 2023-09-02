@@ -5,6 +5,7 @@ import { ChakraProvider } from '@chakra-ui/react'
 import { checkboxAnatomy } from '@chakra-ui/anatomy'
 import { baseStyle } from '@chakra-ui/avatar/dist/avatar'
 import { h } from '@chakra-ui/toast/dist/toast.types-f226a101'
+import { size } from 'lodash'
 
 const FRAMES_LIST = {
   fontSize: '0.8em',
@@ -34,7 +35,24 @@ const LINK_FRAME = {
   alignItems: 'center',
 }
 
+const CONTROL_PANEL_ITEM = {
+  display: 'flex',
+  flexDirection: 'row',
+  px: 2,
+  py: 1,
+  borderWidth: 1,
+  borderColor: 'blackAlpha.50'
+}
+
 const LAYER_STYLES = {
+  'control-panel-item':
+    CONTROL_PANEL_ITEM
+  ,
+  'control-panel-item-hover': {
+    ...CONTROL_PANEL_ITEM,
+    borderColor: 'accent',
+    backgroundColor: 'blackAlpha.50'
+  },
   'frame-placeholder-text': {
     px: 2,
     py: 2,
@@ -67,7 +85,8 @@ const LAYER_STYLES = {
     px: 3,
     Button: {
       textTransform: 'none',
-      fontSize: '0.8em',
+      fontSize: '10pt',
+      backgroundColor: 'transparent',
       _hover: {
         fontWeight: 600,
       }
@@ -157,7 +176,7 @@ const LAYER_STYLES = {
     flexWrap: 'nowrap',
     alignItems: 'center',
     justifyContent: 'center',
-    alignContent:'center',
+    alignContent: 'center',
     borderRadius: '50%',
     display: 'flex',
   },
@@ -223,7 +242,7 @@ const LAYER_STYLES = {
     py: [1, 1, 2],
     backgroundColor: 'white',
     _hover: {
-      backgroundColor: 'light-accent',
+      backgroundColor: 'accent-lt',
       fontWeight: 800
     }
   }
@@ -231,10 +250,10 @@ const LAYER_STYLES = {
 
 const COLORS = {
   accent: 'hsl(30,100%,50%)',
-  'dark-accent': 'hsl(30,100%,33%)',
-  'x-dark-accent': 'hsl(30,50%,25%)',
-  'light-accent': 'hsl(30,100%,75%)',
-  'x-light-accent': 'hsl(30,100%,85%)',
+  'accent-dk': 'hsl(30,100%,33%)',
+  'x-accent-dk': 'hsl(30,50%,25%)',
+  'accent-lt': 'hsl(30,100%,75%)',
+  'accent-xl': 'hsl(30,100%,85%)',
   'hover-row': 'hsl(60,100%,85%)',
 
   'frame-view-hover-border': 'hsla(30,100%,50%,0.5)',
@@ -261,6 +280,13 @@ const COLORS = {
 };
 
 const TEXT_STYLES = {
+  'control-panel-label': {
+    fontSize: 'xs'
+  },
+  'footer-label': {
+    fontSize: '10pt',
+    size: "xs"
+  },
   'popup-item': {
     fontSize: '0.8em',
     noOfLines: 1,
@@ -388,11 +414,11 @@ const BUTTONS = {
   },
   submit: {
     borderWidth: '1px',
-    borderColor: 'light-accent',
+    borderColor: 'accent-lt',
     backgroundColor: 'white',
     _hover: {
-      color: 'x-dark-accent',
-      backgroundColor: 'x-light-accent'
+      color: 'x-accent-dk',
+      backgroundColor: 'accent-xl'
     }
   },
   'frame-list-button': {

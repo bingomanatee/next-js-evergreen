@@ -24,7 +24,9 @@ export default function MoveFrameView() {
   useEffect(() => {
     if (planEditorState && state) {
       const sub = state.do.init(planEditorState);
+      window.addEventListener('mousedown', blockManager.do.finish);
       return () => {
+        window.removeEventListener('mousedown', blockManager.do.finish);
         sub?.unsubscribe();
       }
     }

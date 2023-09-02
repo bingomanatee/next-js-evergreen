@@ -27,16 +27,11 @@ const ControlBarState = (props, planEditorState) => {
     },
 
     actions: {
-      async addFrame(state: leafType) {
+      async addFrame(state: leafType, type: string) {
         const { newFrame } = state.value;
         const planId = dataManager.planStream.value.plan?.id;
         if (!planId) {
           return messageManager.notify('New Frame', 'Cannot identify plan', 'error');
-        }
-        const type = newFrame.type || FrameTypes.unknown;
-
-        if (type === FrameTypes.unknown) {
-          return messageManager.notify('New Frame', 'Select a frame type first', 'error');
         }
 
         const id = v4();
@@ -56,7 +51,7 @@ const ControlBarState = (props, planEditorState) => {
           }
           await db.frames.incrementalUpsert(newFrame);
           messageManager.notify('New Frame', `Created new ${type} ${id} `)
-          messageManager.editFrame(id);
+          blockManager.do.block(BlockMode.EDIT_FRAME, {frameId: id})
         })
       },
       init(state: leafType) {
@@ -92,40 +87,19 @@ const ControlBarState = (props, planEditorState) => {
         window.removeEventListener('mousedown', state.do.endPan);
       },
       pan(state: leafType, e) {
-        swallowEvent(e);
-
-        if (blockManager.value.locked) {
+        if (blockManager.value.type === BlockMode.PANNING) {
+          state.do.endPan(e);
           return;
         }
+        swallowEvent(e);
+
         if (blockManager.$.isBlocked()) {
-          return blockManager.do.finish();
+          return;
         }
 
         window.removeEventListener('mousedown', state.do.endPan);
         window.document.addEventListener('mousedown', state.do.endPan, { once: true });
 
-        keyManager.init();
-
-        const [id, subject] = blockManager.do.block(BlockMode.PANNING)
-          subject.subscribe({
-            error(err) {
-              keySub?.unsubscribe();
-              console.error('error in blockSub:', err);
-            },
-            complete() {
-              keySub?.unsubscribe();
-              state.do.set_panning(false);
-              window.removeEventListener('mousedown', state.do.endPan);
-            }
-          });
-
-        // ---- listen for Esc key
-        let keySub = keyManager.stream.subscribe((keys) => {
-          if (keys.has('Escape')) {
-            blockManager.do.finish(id);
-            keySub.unsubscribe();
-          }
-        });
         state.do.set_panning(true);
       }
     },

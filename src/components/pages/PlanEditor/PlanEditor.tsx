@@ -78,11 +78,11 @@ function PlanEditor(props: PlanEditorProps) {
         </UnZoom>
         <LinkView under />
         <FramesList frames={frames}/>
-        <BlockerSwitch inline />
+        <BlockerSwitch role="inline-block-switch" inline />
       </FrameAnchorView>
       <ControlBar />
     </PlanEditorStateCtx.Provider>
-    <BlockerSwitch inline={false} />
+    <BlockerSwitch role="non-inline-block-switch" />
     <NewFrame box={newFrame}/>
     <HelpPrompt/>
     <KeyFeedback keys={keys}/>

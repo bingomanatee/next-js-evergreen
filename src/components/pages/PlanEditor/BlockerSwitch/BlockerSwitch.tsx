@@ -6,20 +6,23 @@ import blockManager, { BlockManagerValue, INITIAL } from '~/lib/managers/blockMa
 import dynamic from 'next/dynamic'
 import { BlockMode } from '~/types'
 import keyManager from '~/lib/managers/keyManager'
+import { Spinner } from '@chakra-ui/react'
+import { Suspense } from 'react';
 
-type InViewBlockersProps = { inline: boolean }
+type InViewBlockersProps = { inline?: boolean, role: string }
 const views = new Map();
 
 const INLINE_VIEWS = [
   BlockMode.MOVING_FRAME,
-  BlockMode.LINKING_FRAME
+  BlockMode.LINKING_FRAME,
 ]
 
 const NON_INLINE_VIEWS = [
   BlockMode.LIST_FRAMES,
-  BlockMode.EDIT_FRAME
+  BlockMode.EDIT_FRAME,
 ]
-export default function BlockerSwitch(props: InViewBlockersProps) {
+
+export default function BlockerSwitch({ role, inline = false }: InViewBlockersProps) {
   const [blocker, setBlocker] = useState<BlockManagerValue>({ ...INITIAL });
 
   useEffect(() => {
@@ -32,55 +35,26 @@ export default function BlockerSwitch(props: InViewBlockersProps) {
 
   const { type, id } = blocker;
 
+
   const validType = useMemo(() => {
       if (!type) {
         return null;
       }
-      //@ts-ignore
-      if (props.inline && !(INLINE_VIEWS.includes(type))
-        || !props.inline && !(NON_INLINE_VIEWS.includes(type))) {
+
+      if ((!inline) && !NON_INLINE_VIEWS.includes(type)) {
+        return null;
+      }
+      if (inline && !INLINE_VIEWS.includes(type)) {
         return null;
       }
       return type;
     },
-    [type, props.inline]);
+    [type, inline, role]);
 
-  if (validType && !views.has(validType)) {
-    switch (validType) {
-      case BlockMode.MOVING_FRAME:
-        views.set(BlockMode.MOVING_FRAME,
-          dynamic(() => import ('../MoveFrameView/MoveFrameView'), {
-            suspense: true
-          }))
-        break;
 
-      case BlockMode.EDIT_FRAME:
-        views.set(BlockMode.EDIT_FRAME,
-          dynamic(() => import ('../FrameDetail/FrameDetail'), {
-            suspense: true
-          }))
-        break;
-
-      case BlockMode.LIST_FRAMES:
-        views.set(BlockMode.EDIT_FRAME,
-          dynamic(() => import ('../FrameListPanel/FrameListPanel'), {
-            suspense: true
-          }))
-        break;
-
-      case BlockMode.LINKING_FRAME:
-        views.set(BlockMode.LINKING_FRAME,
-          dynamic(() => import ('../LinkFrameView/LinkFrameView'), {
-            suspense: true
-          }))
-        break;
-    }
-  }
-
-  useEffect(()=> {
+  useEffect(() => {
     keyManager.init();
     let keySub = keyManager.stream.subscribe((keys) => {
-      console.log('keys:', keys, 'validType:', validType);
       if (keys.has('Escape') && validType) {
         blockManager.do.finish();
       }
@@ -90,11 +64,53 @@ export default function BlockerSwitch(props: InViewBlockersProps) {
     };
   }, [validType]);
 
+  if (validType && !views.has(validType)) {
+    switch (validType) {
+      case BlockMode.MOVING_FRAME:
+        views.set(validType,
+          dynamic(() => import ('../MoveFrameView/MoveFrameView'), {
+            suspense: true
+          }))
+        break;
+
+      case BlockMode.EDIT_FRAME:
+        views.set(validType,
+          dynamic(() => import ('../FrameDetail/FrameDetail'), {
+            suspense: true
+          }))
+        break;
+
+      case BlockMode.LIST_FRAMES:
+        views.set(validType,
+          dynamic(() => import ('../FrameListPanel/FrameListPanel'), {
+            suspense: true
+          }))
+        break;
+
+      case BlockMode.LINKING_FRAME:
+        views.set(validType,
+          dynamic(() => import ('../LinkFrameView/LinkFrameView'), {
+            suspense: true
+          }))
+        break;
+
+      case null:
+        break;
+
+      default:
+        throw new Error('cannot load ' + validType)
+    }
+  }
+
   let ViewComponent = views.get(validType);
 
   if (!ViewComponent) {
     return null;
   }
 
-  return <ViewComponent blockId={id}/>;
+  return (
+    <Suspense fallback={<Spinner/>}>
+      <ViewComponent blockId={id}/>
+    </Suspense>
+  )
 }

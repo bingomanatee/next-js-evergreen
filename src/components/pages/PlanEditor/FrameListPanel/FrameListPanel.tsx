@@ -34,6 +34,7 @@ import {
 import useForestInput from '~/lib/useForestInput'
 import { Frame } from '~/types'
 import FrameIcon from '~/components/icons/FrameIcon'
+import blockManager from '~/lib/managers/blockManager'
 
 function Search(props: {
   state: leafI
@@ -232,7 +233,7 @@ export default function FrameListPanel(props: FrameListProps) {
         </DrawerBody>
 
         <DrawerFooter>
-          <DialogButton onClick={state.do.close} colorScheme="blue">Done</DialogButton>
+          <DialogButton onClick={blockManager.do.finish} colorScheme="blue">Done</DialogButton>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

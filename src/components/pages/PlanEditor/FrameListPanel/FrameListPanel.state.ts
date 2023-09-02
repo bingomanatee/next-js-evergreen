@@ -11,6 +11,7 @@ import messageManager from '~/lib/managers/messageManager'
 // component
 import { FrameListProps } from './types'
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
+import blockManager from '~/lib/managers/blockManager'
 
 export type FrameListStateValue = {
   frames: Frame[],
@@ -28,7 +29,8 @@ type leafType = typedLeaf<FrameListStateValue>;
 export const MAX_FRAMES = 30;
 
 const FrameListPanelState = (props: FrameListProps) => {
-  const value: { id?: string } = props.value.value;
+  const {data} = blockManager.value;
+  const id = data?.frameId || '';
 
   const $value: FrameListStateValue = {
     overId: null,
@@ -36,7 +38,7 @@ const FrameListPanelState = (props: FrameListProps) => {
     links: [],
     linkTarget: null,
     mousePos: new Vector2(),
-    activeId: value.id ?? '',
+    activeId: id,
     clickedId: null,
     offset: 0,
     search: '',

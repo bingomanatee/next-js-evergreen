@@ -3,8 +3,6 @@ import dataManager from '~/lib/managers/dataManager'
 import { Vector2 } from 'three'
 import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
 import { DimensionValue, Direction, dirToString, Frame, isDirection, X_DIR, Y_DIR } from '~/types'
-import blockManager from '~/lib/managers/blockManager'
-import { string } from 'zod'
 
 export const DIMENSION_ACTIONS = {
   async updateId(state: leafI, id: string) {
@@ -19,34 +17,6 @@ export const DIMENSION_ACTIONS = {
     state.do.set_bottom(frame.top + frame.height);
     state.do.set_type(frame.type);
     state.do.set_loaded(true);
-  },
-
-  /**
-   * save the frame with the dimensions' information
-   * @param state
-   */
-  async updateFrame(state: leafI) {
-    if (!state.value.id) {
-      return;
-    }
-    const update = {
-      left: state.$.left(),
-      top: state.$.top(),
-      width: state.$.width(),
-      height: state.$.height()
-    }
-    const frame = await state.$.frame();
-    try {
-      await frame?.incrementalPatch(update);
-    } catch (err) {
-      console.error('cannot incremental update ', update, 'frame', frame, err);
-    }
-
-    blockManager.do.finish();
-    // may not be necessary
-    state.do.updateId(null);
-    state.do.set_loaded(false);
-    state.do.set_deltas(new Map());
   },
 
   async readFrame(state: leafI, id: string | null) {

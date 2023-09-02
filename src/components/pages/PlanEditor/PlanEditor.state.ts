@@ -300,14 +300,24 @@ const PlanEditorState = (id, planContainerRef) => {
         return sub;
       },
 
-      zoomOut(state: leafType) {
+      zoomOut(state: leafType, e) {
+        if (e) {
+          swallowEvent(e);
+        }
         const { zoom } = state.value;
         const nextZoom = Math.floor(zoom / 10) + 1;
-        state.do.set_zoom(nextZoom * 10);
+        console.log('zooming out from ', zoom, 'to', nextZoom * 10)
+        if (nextZoom < 20) {
+          state.do.set_zoom(nextZoom * 10);
+        }
       },
-      zoomIn(state: leafType) {
+      zoomIn(state: leafType, e) {
+        if (e) {
+          swallowEvent(e);
+        }
         const { zoom } = state.value;
         const nextZoom = Math.floor(zoom / 10) - 1;
+        console.log('zooming in from ', zoom, 'to', nextZoom * 10)
         if (nextZoom >= 1) {
           state.do.set_zoom(nextZoom * 10);
         }

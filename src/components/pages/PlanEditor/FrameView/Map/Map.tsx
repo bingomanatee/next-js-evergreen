@@ -49,19 +49,7 @@ export default function MapView(props: MapProps) {
 
   if (!(mapData.lng && mapData.lat)) return null;
   return (
-      <div style={{ width: px(size.x), height: px(size.y) }}>
-        <Map
-          style="mapbox://styles/mapbox/streets-v9"
-          onStyleLoad={(map) => {
-            console.log('map object', map);
-            mapRef.current = map;
-          }}
-          center={[mapData.lng, mapData.lat]}
-          zoom={[mapData.zoom]}
-          containerStyle={{
-            width: '100%',
-            height: '100%'
-          }}/>
+      <div style={{ width: px(size.x), height: px(size.y) }} ref={state.do.setRef}>
       </div>
   )
 }

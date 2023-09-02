@@ -14,7 +14,7 @@ import { string } from 'zod'
 
 export type BlockManagerValue = {
   id: string,
-  type: string,
+  type: any,
   data: any,
   locked: boolean;
 }
@@ -62,6 +62,9 @@ const blockManager = new Forest({
       if (locked) return;
 
       if (id) {
+        console.error('attempt to block while block is in place:',
+          type, data, 'current state', state.value
+          )
         throw new Error('already blocking');
       }
       if (!type) {

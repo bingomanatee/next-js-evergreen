@@ -15,14 +15,39 @@ const MoveFrameViewState = (props, planEditorState) => {
   return {
     $value,
     actions: {
+      ... DIMENSION_ACTIONS,
+
       init(state: leafType) {
         // load in the current frame every time the id and mode changes
         const { type, data } = blockManager.value;
         //@TODO: validate move state?
         state.do.updateId(data.frameId);
       },
+      /**
+       * save the frame with the dimensions' information
+       * @param state
+       */
+      async updateFrame(state: leafI) {
+        if (!state.value.id) {
+          return;
+        }
+        const update = {
+          left: state.$.left(),
+          top: state.$.top(),
+          width: state.$.width(),
+          height: state.$.height()
+        }
+        const frame = await state.$.frame();
+        try {
+          await frame?.incrementalPatch(update);
+        } catch (err) {
+          console.error('cannot incremental update ', update, 'frame', frame, err);
+        }
+        
+        state.do.set_deltas(new Map());
+        state.do.updateId(frame.id);
 
-      ... DIMENSION_ACTIONS
+      },
     },
     selectors: {
       ...DIMENSION_SELECTORS

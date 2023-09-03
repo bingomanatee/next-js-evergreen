@@ -10,7 +10,7 @@ import { Box2, Vector2 } from 'three'
 import { v4 } from 'uuid';
 import { asJson } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
-import { anonUserId } from '~/constants'
+import { anonUserId, HOUR } from '~/constants'
 import { Frame, Link, Plan, Setting } from '~/types'
 import { sortBy } from 'lodash';
 import frameMover, { ShufflePos } from '~/lib/utils/frameMover'
@@ -44,11 +44,11 @@ type ImageData = {
 }
 
 type DataManager = {
-  userOwnsPlan(id): Promise<boolean>;
+  addCollection(name: string, colls: Record<string, any>): Promise<any>;
   addCollections(colls: Record<string, any>): Promise<void>;
+  userOwnsPlan(id): Promise<boolean>;
   planStream: BehaviorSubject<DataStreamItem>;
   initPlan(id: string): Promise<void>;
-  addCollection(name: string, colls: Record<string, any>): Promise<any>;
   anonUserId: any;
   addFrame(planId: string, bounds: Box2): Promise<void>;
   _productSub?: Subscription;
@@ -69,6 +69,7 @@ type DataManager = {
 type Action = (db: RxDatabase<any>) => Promise<any> | Promise<void>
 
 const framesMap: Map<string, Frame> = new Map();
+const settingsMap: Map<string, string | number> = new Map();
 const frames: Frame[] = [];
 const links: Link[] = [];
 
@@ -78,11 +79,9 @@ const planStream: BehaviorSubject<DataStreamItem> = new BehaviorSubject(
     planId: null,
     framesMap,
     frames: frames,
-    links: links
-  })
-
-const ONE_HOUR = 60 * 60 * 1000;
-
+    links: links,
+    settingsMap
+  });
 
 const dataManager: DataManager = {
   fetchImageData(id): Promise<ImageData> {
@@ -122,15 +121,20 @@ const dataManager: DataManager = {
     }
   },
   async getImageUrl(id: string, noSave = false) {
+    const cutoff =  HOUR + Date.now();
     try {
       const frame = await dataManager.fetchFrame(id);
       try {
         const currentData = JSON.parse(frame.value);
         const { url, time, error } = currentData;
-        if (url && time && (!error) && time + ONE_HOUR < Date.now()) {
+        if (url && time && (!error) && (time > cutoff)) {
+          console.log('using current image data');
           return currentData
+        } else {
+          console.log('time', time , '<', cutoff, 'reloading', currentData);
         }
       } catch (err) {
+        console.error('cannot parse', frame.value, err.message);
         // -- ignore error -- proceed
       }
 

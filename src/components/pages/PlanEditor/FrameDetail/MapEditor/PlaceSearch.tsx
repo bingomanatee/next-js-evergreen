@@ -25,8 +25,8 @@ export function PlaceSearch(props: { state: leafI }) {
 
   return (
     <VStack spacing={[1, 2, 2]}>
-      <InputGroup>
-        <InputLeftAddon size="sm" pointerEvents="none">
+      <InputGroup size="sm">
+        <InputLeftAddon layerStyle="input-label" pointerEvents="none">
           Search
         </InputLeftAddon>
         <Input value={placeSearch} onChange={setPlaceSearch}/>

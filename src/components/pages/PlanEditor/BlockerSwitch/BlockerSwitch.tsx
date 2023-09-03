@@ -20,6 +20,7 @@ const INLINE_VIEWS = [
 const NON_INLINE_VIEWS = [
   BlockMode.LIST_FRAMES,
   BlockMode.EDIT_FRAME,
+  BlockMode.SETTINGS,
 ]
 
 export default function BlockerSwitch({ role, inline = false }: InViewBlockersProps) {
@@ -49,8 +50,7 @@ export default function BlockerSwitch({ role, inline = false }: InViewBlockersPr
       }
       return type;
     },
-    [type, inline, role]);
-
+    [type, inline]);
 
   useEffect(() => {
     keyManager.init();
@@ -69,6 +69,13 @@ export default function BlockerSwitch({ role, inline = false }: InViewBlockersPr
       case BlockMode.MOVING_FRAME:
         views.set(validType,
           dynamic(() => import ('../MoveFrameView/MoveFrameView'), {
+            suspense: true
+          }))
+        break;
+
+      case BlockMode.SETTINGS:
+        views.set(validType,
+          dynamic(() => import ('../Plan/PlanSettings'), {
             suspense: true
           }))
         break;

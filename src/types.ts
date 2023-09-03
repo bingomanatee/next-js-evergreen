@@ -144,3 +144,9 @@ export enum BlockMode {
   LIST_FRAMES = 'list-frames',
   SETTINGS = 'settings'
 }
+
+export enum ProjectSettings {
+  GRID_SIZE="grid-size",
+  GRID_SNAP="grid-snap",
+  GRID_SHOW="grid-show",
+}

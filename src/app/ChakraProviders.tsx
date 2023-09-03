@@ -48,6 +48,21 @@ const LAYER_STYLES = {
   'control-panel-item':
     CONTROL_PANEL_ITEM
   ,
+  'input-group-item-wrapper': {
+    w: '100%',
+    borderWidth: 1,
+    borderRightColor: 'blackAlpha.200',
+    borderTopColor: 'blackAlpha.200',
+    borderBottomColor: 'blackAlpha.200',
+    borderLeftColor: 'transparent',
+    alignContent: 'center'
+  },
+  'input-label': {
+    minWidth: 36,
+    textAlign: 'right',
+    justifyContent: 'flex-end',
+    backgroundColor: 'blackAlpha.50',
+  },
   'control-panel-item-hover': {
     ...CONTROL_PANEL_ITEM,
     borderColor: 'accent',

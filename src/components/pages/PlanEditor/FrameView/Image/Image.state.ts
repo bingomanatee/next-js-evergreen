@@ -1,7 +1,7 @@
 import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import axios from 'axios';
 import { Vector2 } from 'three'
 import dataManager from '~/lib/managers/dataManager'
+import { HOUR } from '~/constants'
 
 export type ImageStateValue = {
   url: string,
@@ -14,7 +14,6 @@ export type ImageStateValue = {
 
 type leafType = typedLeaf<ImageStateValue>;
 
-const HOUR = 60 * 60 * 1000;
 const ImageState = (props) => {
   const { frame } = props;
   const $value: ImageStateValue = {
@@ -35,10 +34,15 @@ const ImageState = (props) => {
         if (!value) {
           dataManager.getImageUrl(frame.id);
         } else {
+          const cutoff = Date.now() + HOUR;
           try {
-            state.value = JSON.parse(value);
-            if ('time' in state.value && state.value.time < Date.now() - HOUR) {
+            const info = JSON.parse(value);
+            state.value = info;
+            if ('time' in state.value && state.value.time < cutoff) {
+              console.log('image info', info , 'cutoff', cutoff, 'reloading');
               dataManager.getImageUrl(frame.id);
+            } else {
+
             }
           } catch (err) {
             state.do.setError(err.message)

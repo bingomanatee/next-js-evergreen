@@ -98,20 +98,17 @@ export default function FrameDetail(props: FrameDetailProps) {
                   <HStack gap={4} overflow="visible" align="start">
                     <VStack flexBasis="50%">
                       <InputGroup size="sm">
-                        <InputLeftAddon>
-                          <Text textStyle="label">Left</Text>
+                        <InputLeftAddon layerStyle="input-label">                          <Text textStyle="label">Left</Text>
                         </InputLeftAddon>
                         <Input value={left} onChange={setLeft} textAlign="right" type="number"/>
                       </InputGroup>
                       <InputGroup size="sm">
-                        <InputLeftAddon>
-                          <Text textStyle="label">Top</Text>
+                        <InputLeftAddon layerStyle="input-label">                          <Text textStyle="label">Top</Text>
                         </InputLeftAddon>
                         <Input value={top} onChange={setTop} textAlign="right" ype="number"/>
                       </InputGroup>
                       <InputGroup size="sm">
-                        <InputLeftAddon>
-                          <Text textStyle="label">Order</Text>
+                        <InputLeftAddon layerStyle="input-label">                          <Text textStyle="label">Order</Text>
                         </InputLeftAddon>
                         <Input readOnly value={order} type="number" onChange={setOrder} textAlign="right"
                                ype="number"/>
@@ -119,14 +116,12 @@ export default function FrameDetail(props: FrameDetailProps) {
                     </VStack>
                     <VStack flexBasis="50%">
                       <InputGroup size="sm">
-                        <InputLeftAddon>
-                          <Text textStyle="label">Width</Text>
+                        <InputLeftAddon layerStyle="input-label">                          <Text textStyle="label">Width</Text>
                         </InputLeftAddon>
                         <Input value={width} onChange={setWidth} textAlign="right" type="number" min={50}/>
                       </InputGroup>
                       <InputGroup size="sm">
-                        <InputLeftAddon>
-                          <Text textStyle="label">Height</Text>
+                        <InputLeftAddon layerStyle="input-label">                          <Text textStyle="label">Height</Text>
                         </InputLeftAddon>
                         <Input value={height} size="sm" onChange={setHeight} textAlign="right" type="number"
                                min={50}/>

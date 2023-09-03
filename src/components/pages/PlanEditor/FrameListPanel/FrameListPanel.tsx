@@ -44,7 +44,7 @@ function Search(props: {
 
   return <HStack>
     <InputGroup size="sm">
-      <InputLeftAddon>Search</InputLeftAddon>
+      <InputLeftAddon layerStyle="input-label">Search</InputLeftAddon>
       <Input variant="outline" fontSize="0.8em" value={search} onChange={setSearch} placeholder="search"/>
       <InputRightAddon>
         <CloseButton size="sm" boxSize="10pt" onClick={() => state.do.clearSearch()}/>
@@ -99,7 +99,7 @@ export default function FrameListPanel(props: FrameListProps) {
       size={['md', 'md', 'lg']}
       onClose={blockManager.do.finish}
     >
-      <DrawerOverlay/>z
+      <DrawerOverlay/>
       <DrawerContent zIndex={1000}>
         <DrawerCloseButton />
         <DrawerHeader>Frames</DrawerHeader>

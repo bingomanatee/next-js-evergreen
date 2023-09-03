@@ -9,3 +9,4 @@ export const frameTypeNames = [
   FrameTypes.image,
   FrameTypes.map
 ]
+export const HOUR = 60 * 60 * 1000;

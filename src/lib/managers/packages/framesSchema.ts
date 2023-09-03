@@ -80,9 +80,10 @@ export default function framesSchema(dataManager) {
         },
       }
     },
-    settings: { migrationStrategies: {
-        1:  migrationNoOp,
-        2:  migrationNoOp
+    settings: {
+      migrationStrategies: {
+        1: migrationNoOp,
+        2: migrationNoOp
       },
       schema: {
         version: 2,
@@ -96,6 +97,55 @@ export default function framesSchema(dataManager) {
           string: STRING,
           number: NUMBER,
           is_number: BOOLEAN,
+        }
+      },
+      statics: {
+        async assertSetting(planId: string, name: string, value:
+          string | number, isNumber: boolean = true
+        ) {
+          const existing = await this.findOne({
+            selector: {
+              name,
+              plan_id: planId
+            }
+          }).exec();
+
+          console.log('existing:', existing);
+          if (isNumber) {
+            if (existing) {
+              existing.incrementalPatch({
+                is_number: true,
+                string: '',
+                number: value
+              })
+            } else {
+              this.incrementalUpsert({
+                id: v4(),
+                plan_id: planId,
+                name,
+                is_number: true,
+                number: value,
+                string: ''
+              })
+            }
+          } else {
+            if (existing) {
+              existing.incrementalPatch({
+                is_number: false,
+                number: 0,
+                string: value
+              })
+            } else {
+              this.incrementalUpsert({
+                id: v4(),
+                plan_id: planId,
+                name,
+                is_number: false,
+                number: 0,
+                string: value
+              })
+            }
+          }
         }
       }
     },
@@ -184,7 +234,7 @@ export default function framesSchema(dataManager) {
           const map = await this.findByIds([id]).exec();
           return map.get(id);
         },
-      async nextFrameOrder(planId): number {
+        async nextFrameOrder(planId): number {
           // returns a number 1 larger than all the current orders of the frames in the given plan.
           try {
             const frames = await this.find()
@@ -211,7 +261,7 @@ export default function framesSchema(dataManager) {
           start_frame: ID_PROP,
           end_frame: ID_PROP,
           start_at: STRING,
-          end_at: STRING   ,
+          end_at: STRING,
           start_label: STRING,
           end_label: STRING,
           label: STRING,

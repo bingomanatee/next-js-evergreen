@@ -5,6 +5,7 @@ import { userManager } from '~/lib/managers/userManager'
 import { Direction, dirToString, Frame, LFSummary, X_DIR, Y_DIR } from '~/types'
 import { Vector2 } from 'three'
 import { vectorToStyle } from '~/lib/utils/px'
+import { string } from 'zod'
 
 function projectIdToPanId(oldDoc) {
   if ('project_id' in oldDoc) {

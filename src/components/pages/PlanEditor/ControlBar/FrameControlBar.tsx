@@ -9,6 +9,7 @@ import { CloseButton, HStack, IconButton, Text } from '@chakra-ui/react'
 import Image from 'next/image'
 import dataManager from '~/lib/managers/dataManager'
 import { ShufflePos } from '~/lib/utils/frameMover'
+import ControlBarItem from '~/components/pages/PlanEditor/ControlBar/ControlBarItem'
 
 const MOVE_ICON_SIZE = 18;
 
@@ -46,53 +47,64 @@ export function FrameControlBar({ frame }) {
         Frame&nbsp;
         <b>{frame.name || frame.id}</b>
       </Text>
-      <CloseButton
-        mr={4}
-        color="red"
-        size="xs"
+      <ControlBarItem
         onClick={frameListHoverManager.do.clearClicked}
+        iconItem={<CloseButton color="red" size="xs"/>}
+        label="deselect frame"
       />
-      <IconButton
-        variant="pagination-button"
+      <ControlBarItem
         onClick={editFrame}
-        aria-label={"edit-icon"}
-        icon={<Image alt="edit-icon" src="/img/icons/frame-edit.svg" width="20" height="20"/>}
+        icon="/img/icons/frame-edit.svg"
+        label="edit Frame"
       />
-      <IconButton
-        onClick={() => dataManager.moveFrame(clicked, ShufflePos.top0)}
-        variant="pagination-button"
-        icon={<Image src="/img/icons/to-top.svg"
-                     width={MOVE_ICON_SIZE}
-                     height={MOVE_ICON_SIZE}
-                     alt="move-top-icon"/>}
-        size="sm"
-        aria-label="move-frame-to-top"/>
-      <IconButton
-        variant="pagination-button"
-        onClick={() => dataManager.moveFrame(clicked, ShufflePos.before2)}
-        icon={<Image src="/img/icons/to-up.svg"
-                     width={MOVE_ICON_SIZE}
-                     height={MOVE_ICON_SIZE}
-                     alt="move-up-icon"/>}
-        size="sm"
-        aria-label="move-frame-up"/>
-      <IconButton
-        variant="pagination-button"
-        onClick={() => dataManager.moveFrame(clicked, ShufflePos.after4)}
-        icon={<Image src="/img/icons/to-down.svg"
-                     width={MOVE_ICON_SIZE}
-                     height={MOVE_ICON_SIZE}
-                     alt="move-down-icon"/>}
-        size="sm" aria-label="move-frame-down"/>
-      <IconButton
-        variant="pagination-button"
-        onClick={() => dataManager.moveFrame(clicked, ShufflePos.bottom6)}
-        icon={<Image src="/img/icons/to-bottom.svg"
-                     width={MOVE_ICON_SIZE}
-                     height={MOVE_ICON_SIZE}
-                     alt="move-bottom-icon"/>}
-        size="sm"
-        aria-label="move-frame-back"/>
+      <ControlBarItem
+        icon="/img/icons/pagination.svg"
+        label="Reorder Frame"
+        height={30}
+        rightAlign
+      >
+        <HStack
+          px={3}
+          py={2}
+          backgroundColor="white"
+        >
+          <IconButton
+            onClick={() => dataManager.moveFrame(clicked, ShufflePos.top0)}
+            variant="pagination-button"
+            icon={<Image src="/img/icons/to-top.svg"
+                         width={MOVE_ICON_SIZE}
+                         height={MOVE_ICON_SIZE}
+                         alt="move-top-icon"/>}
+            size="sm"
+            aria-label="move-frame-to-top"/>
+          <IconButton
+            variant="pagination-button"
+            onClick={() => dataManager.moveFrame(clicked, ShufflePos.before2)}
+            icon={<Image src="/img/icons/to-up.svg"
+                         width={MOVE_ICON_SIZE}
+                         height={MOVE_ICON_SIZE}
+                         alt="move-up-icon"/>}
+            size="sm"
+            aria-label="move-frame-up"/>
+          <IconButton
+            variant="pagination-button"
+            onClick={() => dataManager.moveFrame(clicked, ShufflePos.after4)}
+            icon={<Image src="/img/icons/to-down.svg"
+                         width={MOVE_ICON_SIZE}
+                         height={MOVE_ICON_SIZE}
+                         alt="move-down-icon"/>}
+            size="sm" aria-label="move-frame-down"/>
+          <IconButton
+            variant="pagination-button"
+            onClick={() => dataManager.moveFrame(clicked, ShufflePos.bottom6)}
+            icon={<Image src="/img/icons/to-bottom.svg"
+                         width={MOVE_ICON_SIZE}
+                         height={MOVE_ICON_SIZE}
+                         alt="move-bottom-icon"/>}
+            size="sm"
+            aria-label="move-frame-back"/>
+        </HStack>
+      </ControlBarItem>
       <IconButton
         variant="pagination-button"
         onClick={move}

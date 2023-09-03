@@ -18,6 +18,14 @@ export type Frame = {
   value: string
 }
 
+export type Setting = {
+  name: string,
+  id: string,
+  string: string,
+  number: number,
+  is_number: boolean,
+}
+
 export type Plan = {
   id: string,
   user_id: string,
@@ -133,5 +141,6 @@ export enum BlockMode {
   LINKING_FRAME = 'linking-frame',
   EDIT_FRAME = 'edit-frame',
   PANNING = 'panning',
-  LIST_FRAMES = 'list-frames'
+  LIST_FRAMES = 'list-frames',
+  SETTINGS = 'settings'
 }

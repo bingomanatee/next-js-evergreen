@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-    <rect id="frame-link" x="0" y="-0" width="24" height="24" style="fill:none;"/>
+<svg width="100%" height="100%" viewBox="0 0 25 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;">
+    <rect id="frame-link" x="0.529" y="-0" width="24" height="24" style="fill:none;"/>
     <clipPath id="_clip1">
-        <rect id="frame-link1" x="0" y="-0" width="24" height="24"/>
+        <rect id="frame-link1" serif:id="frame-link" x="0.529" y="-0" width="24" height="24"/>
     </clipPath>
     <g clip-path="url(#_clip1)">
-        <path d="M10.75,5.04L8.852,5.668L13.25,18.96L15.148,18.332L10.75,5.04Z" style="fill-opacity:0.5;"/>
-        <rect x="1.75" y="-1.5" width="18.25" height="8.5" style="fill:#b17fbe;"/>
-        <path d="M21,-1.5L21,7C21,7.552 20.552,8 20,8L1.75,8C1.198,8 0.75,7.552 0.75,7L0.75,-1.5C0.75,-2.052 1.198,-2.5 1.75,-2.5L20,-2.5C20.552,-2.5 21,-2.052 21,-1.5ZM20,-1.5L1.75,-1.5L1.75,7L20,7L20,-1.5Z"/>
-        <rect x="3.875" y="17" width="18.125" height="8.5" style="fill:#b17fbe;"/>
-        <path d="M23,17L23,25.5C23,26.052 22.552,26.5 22,26.5L3.875,26.5C3.323,26.5 2.875,26.052 2.875,25.5L2.875,17C2.875,16.448 3.323,16 3.875,16L22,16C22.552,16 23,16.448 23,17ZM22,17L3.875,17L3.875,25.5L22,25.5L22,17Z"/>
+        <path d="M3.529,3L21.529,21" style="fill:none;stroke:#000;stroke-width:1.5px;"/>
+        <circle cx="3.529" cy="3" r="3" style="fill:#b17fbe;"/>
+        <circle cx="21.529" cy="21" r="3" style="fill:#b17fbe;"/>
     </g>
 </svg>

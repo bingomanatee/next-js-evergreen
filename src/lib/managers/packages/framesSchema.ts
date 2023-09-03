@@ -1,6 +1,6 @@
 import { v4 } from 'uuid'
 import { BehaviorSubject, switchMap } from 'rxjs'
-import { ID_PROP, STRING, STYLE, INT } from '~/lib/utils/schemaUtils'
+import { ID_PROP, STRING, STYLE, INT, NUMBER, BOOLEAN } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
 import { Direction, dirToString, Frame, LFSummary, X_DIR, Y_DIR } from '~/types'
 import { Vector2 } from 'three'
@@ -78,6 +78,25 @@ export default function framesSchema(dataManager) {
           }
           return oldDoc;
         },
+      }
+    },
+    settings: { migrationStrategies: {
+        1:  migrationNoOp,
+        2:  migrationNoOp
+      },
+      schema: {
+        version: 2,
+        primaryKey: 'id',
+        type: 'object',
+        required: ['id', 'name', 'plan_id'],
+        properties: {
+          id: ID_PROP,
+          plan_id: ID_PROP,
+          name: STRING,
+          string: STRING,
+          number: NUMBER,
+          is_number: BOOLEAN,
+        }
       }
     },
     frames: {

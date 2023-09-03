@@ -9,6 +9,13 @@ export const ID_PROP = {
 export const INT = {
   type: 'integer',
 }
+export const NUMBER = {
+  type: 'number',
+}
+export const BOOLEAN = {
+  type: 'boolean',
+  defaultValue: false
+}
 export const STRING = {
   type: 'string'
 }

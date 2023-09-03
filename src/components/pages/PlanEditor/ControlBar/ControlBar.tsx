@@ -71,6 +71,11 @@ export default function ControlBar(props: ControlBarProps) {
         <HStack spacing={2}>
 
           <ControlBarItem
+            onClick={() => blockManager.do.block(BlockMode.SETTINGS)}
+            icon={"/img/icons/settings.svg"}
+            label="Project Settings"/>
+
+          <ControlBarItem
             label="Add Frame"
             height={40}
             icon="/img/icons/add-frame.svg" alt="add-frame-icon">

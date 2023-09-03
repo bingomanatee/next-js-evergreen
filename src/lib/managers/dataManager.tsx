@@ -11,7 +11,7 @@ import { v4 } from 'uuid';
 import { asJson } from '~/lib/utils/schemaUtils'
 import { userManager } from '~/lib/managers/userManager'
 import { anonUserId } from '~/constants'
-import { Frame, Link, Plan } from '~/types'
+import { Frame, Link, Plan, Setting } from '~/types'
 import { sortBy } from 'lodash';
 import frameMover, { ShufflePos } from '~/lib/utils/frameMover'
 import axios from 'axios';
@@ -33,7 +33,8 @@ type DataStreamItem = {
   links: any[];
   framesMap: Map<string, Frame>
   planId: string | null,
-  plan: Plan | null
+  plan: Plan | null,
+  settingsMap: Map<string, string | number>
 }
 
 type ImageData = {
@@ -238,28 +239,37 @@ const dataManager: DataManager = {
       const frames = await db.frames.find().where('plan_id').eq(planId).$;
       const links = await db.links.find().where('plan_id').eq(planId).$;
       const plans = await db.plans.findByIds([planId]).$;
+      const settings = await db.settings.find().where('plan_id').eq(planId).$;
       dataManager._productSub = combineLatest([
         frames,
         links,
         plans,
-        planId
+        planId,
+        settings
       ])
         .pipe(
           // convert documents to POJO
-          map(([frames, links, plans]) => {
+          map(([frames, links, plans, _planId, settings]) => {
             const planJson = plans.get(planId)?.toJSON();
 
             const framesMap = new Map();
             frames.forEach((frame: Frame) => {
               framesMap.set(frame.id, frame);
             })
-
+            const settingsMap = new Map();
+            settings.forEach((setting: Setting) => {
+              settingsMap.set(
+                setting.name,
+                setting.is_number ? setting.number : setting.string
+              )
+            });
             const data: DataStreamItem = {
               plan: planJson,
               frames: asJson(frames as RxDocument[]),
               framesMap,
               links: asJson(links as RxDocument[]),
-              planId
+              planId,
+              settingsMap
             }
             return (data)
           }),

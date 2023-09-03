@@ -9,7 +9,7 @@ import {
   DrawerFooter,
   Text,
   InputLeftAddon,
-  InputRightAddon, DrawerOverlay, DrawerContent, Drawer
+  InputRightAddon, DrawerOverlay, DrawerContent, Drawer, DrawerCloseButton, DrawerHeader
 } from '@chakra-ui/react'
 import { useCallback, useContext, useRef } from 'react';
 
@@ -97,10 +97,12 @@ export default function FrameListPanel(props: FrameListProps) {
       autoFocus={false}
       placement='right'
       size={['md', 'md', 'lg']}
-      onClose={state.do.cancel}
+      onClose={blockManager.do.finish}
     >
-      <DrawerOverlay/>
+      <DrawerOverlay/>z
       <DrawerContent zIndex={1000}>
+        <DrawerCloseButton />
+        <DrawerHeader>Frames</DrawerHeader>
         <DrawerBody ref={bodyRef}>
           <LinkTarget state={state}/>
           <Search state={state}/>

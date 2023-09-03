@@ -74,7 +74,6 @@ const ImageEditorState = (props) => {
             }
           });
           state.do.set_loaded(false);
-          console.log('------------------- image data saved on server/local', data);
           return state.do.init();
         } catch (err) {
           console.log('error in upload:', err.message);
@@ -83,7 +82,6 @@ const ImageEditorState = (props) => {
       },
       async init(state: leafType) {
         const data = await dataManager.getImageUrl(id);
-        console.log('--------------- updating image data to ', data);
 
         const imageData = await dataManager.fetchImageData(id);
         frameState.do.set_value(JSON.stringify(imageData));

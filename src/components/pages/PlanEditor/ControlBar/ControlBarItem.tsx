@@ -13,7 +13,8 @@ export default function ControlBarItem(
     showOpen = false,
     label,
     children,
-    onClick
+    onClick,
+    rightAlign = false
   }) {
 
   const [isDown, isDownState] = useBoolean(false);
@@ -39,7 +40,9 @@ export default function ControlBarItem(
           height={20}
         />}
         {children ? (
-          <Box position="absolute" left={0} top={px(-height)} visibility={isHover ? 'visible' : 'hidden'}>
+          <Box position="absolute"
+               {...(rightAlign ? { right: 0 } : { left: 0 })}
+               top={px(-height)} visibility={isHover ? 'visible' : 'hidden'}>
             {children}
           </Box>
         ) : null}

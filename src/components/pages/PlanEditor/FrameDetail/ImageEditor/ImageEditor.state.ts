@@ -65,7 +65,7 @@ const ImageEditorState = (props) => {
         const { name, type, size } = file;
         console.log('uploading', file);
         try {
-          const { data } = await axios.post(IMAGE_API_URL, file, {
+          await axios.post(IMAGE_API_URL, file, {
             headers: {
               'Content-Type': type,
               'file-type': type,
@@ -81,16 +81,15 @@ const ImageEditorState = (props) => {
 
       },
       async init(state: leafType) {
-        const data = await dataManager.getImageUrl(id);
 
         const imageData = await dataManager.fetchImageData(id);
         frameState.do.set_value(JSON.stringify(imageData));
-        frameState.do.set_width(imageData.width);
-        frameState.do.set_height(imageData.height);
-
-        state.do.set_imageUrl(imageData.url);
-        if (data?.url) {
-          state.do.sizeImage();
+        if(imageData.is_valid) {
+          frameState.do.set_width(imageData.width);
+          frameState.do.set_height(imageData.height);
+          state.do.set_imageUrl(imageData.url);
+        } else {
+          state.do.set_imageUrl('')
         }
         state.do.set_loaded(true);
       }

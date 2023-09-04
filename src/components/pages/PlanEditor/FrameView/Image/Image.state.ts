@@ -4,6 +4,7 @@ import dataManager from '~/lib/managers/dataManager'
 import { HOUR } from '~/constants'
 
 export type ImageStateValue = {
+  frame_id: string,
   url: string,
   size: Vector2 | null,
   time: number,
@@ -17,11 +18,12 @@ type leafType = typedLeaf<ImageStateValue>;
 const ImageState = (props) => {
   const { frame } = props;
   const $value: ImageStateValue = {
+    frame_id: frame.id,
     url: '',
     size: null,
     time: 0,
     height: 0,
-    width: 0
+    width: 0,
   };
   return {
     name: "Image",
@@ -30,26 +32,24 @@ const ImageState = (props) => {
     selectors: {},
 
     actions: {
-      tryToDecodeFrame(state: leafType, value) {
-        if (!value) {
-          dataManager.getImageUrl(frame.id);
-        } else {
-          const cutoff = Date.now() + HOUR;
-          try {
-            const info = JSON.parse(value);
-            state.value = info;
-            if ('time' in state.value && state.value.time < cutoff) {
-              console.log('image info', info , 'cutoff', cutoff, 'reloading');
-              dataManager.getImageUrl(frame.id);
-            } else {
-
-            }
-          } catch (err) {
-            state.do.setError(err.message)
+      async load(state: leafType) {
+        let sub;
+        try {
+          const imageFile = await dataManager.do((db) => {
+            return db.frame_images
+              .fetchImageData(frame.id, frame.plan_id);
+          });
+          if (imageFile) {
+            state.value = imageFile.toJSON();
+            sub = imageFile.$((newIF) => {
+              state.value = newIF.toJSON();
+            });
           }
+        } catch(err) {
+          console.log('error getting image data:', err, 'for frame', frame.id);
         }
-      },
-      load(state: leafType) {
+
+        return () => sub?.unsubscribe();
       },
     }
   };

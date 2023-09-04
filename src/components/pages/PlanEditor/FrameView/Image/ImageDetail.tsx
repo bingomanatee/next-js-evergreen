@@ -4,14 +4,14 @@ import useForest from '~/lib/useForest';
 import { Frame } from '~/types'
 import Image from 'next/image';
 import { useEffect, useMemo } from 'react'
-import { VStack, Text} from '@chakra-ui/react'
+import { VStack, Text } from '@chakra-ui/react'
 
 type ImageProps = { frame: Frame }
 
-function NoImage({state: leafI}) {
+function NoImage({ state, frame }) {
   return <VStack w="100%" alignContent="center" py={12} px={4}>
-    <Image width={120} height={120} alt="no-image-icon" src="/img/icons/no-image.svg" />
-    <Text textStyle="info-sm">No image has been saved for this frame</Text>
+    <Image width={120} height={120} alt="no-image-icon" src="/img/icons/no-image.svg"/>
+    <Text textStyle="info-sm">No image has been saved for frame {frame.id}</Text>
   </VStack>
 }
 
@@ -20,13 +20,9 @@ export default function ImageDetail(props: ImageProps) {
   const { frame } = props;
   const [value, state] = useForest([stateFactory, props],
     (localState) => {
-     // localState.do.load();
+      localState.do.load();
     });
-  const {url, width, height} = value;
-
-  useEffect(() => {
-      state.do.tryToDecodeFrame(frame.value);
-  }, [state, frame.value])
+  const { url, width, height } = value;
 
   return (<div className={styles.container}>
     {
@@ -35,7 +31,7 @@ export default function ImageDetail(props: ImageProps) {
         src={url}
         width={width}
         height={height}
-      /> : <NoImage state={state} />
+      /> : <NoImage frame={frame} state={state}/>
     }
   </div>);
 }

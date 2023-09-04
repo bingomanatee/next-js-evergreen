@@ -2,7 +2,7 @@ import { leafI } from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
 import { Vector2 } from 'three'
 import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
-import { DimensionValue, Direction, dirToString, Frame, isDirection, X_DIR, Y_DIR } from '~/types'
+import { DimensionValue, Direction, dirToString, Frame, isDirection, ProjectSettings, X_DIR, Y_DIR } from '~/types'
 
 export const DIMENSION_ACTIONS = {
   async updateId(state: leafI, id: string) {
@@ -31,6 +31,16 @@ export const DIMENSION_ACTIONS = {
   }
 }
 
+function snap(value) {
+  const  settingsMap  = dataManager.planStream.value.settingsMap;
+  if (settingsMap.get(ProjectSettings.GRID_SNAP)
+    && settingsMap.has(ProjectSettings.GRID_SIZE)) {
+    const size = settingsMap.get(ProjectSettings.GRID_SIZE);
+    return Math.round(Math.round(value / size) * size);
+  }
+  return Math.round(value);
+}
+
 export const DIMENSION_SELECTORS = {
   async frame(state: leafI) {
     const { id } = state.value;
@@ -53,19 +63,19 @@ export const DIMENSION_SELECTORS = {
   },
   left(state: leafType) {
     const { left, deltas } = state.value;
-    return Math.round(left + (deltas?.get('left') || 0));
+    return snap(left + (deltas?.get('left') || 0));
   },
   right(state: leafType) {
     const { right, deltas } = state.value;
-    return Math.round(right + (deltas?.get('right') || 0));
+    return snap(right + (deltas?.get('right') || 0));
   },
   top(state: leafType) {
     const { top, deltas } = state.value;
-    return Math.round(top + (deltas?.get('top') || 0));
+    return snap(top + (deltas?.get('top') || 0));
   },
   bottom(state: leafType) {
     const { bottom, deltas } = state.value;
-    return Math.round(bottom + (deltas?.get('bottom') || 0));
+    return snap(bottom + (deltas?.get('bottom') || 0));
   },
   point(state: leafType, dir: Direction, offset ?: Vector2) {
     let x = 0;
@@ -125,11 +135,12 @@ const stdMap = new Map();
   .forEach((x) => {
     [Y_DIR.Y_DIR_B, Y_DIR.Y_DIR_M, Y_DIR.Y_DIR_T]
       .forEach((y) => {
-        const dir = {x, y};
+        const dir = { x, y };
         const str = dirToString(dir);
         stdMap.set(str, dir);
       })
   })
+
 export function stringToDir(name: string) {
   if (!stdMap.has(name)) {
     throw new Error('cannot find dir ' + name);

@@ -4,6 +4,7 @@ import { ID_PROP, STRING, STYLE, INT, NUMBER, BOOLEAN } from '~/lib/utils/schema
 import { userManager } from '~/lib/managers/userManager'
 import { dirToString, LFSummary } from '~/types'
 import axios from 'axios';
+import { HOUR } from '~/constants'
 
 function projectIdToPanId(oldDoc) {
   if ('project_id' in oldDoc) {
@@ -316,9 +317,11 @@ export default function framesSchema(dataManager) {
         1: migrationNoOp,
       },
       statics: {
-        async fetchImageData(frame_id, plan_id) {
+        async updateImageData(frame_id, plan_id) {
+          const { data } = await axios.get('/api/images/' + frame_id);
+          let url = data?.url || '';
 
-          const existing = await this.findOne({
+          let existing = await this.findOne({
             selector: {
               frame_id,
               plan_id
@@ -326,25 +329,50 @@ export default function framesSchema(dataManager) {
           }).exec();
 
           if (existing) {
-            return existing.validate();
+            existing = await existing.incrementalPatch({ url });
+            return existing?.validate();
+          }
+
+          return this.incrementalUpsert({
+            id: v4(),
+            url,
+            plan_id,
+            frame_id,
+            created: Date.now(),
+          })?.validate();
+        },
+
+        async fetchImageData(frame_id, plan_id) {
+          let frameImage = await this.findOne({
+            selector: {
+              frame_id,
+              plan_id
+            }
+          }).exec();
+
+          if (frameImage) {
+            if (frameImage.time < Date.now() - HOUR) {
+              console.log('fetched image data:', frameImage);
+              return frameImage;
+            } else {
+              return this.updateImageData(frame_id, plan_id);
+            }
           }
 
           const { data } = await axios.get('/api/images/' + frame_id);
           let url = data?.url || '';
+
           if (url) {
-            const frameImage = await this.incrementalUpsert({
+            frameImage = await this.incrementalUpsert({
               id: v4(),
               url,
               plan_id,
               frame_id,
               created: Date.now(),
-            })?.validate();
-
-            if (frameImage) {
-              return await frameImage.validate();
-            }
+            });
+            return await frameImage?.validate();
           } else {
-            return this.incrementalUpsert({
+            frameImage = this.incrementalUpsert({
               id: v4(),
               url: '',
               plan_id,
@@ -354,63 +382,50 @@ export default function framesSchema(dataManager) {
               is_valid: false,
             })
           }
+          return frameImage;
         }
       },
       methods: {
+        onImageError(err: string) {
+          return this.incrementalModify((doc) => {
+            doc.is_valid = false;
+            doc.error = err;
+            return doc;
+          });
+        },
         async validate() {
 
           if (this.error === NO_IMAGE_ERROR) {
             return this;
           }
           if (!this.url) {
-            try {
-              return await this.incrementalModify((doc) => {
-                doc.error = 'no url';
-                doc.is_valid = false;
-                return doc;
-              });
-            } catch (err) {
-              console.log('error marking frame_images as not valid')
-            }
-
+            return this.onImageError('no url');
           }
+
+          console.log('validating frame image', this);
           return new Promise((done, fail) => {
             let img = new Image();
             img.src = this.url;
-            let handled = false;
+
             img.onload = async () => {
-              if (handled) {
-                return;
-              }
-              handled = true;
-              try {
-                const update = await this.incrementalModify((doc) => {
-                  doc.width = img.width;
-                  doc.height = img.height;
-                  doc.is_valid = true;
-                  return doc;
-                });
+              console.log('image loaded for ', this.url);
+              const update = await this.incrementalModify((doc) => {
+                doc.width = img.width;
+                doc.height = img.height;
+                doc.is_valid = true;
+                return doc;
+              });
 
-                // @TODO: update frame dimensions
-                done(update);
-              } catch (err) {
-                console.error('error setting frame_images as valid from image', err, img);
-                fail(err)
-              }
-
+              // @TODO: update frame dimensions
+              done(update);
             }
             img.onerror = async (err) => {
-              try {
-                const update = await this.incrementalModify((doc) => {
-                  doc.is_valid = false;
-                  doc.error = `${(typeof err === 'string' ? err : err.type) || 'cannot load'}`;
-                  return doc;
-                });
-                done(update);
-              } catch (err) {
-                console.error('error setting frame_images as invalid from image ', err, img);
-                fail(err);
-              }
+
+              console.log('cannot load image ', this.url);
+              const update = await this.onImageError(
+                `${(typeof err === 'string' ? err : err.type) || 'cannot load'}`
+              );
+              done(update);
             };
           });
         }

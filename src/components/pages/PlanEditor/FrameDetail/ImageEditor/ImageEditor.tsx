@@ -1,33 +1,11 @@
-import { useMemo } from 'react';
 import styles from './ImageEditor.module.scss';
 import stateFactory from './ImageEditor.state.ts';
 import useForest from '~/lib/useForest';
-import { Box, HStack, Text } from '@chakra-ui/react'
+import { Box, Text } from '@chakra-ui/react'
 import Dropzone from 'react-dropzone';
-import Image from 'next/image';
-import { vectorToStyle } from '~/lib/utils/px'
-import { leafI } from '@wonderlandlabs/forest/lib/types'
+import { Preview } from '~/components/pages/PlanEditor/FrameDetail/ImageEditor/Preview'
 
 type ImageEditorProps = {}
-
-function Preview({state}: {state: leafI, frameState?: leafI}) {
-  const scaledSize = state.$.scaledSize();
-
-  const { size, imageUrl } = state.value;
-  return (
-    <>
-      <Text textStyle="info" textAlign="center">
-        Image scaled to fit; real size is {size.x}px wide, {size.y}px high
-      </Text>
-      <HStack layerStyle="image-preview">
-        <Box style={vectorToStyle(scaledSize)} overflow="hidden">
-          <Image alt="preview" src={imageUrl} width={scaledSize.x} height={scaledSize.y}
-          /></Box>
-      </HStack>
-      </>
-  )
-
-}
 
 export default function ImageEditor(props: ImageEditorProps) {
   const [value, state] = useForest([stateFactory, props],
@@ -35,10 +13,10 @@ export default function ImageEditor(props: ImageEditorProps) {
       localState.do.init();
     });
 
-  const {  imageUrl, size } = value;
+  const {  url, is_valid } = value;
 
   return (<Box className={styles.container}>
-    {imageUrl && size ? (<Preview state={state} frameState={props.frameState} />) : null}
+    {url && is_valid ? (<Preview state={state} frameState={props.frameState} />) : null}
     <Dropzone onDrop={state.do.upload}>
       {({ getRootProps, getInputProps }) => (
         <Box layerStyle="drop-target" data-role="dropzone-inner">

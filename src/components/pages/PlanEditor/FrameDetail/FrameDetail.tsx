@@ -3,9 +3,28 @@ import styles from './FrameDetail.module.scss';
 import stateFactory from './FrameDetail.state.ts';
 import useForest from '~/lib/useForest';
 import {
-  Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
-  Box, DrawerBody, DrawerFooter, Heading, Button, Flex,
-  HStack, Input, Spinner, Text, VStack, InputGroup, InputLeftAddon, DrawerOverlay, DrawerContent, Drawer,
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
+  DrawerBody,
+  DrawerFooter,
+  Heading,
+  Button,
+  Flex,
+  HStack,
+  Input,
+  Spinner,
+  Text,
+  VStack,
+  InputGroup,
+  InputLeftAddon,
+  DrawerOverlay,
+  DrawerContent,
+  Drawer,
+  DrawerCloseButton, DrawerHeader,
 } from '@chakra-ui/react'
 import { upperFirst } from 'lodash'
 // site
@@ -30,7 +49,6 @@ export default function FrameDetail(props: FrameDetailProps) {
       return () => sub?.unsubscribe();
     }, true);
 
-  console.log('frameDetail value:', value);
   const frameState = state.child('frame')!;
   const type = frameState.value.type;
 
@@ -79,7 +97,13 @@ export default function FrameDetail(props: FrameDetailProps) {
       >
         <DrawerOverlay/>
         <DrawerContent zIndex={1000}>
+          <DrawerCloseButton />
+          <DrawerHeader>Edit Frame</DrawerHeader>
           <DrawerBody>
+            <Text textStyle="info">
+              ID:  {frameState.value.id}
+            </Text>
+
             <FieldGrid>
               <Text textStyle="fieldLabel">Name</Text>
               <Input value={name} onChange={setName}/>

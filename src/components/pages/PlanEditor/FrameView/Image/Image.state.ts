@@ -41,10 +41,8 @@ const ImageState = (props) => {
           });
           if (imageFile) {
             state.value = imageFile.toJSON();
-            sub = imageFile.$((newIF) => {
-              state.value = newIF.toJSON();
-            });
           }
+          //@TODO: observe
         } catch(err) {
           console.log('error getting image data:', err, 'for frame', frame.id);
         }

@@ -4,10 +4,11 @@ import { Vector2 } from 'three'
 import dataManager from '~/lib/managers/dataManager'
 
 export type ImageEditorStateValue = {
-  imageData: Record<string, any> | null,
-  imageUrl: string | null,
-  loaded: boolean,
-  size: Vector2 | null
+  url: string,
+  is_valid: boolean,
+  width: number,
+  height: number,
+  loaded: boolean
 };
 
 type leafType = typedLeaf<ImageEditorStateValue>;
@@ -17,13 +18,15 @@ const IMAGER_SIZE_TARGET = 250;
 const ImageEditorState = (props) => {
   const { frameState } = props;
   const id = frameState.value.id;
+  const plan_id = frameState.value.plan_id;
   const IMAGE_API_URL = `/api/images/${id}`;
 
   const $value: ImageEditorStateValue = {
-    imageData: null,
-    imageUrl: null,
-    loaded: false,
-    size: null
+    url: '',
+    is_valid: false,
+    width: 0,
+    height: 0,
+    loaded: false
   };
   return {
     name: "ImageEditor",
@@ -31,39 +34,22 @@ const ImageEditorState = (props) => {
 
     selectors: {
       scaledSize(state: leafType) {
-        const { size } = state.value;
-        if (!size) {
-          return null;
-        }
+        const { width, height } = state.value;
 
-        let maxDimension = Math.max(size.x, size.y);
+        let maxDimension = Math.max(width, height);
         if (maxDimension <= IMAGER_SIZE_TARGET) {
-          return size;
+          return new Vector2(width, height);
         }
         const scalar = IMAGER_SIZE_TARGET / maxDimension;
-        return size.clone().multiplyScalar(scalar).round();
+        return new Vector2(width, height).multiplyScalar(scalar).round();
       }
     },
 
     actions: {
-      async sizeImage(state: leafType) {
-        let img = new Image();
-        img.src = state.value.imageUrl;
-        img.onload = () => {
-          const size = new Vector2(img.width, img.height);
-          state.do.setImageSize(size);
-        }
-      },
-
-      setImageSize(state: leafType, size: Vector2) {
-        state.do.set_size(size);
-        frameState.do.updateSize(size.x, size.y);
-      },
 
       async upload(state: leafType, files: File[]) {
         const [file] = files;
         const { name, type, size } = file;
-        console.log('uploading', file);
         try {
           await axios.post(IMAGE_API_URL, file, {
             headers: {
@@ -73,24 +59,26 @@ const ImageEditorState = (props) => {
               'file-size': size
             }
           });
-          state.do.set_loaded(false);
-          return state.do.init();
+          return state.do.init(true);
         } catch (err) {
           console.log('error in upload:', err.message);
         }
 
       },
-      async init(state: leafType) {
+      async init(state: leafType, update = false) {
+        const imageData = await dataManager.do((db) => {
+          return update ? db.frame_images.updateImageData(id, plan_id):
+            db.frame_images.fetchImageData(id, plan_id);
+        });
 
-        const imageData = await dataManager.fetchImageData(id);
-        frameState.do.set_value(JSON.stringify(imageData));
-        if(imageData.is_valid) {
+        console.log('initialized imageEditor:', imageData, 'update = ', update);
+        const info = imageData.toJSON()
+        frameState.do.set_value(JSON.stringify(info));
+        if (imageData.is_valid) {
           frameState.do.set_width(imageData.width);
           frameState.do.set_height(imageData.height);
-          state.do.set_imageUrl(imageData.url);
-        } else {
-          state.do.set_imageUrl('')
         }
+        state.value = info;
         state.do.set_loaded(true);
       }
     }

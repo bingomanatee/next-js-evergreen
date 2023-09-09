@@ -1,8 +1,8 @@
-import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import {leafI, typedLeaf} from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
-import { Frame } from '~/types'
+import {Frame} from '~/types'
 import searchFrames from '~/lib/utils/searchFrames'
-import { sortBy } from 'lodash';
+import {sortBy} from 'lodash';
 import blockManager from '~/lib/managers/blockManager'
 
 export type FrameDetailStateValue = {
@@ -28,7 +28,7 @@ const FrameDetailState = (id: string) => {
 
     selectors: {
       afterChoices(state: leafType) {
-        const { search, frames } = state.value;
+        const {search, frames} = state.value;
 
         return sortBy(searchFrames(frames, search), 'order');
       }
@@ -36,11 +36,11 @@ const FrameDetailState = (id: string) => {
 
     actions: {
       reorder(state: leafType, order: string, frameId: string) {
-        state.do.set_move({ order, frameId })
+        state.do.set_move({order, frameId})
       },
 
       async initData(state: leafType) {
-        const { data } = blockManager.value;
+        const {data} = blockManager.value;
         const frame = dataManager.getFrame(data.frameId);
         if (!frame) {
           console.error('cannot get frame', data.frameId);
@@ -50,22 +50,25 @@ const FrameDetailState = (id: string) => {
         state.child('frame')!.value = {...frame};
         state.do.set_loaded(true);
 
-        const sub = dataManager.planStream.subscribe(({ frames }) => {
+        const sub = dataManager.planStream.subscribe(({frames}) => {
           state.do.set_frames(frames);
         });
 
         return () => sub.unsubscribe()
       },
-      async save(state: leafType) {
-        console.log('saving frame');
+      save(state: leafType) {
+        console.log('---- saving frame');
         state.do.set_saving(true);
+        console.log('save set to true');
+        state.do.finishSave();
+      },
+
+      async finishSave(state: leafType) {
         await dataManager.do(async (db) => {
           const frameData = state.child('frame')!.value;
-          const oldFrame = await dataManager.fetchFrame(frameData.id)
-          console.log('saving frameData:', frameData, 'over', oldFrame);
+          // const oldFrame = await dataManager.fetchFrame(frameData.id)
           await db.frames.incrementalUpsert(frameData);
         });
-        console.log('closing');
         blockManager.do.finish();
       },
 

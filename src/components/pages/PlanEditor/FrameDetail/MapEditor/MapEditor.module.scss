@@ -1,4 +1,16 @@
 
-.container {
+.map-container {
+  canvas {
+    cursor: crosshair
+  }
+}
 
+
+.point-table {
+  tr, td, th {
+    line-height: 1.5 !important;
+    font-weight: 400;
+    font-size: 14px;
+
+  }
 }

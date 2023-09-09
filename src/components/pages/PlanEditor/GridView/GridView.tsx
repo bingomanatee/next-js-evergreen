@@ -70,6 +70,8 @@ export class GridView extends SVGComponent {
 
   componentDidMount() {
     super.componentDidMount();
-    this.drawGrid();
+    setTimeout(() => {
+      this.drawGrid();
+    }, 100)
   }
 }

@@ -44,7 +44,7 @@ const MapState = (props) => {
               })
             }
           } catch (err) {
-            console.warn('cannot jsonify ', frame.value);
+           // console.warn('cannot jsonify ', frame.value);
           }
         } catch (err) {
 
@@ -58,7 +58,6 @@ const MapState = (props) => {
 
 
         if (container && !state.getMeta('map') && zoom) {
-          console.log('setting container ', container)
           const map = new mapboxgl.Map({
             container,
             style: 'mapbox://styles/mapbox/streets-v12',

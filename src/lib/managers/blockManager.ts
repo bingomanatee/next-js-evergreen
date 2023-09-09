@@ -75,12 +75,17 @@ const blockManager = new Forest({
       state.do.set_type(type);
       state.do.set_data(data);
       state.do.set_locked(isLocked);
+
+      const observable = state.observable.pipe(
+          map(({ id }) => id),
+          distinctUntilChanged(),
+          takeWhile((id) => id === newId)
+      );
+
+      state.setMeta('observable', observable);
+
       // returns an observable that completes when the blocking is closed
-      return [newId, state.observable.pipe(
-        map(({ id }) => id),
-        distinctUntilChanged(),
-        takeWhile((id) => id === newId)
-      )];
+      return [newId, observable];
     }
   },
   selectors: {

@@ -58,8 +58,16 @@ const LAYER_STYLES = {
     alignContent: 'center'
   },
   'input-label': {
-    minWidth: 36,
+    minWidth: '50px',
+    flex: 0,
     textAlign: 'right',
+    justifyContent: 'flex-end',
+    backgroundColor: 'blackAlpha.50',
+  },
+  'input-label-sm': {
+    minWidth: '40px',
+    textAlign: 'right',
+    flex: 0,
     justifyContent: 'flex-end',
     backgroundColor: 'blackAlpha.50',
   },
@@ -295,6 +303,12 @@ const COLORS = {
 };
 
 const TEXT_STYLES = {
+  'table-head': {
+    fontSize: 'md',
+    color: 'blackAlpha.600',
+    fontWeight: 'normal',
+    textAlign: 'center',
+  },
   'control-panel-label': {
     fontSize: 'xs'
   },
@@ -549,6 +563,11 @@ const theme = extendTheme({
     Heading: {
       baseStyle: {},
       variants: {
+        'dialog-subhead': {
+          fontSize: 'lg',
+          color: 'blackAlpha.700',
+          py: 2
+        },
         markdownHead: {
           fontWeight: 'normal',
           noOfLines: 1,

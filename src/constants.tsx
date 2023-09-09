@@ -10,3 +10,4 @@ export const frameTypeNames = [
   FrameTypes.map
 ]
 export const HOUR = 60 * 60 * 1000;
+export const TO_RAD = Math.PI / 180;

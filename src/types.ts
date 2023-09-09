@@ -77,6 +77,17 @@ export type DimensionValue = {
   id: string | null
 };
 
+export type MapPoint = {
+  id: string,
+  lat: number,
+  lng: number,
+  label?: string,
+}
+
+export type FrameMap = MapPoint & {
+  zoom: number
+}
+
 export type Area = {
   left: number,
   right: number,

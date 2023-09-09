@@ -2,9 +2,9 @@ import { leafI } from '@wonderlandlabs/forest/lib/types'
 import useForestInput from '~/lib/useForestInput'
 import useForestFiltered from '~/lib/useForestFiltered'
 import { Box, Button, Input, InputGroup, InputLeftAddon, InputRightAddon, Text, VStack } from '@chakra-ui/react'
-import { TO_RAD } from '~/components/pages/PlanEditor/FrameDetail/MapEditor/PlaceInfo'
 import QueryAutocompletePrediction = google.maps.places.QueryAutocompletePrediction
 import { formatLatitude, formatLongitude } from 'latlon-formatter';
+import { TO_RAD } from '~/constants'
 
 function Prediction(props: { pred: QueryAutocompletePrediction, state: leafI }) {
   const { pred, state } = props;

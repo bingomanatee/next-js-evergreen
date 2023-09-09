@@ -1,10 +1,10 @@
-import { v4 } from 'uuid'
-import { BehaviorSubject, switchMap } from 'rxjs'
-import { ID_PROP, STRING, STYLE, INT, NUMBER, BOOLEAN } from '~/lib/utils/schemaUtils'
-import { userManager } from '~/lib/managers/userManager'
-import { dirToString, LFSummary } from '~/types'
+import {v4} from 'uuid'
+import {BehaviorSubject, switchMap} from 'rxjs'
+import {asJson, BOOLEAN, ID_PROP, INT, NUMBER, STRING, STYLE} from '~/lib/utils/schemaUtils'
+import {userManager} from '~/lib/managers/userManager'
+import {dirToString, LFSummary, MapPoint} from '~/types'
 import axios from 'axios';
-import { HOUR } from '~/constants'
+import {HOUR} from '~/constants'
 
 function projectIdToPanId(oldDoc) {
   if ('project_id' in oldDoc) {
@@ -29,7 +29,7 @@ function migrationNoOp(oldDoc) {
 export const NO_IMAGE_ERROR = 'no image saved';
 
 export default function framesSchema(dataManager) {
-  return ({
+  return {
     plans: {
       statics: {
         newPlan(name, userId) {
@@ -196,7 +196,7 @@ export default function framesSchema(dataManager) {
       migrationStrategies: {
         1: (oldDoc) => {
           console.log('cloning f 1', oldDoc);
-          if (!(oldDoc.created && (typeof oldDoc.created === 'number'))) {
+          if (!(oldDoc.created && typeof oldDoc.created === 'number')) {
             oldDoc.created = Date.now();
           }
           return oldDoc;
@@ -352,7 +352,6 @@ export default function framesSchema(dataManager) {
 
           if (frameImage) {
             if (frameImage.time < Date.now() - HOUR) {
-              console.log('fetched image data:', frameImage);
               return frameImage;
             } else {
               return this.updateImageData(frame_id, plan_id);
@@ -402,13 +401,11 @@ export default function framesSchema(dataManager) {
             return this.onImageError('no url');
           }
 
-          console.log('validating frame image', this);
           return new Promise((done, fail) => {
             let img = new Image();
             img.src = this.url;
 
             img.onload = async () => {
-              console.log('image loaded for ', this.url);
               const update = await this.incrementalModify((doc) => {
                 doc.width = img.width;
                 doc.height = img.height;
@@ -466,6 +463,65 @@ export default function framesSchema(dataManager) {
         },
         required: ['id', 'scope', 'tag', 'style']
       }
+    },
+
+    map_points: {
+      schema: {
+        version: 0,
+        primaryKey: 'id',
+        type: 'object',
+        properties: {
+          id: ID_PROP,
+          frame_id: ID_PROP,
+          lat: NUMBER,
+          lng: NUMBER,
+          label: STRING,
+        },
+        required: ['id', 'frame_id', 'lat', 'lng']
+      },
+      statics: {
+        async forFrame(frame_id: string) {
+         return this.find()
+              .where('frame_id').eq(frame_id).exec();
+        },
+        async updatePoints(frame_id: string, points: MapPoint[], exclusive = false) {
+          console.log(' ------------ updating points:', frame_id, points, 'exclusive = ', exclusive);
+
+          if (exclusive) {
+            const ids = new Set(
+              points.map((p) => p.id)
+            );
+
+            console.log('ids in points:', ids);
+
+            const existing = await this.forFrame(frame_id);
+            console.log('existing ids', existing.map(p => p.id));
+
+            const deleteIds = existing
+                .map((point: MapPoint) => point.id
+                )
+                .filter((pointId) => {
+                  if (!(ids.has(pointId))) {
+                    console.log('deleting ', pointId);
+                    return true;
+                  } else {
+                    console.log('not deleting ', pointId);
+                    return false;
+                  }
+                });
+
+            console.log('deleting ids:', deleteIds)
+            await this.bulkRemove(deleteIds);
+
+            const current = await this.forFrame(frame_id);
+            console.log('after deleting points are', current);
+          }
+
+          return this.bulkUpsert(points.map((pointData) => ({
+            ...pointData, frame_id
+          })));
+        }
+      }
     }
-  });
+  };
 }

@@ -31,8 +31,8 @@ const LINK_FRAME = {
   position: 'absolute',
   borderWidth: '3px',
   borderStyle: 'solid',
-  justifyContent: 'center',
-  alignItems: 'center',
+  alignItems: 'start',
+  p: 3
 }
 
 const CONTROL_PANEL_ITEM = {
@@ -48,6 +48,13 @@ const LAYER_STYLES = {
   'control-panel-item':
     CONTROL_PANEL_ITEM
   ,
+  'grid-view-box': {
+    position: 'absolute',
+    w: '100vw',
+    h: '100vh',
+    left: 0,
+    top: 0
+  },
   'input-group-item-wrapper': {
     w: '100%',
     borderWidth: 1,
@@ -327,7 +334,7 @@ const TEXT_STYLES = {
     color: 'nav-x-dark',
     fontSize: 'lg',
     fontWeight: 600,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   par: {
     fontSize: 'md',

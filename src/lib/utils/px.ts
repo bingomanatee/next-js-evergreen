@@ -1,5 +1,5 @@
-import { Vector2 } from 'three'
-import { Area, Direction, Frame, X_DIR, Y_DIR } from '~/types'
+import {Vector2} from 'three'
+import {Area, Direction, Frame, X_DIR, Y_DIR} from '~/types'
 
 export default function px(n: number, decimal?: boolean): string {
   if (!(n && (typeof n === 'number'))) {
@@ -73,15 +73,11 @@ export function areaDirToPoint(size: Area, dir: Direction) {
   return new Vector2(x, y);
 }
 
-export function frameToPoint(f: Frame, dir: Direction, offset?: Vector2) {
+export function frameToPoint(f: Frame, dir: Direction) {
   const size = frameToSize(f);
   if (!size) {
     return null;
   }
 
-  const point = areaDirToPoint(size, dir);
-  if (offset) {
-    return point.add(offset);
-  }
-  return point;
+  return areaDirToPoint(size, dir);
 }

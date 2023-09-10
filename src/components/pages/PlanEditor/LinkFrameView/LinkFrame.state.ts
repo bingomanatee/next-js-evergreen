@@ -1,12 +1,13 @@
-import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import {leafI, typedLeaf} from '@wonderlandlabs/forest/lib/types'
 import blockManager from '~/lib/managers/blockManager'
-import { DIMENSION_ACTIONS, DIMENSION_SELECTORS, dimensionValue } from '~/components/pages/PlanEditor/util'
-import { BlockMode, DimensionValue, Direction, LFSummary } from '~/types'
+import {DIMENSION_ACTIONS, DIMENSION_SELECTORS, dimensionValue} from '~/components/pages/PlanEditor/util'
+import {BlockMode, DimensionValue, Direction, LFSummary} from '~/types'
 import dataManager from '~/lib/managers/dataManager'
-import { Vector2 } from 'three'
-import { frameToPoint } from '~/lib/utils/px'
-import { boolean } from 'zod'
-import { frameId } from 'three/examples/jsm/nodes/shadernode/ShaderNodeElements'
+import {Vector2} from 'three'
+import {frameToPoint} from '~/lib/utils/px'
+import {boolean} from 'zod'
+import {frameId} from 'three/examples/jsm/nodes/shadernode/ShaderNodeElements'
+import stopPropagation from "~/lib/utils/stopPropagation";
 
 export type LinkFrameStateValue = {
   spriteDir: Direction | null,
@@ -28,19 +29,25 @@ const LinkFrameState = () => {
     selectors: {
       ...DIMENSION_SELECTORS,
 
-      style(state: leafType, dir: Direction, POINT_OFFSET: Vector2, isEnd: boolean) {
+      style(state: leafType, dir: Direction, offset: Vector2, isEnd: boolean, zoom = 100) {
 
         if (isEnd) {
-          return state.child('target')!.$.point(dir, POINT_OFFSET);
+          return state.child('target')!.$.point(dir, offset, zoom);
         }
 
-        return state.$.point(dir, POINT_OFFSET)
+        let location = state.$.point(dir, offset, zoom);
+        if (offset && zoom) {
+          const pointOffset = offset.clone().multiplyScalar(100 / zoom);
+          return location.add(pointOffset);
+        }
+
+        return location;
       }
     },
 
     actions: {
       async save(state: leafType, params: LFSummary) {
-        const { id, spriteDir, targetId, targetSpriteDir } = params;
+        const {id, spriteDir, targetId, targetSpriteDir} = params;
         if (id && spriteDir && targetId && targetSpriteDir) {
           await dataManager.do(async (db) => {
             return db.links.addLink(state.value.planId, params);
@@ -49,10 +56,8 @@ const LinkFrameState = () => {
         blockManager.do.finish();
       },
       clearLock(state: leafType) {
-        state.do.set_lockedTarget(null);
-      },
-      lockTarget(state: leafType) {
-        state.child('target')!.do.set_locked(true);
+        console.log('--- clearing lock');
+        state.child('target')!.do.updateId(null, false);
       },
       spriteClicked(state: leafType, dir: Direction, onEnd?: boolean) {
         if (onEnd) {
@@ -63,41 +68,20 @@ const LinkFrameState = () => {
       },
       onMouseEnter(state: leafType, e: MouseEvent) {
         e.stopPropagation();
+
         //@ts-ignore
         const targetId = e.target.dataset['frameContainer'];
         const target = state.child('target')!;
+        console.log('--- mouse entered frame with ', target.value);
 
-        if (target.value.locked) {
+        if (target.value.locked && target.value.id) {
           return;
         }
 
-        const closer = state.getMeta('closer');
-        if (closer) {
-          clearTimeout(closer);
-        }
         target.do.updateId(targetId);
       },
-      onMouseLeave(state: leafType, e: MouseEvent) {
-        e.stopPropagation();
 
-        const target = state.child('target')!;
-        if (target.value.locked) {
-          return;
-        }
-
-        const closer = state.getMeta('closer');
-        if (closer) {
-          clearTimeout(closer);
-        }
-
-        state.setMeta('closer', setTimeout(() => {
-          if (!target.value.locked) {
-            target.do.clear();
-          }
-        }, 1200), true)
-      },
-
-     async init(state: leafType, planEditorState: leafI) {
+      async init(state: leafType, planEditorState: leafI) {
         // load in the current frame every time the id and mode changes
         const frameId = blockManager.value.data.frameId;
         state.do.set_planId(planEditorState.value.planId);
@@ -117,12 +101,17 @@ const LinkFrameState = () => {
         },
 
         selectors: {
-          point(state: leafI, dir: Direction, offset: Vector2) {
-            const { frame } = state.value;
+          point(state: leafI, dir: Direction, offset: Vector2, zoom = 100) {
+            const {frame} = state.value;
             if (!frame) {
               return new Vector2(0, 0);
             }
-            return frameToPoint(frame, dir, offset);
+            const location = frameToPoint(frame, dir);
+            if (offset && zoom) {
+              const pointOffset = offset.clone().multiplyScalar(100 / zoom);
+              return location.add(pointOffset);
+            }
+            return location;
           }
         },
 
@@ -131,17 +120,28 @@ const LinkFrameState = () => {
             state.do.set_spriteDir(dir);
           },
           updateId(state: leafI, id, locked) {
-            console.log('setting target id:', id);
+            let oldId = state.value.id;
             state.do.set_id(id);
-            state.do.set_locked(!!locked);
-            state.do.loadFrame();
+            state.do.set_locked(id && locked);
+            if (oldId !== id) state.do.loadFrame();
           },
-          clear(state: leafI) {
+          clear(state: leafI,) {
             state.do.set_id(null);
+            state.do.set_locked(false);
             state.do.set_frame(null);
           },
+          clearLock(state: leafI, e) {
+            stopPropagation(e);
+            state.do.set_locked(false);
+          },
+          lock(state: leafI, e) {
+            stopPropagation(e);
+            if (state.value.id) {
+              state.do.set_locked(true);
+            }
+          },
           loadFrame(state: leafI) {
-            const { id, frame } = state.value;
+            const {id, frame} = state.value;
             const parentId = state.parent!.value.id;
 
             if (!id || (id === parentId)) {

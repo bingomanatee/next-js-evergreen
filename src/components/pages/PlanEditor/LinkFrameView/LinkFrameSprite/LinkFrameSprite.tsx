@@ -4,7 +4,7 @@ import stateFactory from './LinkFrameSprite.state.ts';
 import useForest from '~/lib/useForest'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import { LinkFrameStateContext } from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameView'
-import { vectorToStyle } from '~/lib/utils/px'
+import px, { vectorToStyle } from '~/lib/utils/px'
 import { Vector2 } from 'three'
 import planEditorState from '~/components/pages/PlanEditor/PlanEditor.state'
 import { sameDir } from '~/components/pages/PlanEditor/util'
@@ -15,17 +15,22 @@ type LinkFrameSpriteProps = { dir: Direction, isEnd?: boolean }
 
 export default function LinkFrameSprite(props: LinkFrameSpriteProps) {
   const linkState = useContext(LinkFrameStateContext);
+  const planEditorState = useContext(PlanEditorStateCtx);
+  const {zoom} = useForestFiltered(planEditorState!, ['zoom'])
+
 
   const { dir, isEnd } = props;
 
   const [_value, state] = useForest([stateFactory, props, linkState]);
 
-  const frameStyle = linkState!.$.style(dir, POINT_OFFSET, isEnd);
+  const frameStyle = linkState!.$.style(dir, POINT_OFFSET, isEnd, zoom);
 
   const spriteDir = useForestFiltered(linkState!, 'spriteDir');
   const targetSpriteDir = useForestFiltered(linkState!.child('target')!, 'spriteDir');
 
   const active = sameDir(dir, isEnd ? targetSpriteDir : spriteDir);
+
+  const size = px(Math.round(SPRITE_BOX_WIDTH * 100 / zoom), true);
 
   return (
     <div
@@ -33,7 +38,7 @@ export default function LinkFrameSprite(props: LinkFrameSpriteProps) {
       data-name={dirToString(dir)}
       className={active ? styles['sprite-active'] : styles.sprite}
       style={
-        vectorToStyle(frameStyle)
+        {...vectorToStyle(frameStyle), width: size, height: size, borderWidth: px(200 / zoom, true)}
       }
       ref={state.do.init}
       onClick={state.do.onClick}
@@ -45,4 +50,4 @@ export default function LinkFrameSprite(props: LinkFrameSpriteProps) {
 
 const SPRITE_BOX_WIDTH = 20;
 
-const POINT_OFFSET = new Vector2(-SPRITE_BOX_WIDTH / 2, -SPRITE_BOX_WIDTH / 2);
+export const POINT_OFFSET = new Vector2(-SPRITE_BOX_WIDTH / 2, -SPRITE_BOX_WIDTH / 2);

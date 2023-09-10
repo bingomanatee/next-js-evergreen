@@ -6,8 +6,6 @@
 @mixin spriteBase {
   z-index: 1000000;
   border: 2px solid var(--chakra-colors-nav);
-  width: 20px;
-  height: 20px;
   overflow: hidden;
   position: absolute;
   pointer-events: all !important;

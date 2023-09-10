@@ -23,30 +23,27 @@ export default function LinkFrameView() {
     (localState) => {
     localState.do.init(planEditorState);
     });
-  const { loaded, id, target } = value;
+  const { loaded, id, target, type } = value;
+
+  const {locked} = target;
 
   useEffect(() => {
-    if (!loaded || target.locked) {
-      return;
-    }
     const elements = window.document.querySelectorAll('[data-frame-container]')
 
     elements.forEach(
       (e) => {
         e.addEventListener('mouseenter', state.do.onMouseEnter);
-        e.addEventListener('mouseleave', state.do.onMouseLeave);
+       // e.addEventListener('mouseleave', state.do.onMouseLeave);
       });
 
     return () => {
       elements.forEach(
         (e) => {
           e.removeEventListener('mouseenter', state.do.onMouseEnter);
-          e.removeEventListener('mouseleave', state.do.onMouseLeave);
+       //   e.removeEventListener('mouseleave', state.do.onMouseLeave);
         });
     }
-  }, [loaded, id, state, target.locked])
-
-  console.log('LinkFrameView: ', loaded, id);
+  }, [state])
 
   return !loaded ? null : (
     <LinkFrameStateContext.Provider value={state}>

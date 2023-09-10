@@ -18,7 +18,6 @@ import { vectorToStyle } from '~/lib/utils/px'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 import blockManager from '~/lib/managers/blockManager'
 import { BlockMode } from '~/types'
-import { PanControl } from '~/components/pages/PlanEditor/ControlBar/PanControl'
 import { FrameControlBar } from '~/components/pages/PlanEditor/ControlBar/FrameControlBar'
 import ControlBarItem from '~/components/pages/PlanEditor/ControlBar/ControlBarItem'
 

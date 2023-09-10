@@ -43,7 +43,9 @@ export class GridView extends SVGComponent {
       return;
     }
     const { zoom } = this.props;
-    let size = this.state[ProjectSettings.GRID_SIZE] * zoom / 100;
+    console.log('drawing grid with zoom of ', zoom);
+
+    let size = this.state[ProjectSettings.GRID_SIZE];
     while (size < 8) size *= 2; // on zoom-out, double the grid size to prevent lines from getting too close.
     let width = Math.max(window.screen.width, 1000);
     width -= width % size;
@@ -53,12 +55,17 @@ export class GridView extends SVGComponent {
     const MIN_Y = -height;
     const MIN_X = -(width);
     const MAX_X = 2 * width;
+
+    const stroke = {...STROKE};
+
+    stroke.width *= 100/zoom;
+
     for (let y = MIN_Y; y < MAX_Y; y += size) {
-      this.draw.path(`M ${MIN_X} ${y} L ${MAX_X} ${y}`).stroke(STROKE);
+      this.draw.path(`M ${MIN_X} ${y} L ${MAX_X} ${y}`).stroke(stroke);
     }
 
     for (let x = MIN_X; x < MAX_X; x += size) {
-      this.draw.path(`M ${x} ${MIN_Y} L ${x} ${MAX_Y}`).stroke(STROKE);
+      this.draw.path(`M ${x} ${MIN_Y} L ${x} ${MAX_Y}`).stroke(stroke);
     }
   }
 

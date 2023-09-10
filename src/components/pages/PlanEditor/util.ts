@@ -77,7 +77,7 @@ export const DIMENSION_SELECTORS = {
     const { bottom, deltas } = state.value;
     return snap(bottom + (deltas?.get('bottom') || 0));
   },
-  point(state: leafType, dir: Direction, offset ?: Vector2) {
+  point(state: leafType, dir: Direction) {
     let x = 0;
     let y = 0;
     switch (dir.y) {
@@ -103,9 +103,6 @@ export const DIMENSION_SELECTORS = {
         break;
     }
     let point = new Vector2(x, y);
-    if (offset) {
-      return point.add(offset);
-    }
     return point.round();
   }
 }

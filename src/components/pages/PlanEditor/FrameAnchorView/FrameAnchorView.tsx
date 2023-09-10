@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, PropsWithChildren, useContext } from 'react';
+import { PropsWithChildren, useContext } from 'react';
 import styles from './FrameAnchorView.module.scss';
-import stateFactory from './FrameAnchorView.state.ts';
-import useForest from '~/lib/useForest';
+/*import stateFactory from './FrameAnchorView.state.ts';
+import useForest from '~/lib/useForest';*/
 import useForestFiltered from '~/lib/useForestFiltered'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
 

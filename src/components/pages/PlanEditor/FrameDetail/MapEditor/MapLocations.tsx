@@ -18,10 +18,16 @@ const PointInfo = memo(function PointInfoBase({state}) {
     })
   });
 
+
   const currentPoint = useMemo<MapPoint | null>(() => {
     if (!infoPoint) return null;
     return points.get(infoPoint) || null;
   }, [infoPoint, points]);
+
+  if (infoPoint) {
+    console.log('ip state:', state.value);
+    console.log('--- PointInfo: for ', infoPoint, 'is', currentPoint);
+  }
 
   const [pointInfoData, setPID] = useState(null);
 
@@ -37,7 +43,6 @@ const PointInfo = memo(function PointInfoBase({state}) {
     }
   }, [currentPoint, state])
 
-  console.log('pointInfoData', pointInfoData?.result);
   if (!currentPoint) {
     return <></>
   }
@@ -45,9 +50,9 @@ const PointInfo = memo(function PointInfoBase({state}) {
   return (
       <Box w="100%" my={2} p={3} shadow="lg">
         <Heading textAlign="center" size="sm">Map Point
-        <CloseButton float="right" onClick={() => {
-          state.do.set_infoPoint('');
-        }} />
+          <CloseButton float="right" onClick={() => {
+            state.do.set_infoPoint('');
+          }}/>
         </Heading>
         <Table size="sm" variant="unstyled" w="100%">
           <Tbody>
@@ -58,7 +63,7 @@ const PointInfo = memo(function PointInfoBase({state}) {
             <Tr>
               <Th>location</Th>
               <td><Text fontSize="xs">
-                {formatLatitude(currentPoint.lat)}, {formatLongitude(currentPoint.lng)}
+                {formatLatitude(currentPoint.lat * TO_RAD)}, {formatLongitude(currentPoint.lng * TO_RAD)}
               </Text></td>
             </Tr>
             <Tr>
@@ -149,7 +154,9 @@ function MapLocations(props: { state: leafI }) {
                     </Td>
                     <Td>
                       <Image
-                          onClick={() => state.do.set_infoPoint(point.id)}
+                          onClick={() => {
+                            state.do.set_infoPoint(point.id);
+                          }}
                           width={14}
                           height={14}
                           alt={'map-info'}

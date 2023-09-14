@@ -48,11 +48,11 @@ export default function framesSchema(dataManager) {
             userManager.observable.subscribe(ub);
             const db = await dataManager.db();
             return ub.pipe(
-              switchMap(({ user }) => {
-                const userId = user.id ?? dataManager.anonUserId;
-                return db.plans.find()
-                  .where('user_id').eq(userId).$
-              })
+                switchMap(({user}) => {
+                  const userId = user.id ?? dataManager.anonUserId;
+                  return db.plans.find()
+                      .where('user_id').eq(userId).$
+                })
             )
           } catch (err) {
             console.log('cup error:', err);
@@ -103,7 +103,7 @@ export default function framesSchema(dataManager) {
       },
       statics: {
         async assertSetting(planId: string, name: string, value:
-          string | number, isNumber: boolean = true
+            string | number, isNumber: boolean = true
         ) {
           const existing = await this.findOne({
             selector: {
@@ -208,7 +208,7 @@ export default function framesSchema(dataManager) {
         4: projectIdToPanId,
         5: (oldDoc) => {
           if (!oldDoc.content) {
-            oldDoc.content = { type: 'markdown' }
+            oldDoc.content = {type: 'markdown'}
           }
           if (!oldDoc.content.type) {
             oldDoc.content.type = 'markdown'
@@ -239,7 +239,7 @@ export default function framesSchema(dataManager) {
           // returns a number 1 larger than all the current orders of the frames in the given plan.
           try {
             const frames = await this.find()
-              .where('plan_id').eq(planId).exec();
+                .where('plan_id').eq(planId).exec();
             return frames.reduce((max, fr) => {
               return Math.max(max, fr.order);
             }, 0) + 1;
@@ -286,11 +286,12 @@ export default function framesSchema(dataManager) {
             plan_id: planId,
             start_frame: params.id,
             end_frame: params.targetId,
-            start_at: dirToString(params.spriteDir!),
-            end_at: dirToString(params.targetSpriteDir!),
+            start_at:  dirToString(params.spriteDir),
+            end_at: dirToString(params.targetSpriteDir, params.targetMapPoint),
           }
 
-          return this.incrementalUpsert(newLink);
+          if (newLink.start_at && newLink.end_at)
+            return this.incrementalUpsert(newLink);
         }
       }
     },
@@ -318,7 +319,7 @@ export default function framesSchema(dataManager) {
       },
       statics: {
         async updateImageData(frame_id, plan_id) {
-          const { data } = await axios.get('/api/images/' + frame_id);
+          const {data} = await axios.get('/api/images/' + frame_id);
           let url = data?.url || '';
 
           let existing = await this.findOne({
@@ -329,7 +330,7 @@ export default function framesSchema(dataManager) {
           }).exec();
 
           if (existing) {
-            existing = await existing.incrementalPatch({ url });
+            existing = await existing.incrementalPatch({url});
             return existing?.validate();
           }
 
@@ -358,7 +359,7 @@ export default function framesSchema(dataManager) {
             }
           }
 
-          const { data } = await axios.get('/api/images/' + frame_id);
+          const {data} = await axios.get('/api/images/' + frame_id);
           let url = data?.url || '';
 
           if (url) {
@@ -420,7 +421,7 @@ export default function framesSchema(dataManager) {
 
               console.log('cannot load image ', this.url);
               const update = await this.onImageError(
-                `${(typeof err === 'string' ? err : err.type) || 'cannot load'}`
+                  `${(typeof err === 'string' ? err : err.type) || 'cannot load'}`
               );
               done(update);
             };
@@ -467,34 +468,50 @@ export default function framesSchema(dataManager) {
 
     map_points: {
       schema: {
-        version: 0,
+        version: 1,
         primaryKey: 'id',
         type: 'object',
         properties: {
           id: ID_PROP,
+          plan_id: ID_PROP,
           frame_id: ID_PROP,
           lat: NUMBER,
           lng: NUMBER,
           label: STRING,
+          x: NUMBER,
+          y: NUMBER
         },
-        required: ['id', 'frame_id', 'lat', 'lng']
+        required: ['id', 'frame_id', 'lat', 'lng', 'plan_id'],
+      },
+      migrationStrategies: {
+        1: (data) =>{
+          if (!data.plan_id) {
+            data.plan_id = '';
+          }
+          return data;
+        }
       },
       statics: {
+        async fetch(id: string) {
+          //@ts-ignore
+          const map = await this.findByIds([id]).exec();
+          return map.get(id);
+        },
         async forFrame(frame_id: string) {
-         return this.find()
-              .where('frame_id').eq(frame_id).exec();
+          return this.find()
+              .where('frame_id').eq(frame_id)
         },
         async updatePoints(frame_id: string, points: MapPoint[], exclusive = false) {
-          console.log(' ------------ updating points:', frame_id, points, 'exclusive = ', exclusive);
 
           if (exclusive) {
             const ids = new Set(
-              points.map((p) => p.id)
+                points.map((p) => p.id)
             );
 
             console.log('ids in points:', ids);
 
-            const existing = await this.forFrame(frame_id);
+            const query = await this.forFrame(frame_id);
+            let existing = await query.exec();
             console.log('existing ids', existing.map(p => p.id));
 
             const deleteIds = existing
@@ -512,9 +529,6 @@ export default function framesSchema(dataManager) {
 
             console.log('deleting ids:', deleteIds)
             await this.bulkRemove(deleteIds);
-
-            const current = await this.forFrame(frame_id);
-            console.log('after deleting points are', current);
           }
 
           return this.bulkUpsert(points.map((pointData) => ({

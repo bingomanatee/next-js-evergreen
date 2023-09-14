@@ -1,12 +1,10 @@
 import {leafI, typedLeaf} from '@wonderlandlabs/forest/lib/types'
 import blockManager from '~/lib/managers/blockManager'
 import {DIMENSION_ACTIONS, DIMENSION_SELECTORS, dimensionValue} from '~/components/pages/PlanEditor/util'
-import {BlockMode, DimensionValue, Direction, LFSummary} from '~/types'
+import {DimensionValue, Direction, LFSummary, X_DIR, Y_DIR} from '~/types'
 import dataManager from '~/lib/managers/dataManager'
 import {Vector2} from 'three'
 import {frameToPoint} from '~/lib/utils/px'
-import {boolean} from 'zod'
-import {frameId} from 'three/examples/jsm/nodes/shadernode/ShaderNodeElements'
 import stopPropagation from "~/lib/utils/stopPropagation";
 
 export type LinkFrameStateValue = {
@@ -47,8 +45,8 @@ const LinkFrameState = () => {
 
     actions: {
       async save(state: leafType, params: LFSummary) {
-        const {id, spriteDir, targetId, targetSpriteDir} = params;
-        if (id && spriteDir && targetId && targetSpriteDir) {
+        const {id, spriteDir, targetId, targetSpriteDir, targetMapPoint} = params;
+        if (id && spriteDir && (targetId || targetMapPoint) && targetSpriteDir) {
           await dataManager.do(async (db) => {
             return db.links.addLink(state.value.planId, params);
           });
@@ -97,7 +95,8 @@ const LinkFrameState = () => {
           id: null,
           frame: null,
           locked: false,
-          spriteDir: null
+          spriteDir: {x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M},
+          mapPoint: null,
         },
 
         selectors: {

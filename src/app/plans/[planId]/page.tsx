@@ -3,7 +3,6 @@
 import { Spinner, useBoolean } from '@chakra-ui/react'
 import NavLayout from '~/components/layouts/NavLayout'
 import { NextPageWithLayout } from '~/app/types'
-import ManagerContext from '~/lib/managers/ManagerContext'
 import { useContext, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'

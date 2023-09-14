@@ -1,10 +1,11 @@
 "use client";
 
-import { SVGComponent } from '~/components/helpers/SVGComponent'
+import {SVGComponent} from '~/components/helpers/SVGComponent'
 import dataManager from '~/lib/managers/dataManager'
-import { ProjectSettings } from '~/types'
+import {ProjectSettings} from '~/types'
 
-const STROKE = { color: 'rgb(0,0,0)', opacity: 0.125, width: 1 };
+const STROKE = {color: 'rgb(0,0,0)', opacity: 0.125, width: 1};
+const STROKE_HEAVY = {...STROKE, opacity: 0.25}
 
 export class GridView extends SVGComponent {
 
@@ -22,9 +23,9 @@ export class GridView extends SVGComponent {
 
   private watchSettings() {
 
-    this.sub = dataManager.planStream.subscribe(({ settingsMap }) => {
+    this.sub = dataManager.planStream.subscribe(({settingsMap}) => {
       this.setState((state) => {
-        const newState = { ...state };
+        const newState = {...state};
         if (settingsMap.has(ProjectSettings.GRID_SIZE)) {
           newState[ProjectSettings.GRID_SIZE] = settingsMap.get(ProjectSettings.GRID_SIZE)
         }
@@ -42,11 +43,15 @@ export class GridView extends SVGComponent {
     if (!this.state[ProjectSettings.GRID_SHOW]) {
       return;
     }
-    const { zoom } = this.props;
-    console.log('drawing grid with zoom of ', zoom);
+    const {zoom} = this.props;
+
+    let heavyInc = 16;
 
     let size = this.state[ProjectSettings.GRID_SIZE];
-    while (size < 8) size *= 2; // on zoom-out, double the grid size to prevent lines from getting too close.
+    while (size < 800 / zoom) {
+      size *= 2;
+      if (heavyInc >= 2) heavyInc /= 2;
+    } // on zoom-out, double the grid size to prevent lines from getting too close.
     let width = Math.max(window.screen.width, 1000);
     width -= width % size;
     let height = Math.max(window.screen.height, 1000);
@@ -57,15 +62,27 @@ export class GridView extends SVGComponent {
     const MAX_X = 2 * width;
 
     const stroke = {...STROKE};
+    const heavyStroke = {...STROKE_HEAVY}
+    stroke.width *= 100 / zoom;
+    heavyStroke.width *= 100 / zoom;
 
-    stroke.width *= 100/zoom;
-
+    let inc = 0;
     for (let y = MIN_Y; y < MAX_Y; y += size) {
-      this.draw.path(`M ${MIN_X} ${y} L ${MAX_X} ${y}`).stroke(stroke);
+      let lineStroke = stroke;
+      if (heavyInc >= 2 && (!(inc % heavyInc))) {
+        lineStroke = heavyStroke;
+      }
+      ++inc;
+      this.draw.path(`M ${MIN_X} ${y} L ${MAX_X} ${y}`).stroke(lineStroke);
     }
 
+    inc = 0;
     for (let x = MIN_X; x < MAX_X; x += size) {
-      this.draw.path(`M ${x} ${MIN_Y} L ${x} ${MAX_Y}`).stroke(stroke);
+      let lineStroke = stroke;
+      if (heavyInc >= 2 && (!(inc % heavyInc))) {
+        lineStroke = heavyStroke;
+      }
+      ++inc;    this.draw.path(`M ${x} ${MIN_Y} L ${x} ${MAX_Y}`).stroke(lineStroke);
     }
   }
 

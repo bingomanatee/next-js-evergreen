@@ -1,57 +1,67 @@
 'use client'
 import {leafI, typedLeaf} from '@wonderlandlabs/forest/lib/types'
-import {MarkdownEditorStateValue} from '~/components/pages/PlanEditor/FrameDetail/MarkdownEditor/MarkdownEditor.state'
 import googleMaps from '~/lib/googleMaps'
 import QueryAutocompletePrediction = google.maps.places.QueryAutocompletePrediction
 import {v4} from 'uuid'
-import dataManager from '~/lib/managers/dataManager'
 import {MapPoint} from '~/types'
 import mapboxgl from 'mapbox-gl';
-import blockManager from "~/lib/managers/blockManager";
-import {asJson} from "~/lib/utils/schemaUtils";
+import mapPoints from "~/lib/stateFragments/mapPoints";
+import planEditorState from "~/components/pages/PlanEditor/PlanEditor.state";
+import dataManager from "~/lib/managers/dataManager";
 
 export type MapEditorStateValue = {
   lat: number,
   lng: number,
   zoom: number,
   interactive: number,
+  description: string,
   placeSearch: string,
   pred: Record<string, any>[],
   loaded: boolean,
   infoPoint: string,
 };
 
+export type MapPointsStateValue = {
+  points: Map<string, MapPoint>,
+  editingLabel: string,
+  pointsSourceLoaded: boolean,
+}
+
 type leafType = typedLeaf<MapEditorStateValue>;
+type mapPointsLeafType = typedLeaf<MapPointsStateValue>;
 
 const MapEditorState = (props: { frameState: leafI }) => {
   const {frameState} = props;
   const frameId = frameState.value.id;
 
   const {value} = frameState.value;
-  let $value: MarkdownEditorStateValue = {
-    loaded: false,
-    lat: 0,
-    lng: 0,
-    interactive: 0,
+  let $value: MapEditorStateValue = {
     placeSearch: '',
     description: '',
-    pred: [],
     zoom: 9,
-    infoPoint: '',
+    infoPoint: "",
+    interactive: 0,
+    lat: 0,
+    lng: 0,
+    loaded: false,
+    pred: [],
+
   };
   try {
     const vJson = JSON.parse(value);
     if ('lat' in vJson && 'lng' in vJson) {
       Object.keys($value).forEach((key) => {
+        if (['infoPoint', 'placeSearch', 'interactive'].includes(key)) {
+          return;
+        }
         if (key in $value) {
           $value[key] = vJson[key];
         }
       })
     }
   } catch (err) {
-    console.warn('cannot jsonify ', value);
+    // console.warn('cannot jsonify ', value);
   }
-
   return {
     name: "MapEditor",
     $value,
@@ -183,7 +193,7 @@ const MapEditorState = (props: { frameState: leafI }) => {
         if (state.value.interactive || !map) {
           return;
         }
-        const info = {id: v4(), ...data.lngLat, label: ''};
+        const info = {id: v4(), ...data.lngLat, plan_id: dataManager.planId(), label: ''};
         const mapPoints = state.child('mapPoints')!
         mapPoints.do.addPoint(info);
       },
@@ -228,18 +238,18 @@ const MapEditorState = (props: { frameState: leafI }) => {
       init(state: leafType) {
         state.do.frameToState();
         const subLocal = state.do.dataToFrame();
-        state.child('mapPoints')!.do.init();
+        const pointSub = state.child('mapPoints')!.do.init();
         const sub = state.do.observeSaving();
         state.do.set_loaded(true);
         return () => {
           setTimeout(() => {
             sub?.unsubscribe();
+            pointSub.unsubscribe();
             subLocal?.unsubscribe();
           }, 100);
         }
       },
       async initMap(state: leafType, element) {
-
         const lastMap = state.getMeta('map')
         if (lastMap) {
           try {
@@ -279,84 +289,16 @@ const MapEditorState = (props: { frameState: leafI }) => {
         map.on('click', state.do.onMapClick);
 
         state.setMeta('map', map);
+        await state.child('mapPoints')!.do.refreshPoints();
 
         state.do.onTabChange(0);
+
+        console.log('initMap .... calling rp');
       }
     },
 
     children: {
-      mapPoints: {
-        $value: {
-          points: new Map(),
-          editingLabel: '',
-        },
-        meta: {
-          markers: new Map()
-        },
-        selectors: {
-          asList(state) {
-            return Array.from(state.value.points.values());
-          }
-        },
-        actions: {
-          setPointLabel(state: leafType, id: string, label: string) {
-            if (state.value.points.has(id)) {
-              const point = state.value.points.get(id);
-              const newPoint = {...point, label};
-              const points = new Map(state.value.points);
-              points.set(id, newPoint);
-              state.do.set_points(points);
-            }
-          },
-          removePoint(state: leafType, id: string) {
-            const map = new Map(state.value.points);
-            map.delete(id);
-            state.do.set_points(map);
-            const marker = state.getMeta('markers')?.get(id);
-            if (marker) {
-              marker.remove();
-            }
-          },
-          clearEditingLabel(state: leafType) {
-            state.do.set_editingLabel('');
-          },
-          updateLabel(state: leafType, id: string, label: string) {
-            if (state.value.points.has(id)) {
-              const point = state.value.points.get(id);
-              point.label = label;
-              state.do.addPoint(point);
-            }
-          },
-          addPoint(state: leafType, point: MapPoint) {
-            const points = new Map(state.value.points);
-            points.set(point.id, point);
-            state.do.set_points(points);
-            const map = state.parent.getMeta('map');
-
-            const marker = new mapboxgl.Marker()
-                .setLngLat(point)
-                .addTo(map);
-            state.getMeta('markers')?.set(point.id, marker);
-          },
-          save(state: leafType) {
-            console.log('mapEditor save')
-            dataManager.do(async (db) => {
-              const points = state.$.asList();
-              console.log('points are ', points, 'from list', state.value);
-              return db.map_points.updatePoints(frameId, points, true);
-            })
-          },
-          async init(state: leafType) {
-            const points = await dataManager.do((db) => db.map_points.forFrame(
-                frameId
-            ));
-            const map = new Map();
-            asJson(points).forEach((point: MapPoint) => {
-              state.do.addPoint(point);
-            });
-          }
-        }
-      }
+      mapPoints: mapPoints(frameId, planEditorState)
     },
   };
 };

@@ -127,17 +127,17 @@ export default function FrameDetail(props: FrameDetailProps) {
                         </InputGroup>
                         <InputGroup size="sm">
                           <InputLeftAddon layerStyle="input-label-sm">
-                       Top
+                            Top
                           </InputLeftAddon>
                           <Input value={top} onChange={setTop} textAlign="right" ype="number"/>
                         </InputGroup>
                         <InputGroup size="sm">
                           <InputLeftAddon layerStyle="input-label-sm">
-                           Order
+                            Order
                           </InputLeftAddon>
                           <Input readOnly value={order} type="number"
                                  onChange={setOrder} textAlign="right"
-                               />
+                          />
                         </InputGroup>
                       </VStack>
                       <VStack flexBasis="50%">

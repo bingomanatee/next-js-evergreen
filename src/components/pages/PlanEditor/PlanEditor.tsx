@@ -69,8 +69,9 @@ function PlanEditor(props: PlanEditorProps) {
         <Box layerStyle="grid-view-box" data-ref="grid-view-wrapper">
           <GridView zoom={zoom}/>
         </Box>
-        <LinkView under/>
+        <LinkView />
         <FramesList frames={frames}/>
+        <LinkView over />
         <BlockerSwitch role="inline-block-switch" inline/>
       </FrameAnchorView>
       <ControlBar/>

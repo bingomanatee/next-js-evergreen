@@ -1,45 +1,32 @@
-import {useCallback, useContext} from 'react'
+import {Suspense, useCallback, useContext} from 'react'
 import {Frame, X_DIR, Y_DIR} from '~/types'
 import useForestFiltered from '~/lib/useForestFiltered'
-import dataManager from '~/lib/managers/dataManager'
-import {Box, Button, CloseButton, HStack, Select, Text} from '@chakra-ui/react'
+import {Box, Button, CloseButton, HStack, Select, Spinner, Text, useBoolean} from '@chakra-ui/react'
 import {frameToStyle} from '~/lib/utils/px'
-import LinkFrameSprite, {
-  POINT_OFFSET
-} from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameSprite/LinkFrameSprite'
+import LinkFrameSprite from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameSprite/LinkFrameSprite'
 import {LinkFrameStateContext} from '~/components/pages/PlanEditor/LinkFrameView/LinkFrameView'
-import {Vector2} from "three";
 import UnZoom from "~/components/pages/UnZoom";
+import dynamic from "next/dynamic";
+import Image from 'next/image';
 
-function LinkMapSprite({isEnd}) {
-  const linkState = useContext(LinkFrameStateContext);
-  const offset = new Vector2(-20, 30).add(POINT_OFFSET);
-  const frameStyle = linkState!.$.style({x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M}, offset, isEnd);
-
-  return (
-      <Box position="absolute" style={frameStyle}>
-        <Text>Link to map point</Text>
-        <Select>
-          <option key="center">Center</option>
-        </Select>
-      </Box>
-  )
-}
+let MapPointDlog = null;
 
 export function TargetView({isEnd}) {
   const linkState = useContext(LinkFrameStateContext);
   const targetState = linkState!.child('target')!;
 
+  const {locked, frame, mapPoint} = useForestFiltered(targetState,
+      ['locked', 'frame', 'mapPoint'])
 
-  const {id} = useForestFiltered(linkState!, ['id']);
+  const [openLink, openLinkDlog] = useBoolean(false);
 
-  const {locked, frame} = useForestFiltered(targetState, ['id', 'locked', 'frame'])
-
-  if (!frame) {
-    return null;
+  if (openLink && !MapPointDlog) {
+    MapPointDlog = dynamic(() => import ('./MapPointDlog/MapPointDlog'), {
+      suspense: true
+    });
   }
 
-  console.log('target --- frame = ', frame.type, 'locked = ', locked, 'target state = ', targetState.value);
+  if (!frame) return <span/>
 
   return <>
     <Box
@@ -49,43 +36,61 @@ export function TargetView({isEnd}) {
         layerStyle={locked ? 'link-frame-target-locked' : "link-frame-target"}
         {...frameToStyle(frame)}>
       <UnZoom>
-      <HStack
-          spacing={4}
-      >
+        <HStack
+            spacing={2}
+        >
           {locked ? <>
-                <Text textStyle="link-frame-target">LinkTarget</Text>
                 <CloseButton
                     color="red"
                     aria-label="cancel lock"
                     style={{pointerEvents: 'all'}}
                     onClick={targetState.do.clearLock}
                 />
+                <Text textStyle="frame-target-text">Link target</Text>
+
               </>
               : (
                   <Button
-                      variant="frame-link-locker">
+                      textStyle="frame-target-text"
+                      variant="frame-target-link-button">
                     Click to link
                   </Button>
               )
           }
-      </HStack>
-    </UnZoom>
+        </HStack>
+        {locked && frame?.type === 'map' ? (
+            <Button
+                variant="map-link-button"
+                {...(mapPoint) ? {
+                  leftIcon: <Image alt="active-indicator" src="/img/icons/edit-confirm.svg" height={20} width={20}/>
+                } : {}
+                }
+                onMouseDown={openLinkDlog.on}>
+              Point on map...</Button>
+        ) : ''}
+      </UnZoom>
 
-      {frame.type === 'map' ? <LinkMapSprite/> : ''}
     </Box>
-    {locked ? <>
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_T}}/>
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_M}}/>
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_B}}/>
+    {
+      locked ? <>
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_T}}/>
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_M}}/>
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_R, y: Y_DIR.Y_DIR_B}}/>
 
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_T}}/>
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_M}}/>
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_B}}/>
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_T}}/>
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_M}}/>
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_B}}/>
 
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_T}}/>
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M}}/>
-      <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_B}}/>
-    </> : null}
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_T}}/>
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M}}/>
+        <LinkFrameSprite isEnd dir={{x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_B}}/>
+        {locked && openLink ? (
+            <Suspense fallback={<Spinner/>}>
+              <MapPointDlog openLinkDlog={openLinkDlog}/>
+            </Suspense>
+        ) : null}
+      </> : null
+    }
 
   </>
 }

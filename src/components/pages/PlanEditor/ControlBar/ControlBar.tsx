@@ -43,11 +43,9 @@ export default function ControlBar(props: ControlBarProps) {
     (localState) => {
     });
 
-  const { newFrame, panning, panPosition } = value;
+  const { panPosition } = value;
 
-  const listFrames = useCallback(() => {
-    messageManager.listFrames();
-  }, [])
+  const {id, type} = useForestFiltered(blockManager, ['id', 'type']);
 
   const { clicked } = useForestFiltered(frameListHoverManager!, ['clicked']);
 
@@ -111,14 +109,16 @@ export default function ControlBar(props: ControlBarProps) {
           <ControlBarItem
             onClick={planEditorState.do.clearTransform}
             showOpen={blockManager.value.type === BlockMode.PANNING}
-            icon={"/img/icons/page-move.svg"}
             iconItem={<GrClear />}
             label="Reset View"/>
         </HStack>
         {frame ? <FrameControlBar frame={frame}/> : null}
       </HStack>
       {
-        panning ? <Portal><Panner state={state} panPosition={panPosition}/></Portal> : null
+        //@TODO: move to BlockerSwitch
+        (id && (type === BlockMode.PANNING)) ? (
+            <Portal><Panner state={state} panPosition={panPosition}/></Portal>
+        ): null
       }
     </Box>
   );

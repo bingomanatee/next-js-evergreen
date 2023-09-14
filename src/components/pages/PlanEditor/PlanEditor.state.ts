@@ -37,7 +37,7 @@ const PlanEditorState = (id, planContainerRef) => {
     modeTarget: null,
     planId: id,
     pan: new Vector2(),
-    zoom: 100
+    zoom: 50
   };
   return {
     name: "PlanEditor",

@@ -8,13 +8,12 @@ import keyManager from '~/lib/managers/keyManager'
 import { Vector2 } from 'three'
 import swallowEvent from '~/lib/swallowEvent'
 
-export type ControlBarStateValue = { panning: boolean, panPosition: Vector2 };
+export type ControlBarStateValue = { panPosition: Vector2 };
 
 type leafType = typedLeaf<ControlBarStateValue>;
 
 const ControlBarState = (props, planEditorState) => {
   const $value: ControlBarStateValue = {
-    panning: false,
     panPosition: new Vector2(0, 0)
   };
   return {
@@ -99,8 +98,7 @@ const ControlBarState = (props, planEditorState) => {
 
         window.removeEventListener('mousedown', state.do.endPan);
         window.document.addEventListener('mousedown', state.do.endPan, { once: true });
-
-        state.do.set_panning(true);
+        blockManager.do.block(BlockMode.PANNING);
       }
     },
 

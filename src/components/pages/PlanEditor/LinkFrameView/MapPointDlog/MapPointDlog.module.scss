@@ -1,0 +1,17 @@
+@import '~/utils.scss';
+
+.list-item * {
+  pointer-events: none;
+  @include no-select();
+}
+
+.container {
+
+}
+
+
+.map-container {
+  canvas {
+    cursor: crosshair
+  }
+}

@@ -15,7 +15,6 @@ export default function MapEditor(props: MapEditorProps) {
 
   const [value, state] = useForest([stateFactory, props, frameDetailState],
       (localState) => {
-        console.log('map editor init');
         return localState.do.init();
       });
 

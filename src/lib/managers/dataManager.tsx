@@ -1,41 +1,29 @@
 "use client"
-import { addRxPlugin, createRxDatabase, RxDatabase, RxDocument } from 'rxdb';
-import { wrappedValidateZSchemaStorage } from 'rxdb/plugins/validate-z-schema';
-import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
-import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
-import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-import { RxDBMigrationPlugin } from 'rxdb/plugins/migration';
-import { BehaviorSubject, combineLatest, map, Subscription, tap } from 'rxjs'
-import { Box2, Vector2 } from 'three'
-import { v4 } from 'uuid';
-import { asJson } from '~/lib/utils/schemaUtils'
-import { userManager } from '~/lib/managers/userManager'
-import { anonUserId, HOUR } from '~/constants'
-import { Frame, Link, Plan, Setting } from '~/types'
-import { sortBy } from 'lodash';
-import frameMover, { ShufflePos } from '~/lib/utils/frameMover'
-import axios from 'axios';
+import {addRxPlugin, createRxDatabase, RxDatabase, RxDocument} from 'rxdb';
+import {wrappedValidateZSchemaStorage} from 'rxdb/plugins/validate-z-schema';
+import {RxDBDevModePlugin} from 'rxdb/plugins/dev-mode';
+import {RxDBQueryBuilderPlugin} from 'rxdb/plugins/query-builder';
+import {getRxStorageDexie} from 'rxdb/plugins/storage-dexie';
+import {RxDBMigrationPlugin} from 'rxdb/plugins/migration';
+import {BehaviorSubject, combineLatest, map, Subscription} from 'rxjs'
+import {Box2} from 'three'
+import {v4} from 'uuid';
+import {asJson} from '~/lib/utils/schemaUtils'
+import {userManager} from '~/lib/managers/userManager'
+import {anonUserId, HOUR} from '~/constants'
+import {DataStreamItem, Frame, Link, Plan, Setting} from '~/types'
+import {sortBy} from 'lodash';
+import frameMover, {ShufflePos} from '~/lib/utils/frameMover'
 
 addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBQueryBuilderPlugin);
 addRxPlugin(RxDBMigrationPlugin);
-
-type PlanData = { plan: Plan | null, links: any[], frames: Frame[] }
 
 const dbPromise: Promise<RxDatabase<any>> = createRxDatabase(
   {
     name: 'planboard3',
     storage: wrappedValidateZSchemaStorage({ storage: getRxStorageDexie() })
   });
-
-type DataStreamItem = {
-  frames: any[];
-  links: any[];
-  framesMap: Map<string, Frame>
-  planId: string | null,
-  plan: Plan | null,
-  settingsMap: Map<string, string | number>
-}
 
 type ImageData = {
   url: string,
@@ -63,6 +51,7 @@ type DataManager = {
   getImageUrl(id: string): Promise<ImageData>
   fetchFrame(id: string): Promise<Frame | null>
   getFrame(frameId): Frame | null
+  planId(): any;
 }
 
 type Action = (db: RxDatabase<any>) => Promise<any> | Promise<void>
@@ -83,6 +72,9 @@ const planStream: BehaviorSubject<DataStreamItem> = new BehaviorSubject(
   });
 
 const dataManager: DataManager = {
+  planId(): any {
+    return this.planStream.value.planId;
+  },
   getFrame(frameId): Frame | null {
     // returns a frame from the planStream. Synchronous
     return dataManager.planStream.value.framesMap.get(frameId)?.toJSON()
@@ -116,7 +108,7 @@ const dataManager: DataManager = {
         // -- ignore error -- proceed
       }
 
-      const imageData = await dataManager.fetchImageData(id);
+      const imageData = await dataManager.do((db) => db.frame_images.fetchImageData(id, dataManager.planId()));
       frame.incrementalPatch({
         value: JSON.stringify(imageData), width: imageData.width, height: imageData.height
       })
@@ -238,7 +230,7 @@ const dataManager: DataManager = {
             frames.forEach((frame: Frame) => {
               framesMap.set(frame.id, frame);
             })
-            const settingsMap = new Map();
+            const settingsMap: Map<string, string | number> = new Map();
             settings.forEach((setting: Setting) => {
               settingsMap.set(
                 setting.name,
@@ -247,9 +239,9 @@ const dataManager: DataManager = {
             });
             const data: DataStreamItem = {
               plan: planJson,
-              frames: asJson(frames as RxDocument[]),
+              frames: asJson(frames as RxDocument[]) as Frame[],
               framesMap,
-              links: asJson(links as RxDocument[]),
+              links: asJson(links as RxDocument[]) as Link[],
               planId,
               settingsMap
             }

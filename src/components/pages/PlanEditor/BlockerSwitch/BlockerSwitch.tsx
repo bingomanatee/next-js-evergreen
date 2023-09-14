@@ -38,7 +38,7 @@ export default function BlockerSwitch({ role, inline = false }: InViewBlockersPr
 
 
   const validType = useMemo(() => {
-      if (!type) {
+      if (!(type && id)) {
         return null;
       }
 
@@ -50,7 +50,7 @@ export default function BlockerSwitch({ role, inline = false }: InViewBlockersPr
       }
       return type;
     },
-    [type, inline]);
+    [type, id, inline]);
 
   useEffect(() => {
     keyManager.init();

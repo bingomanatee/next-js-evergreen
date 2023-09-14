@@ -1,30 +1,18 @@
-import { leafI, typedLeaf } from '@wonderlandlabs/forest/lib/types'
-import { SVG } from '@svgdotjs/svg.js'
+import {leafI, typedLeaf} from '@wonderlandlabs/forest/lib/types'
+import {SVG} from '@svgdotjs/svg.js'
 import dataManager from '~/lib/managers/dataManager'
-import { frameToPoint } from '~/lib/utils/px'
-import { LFSummary } from '~/types'
-import { Vector2 } from 'three'
+import {frameToPoint} from '~/lib/utils/px'
+import {LFSummary, X_DIR, Y_DIR} from '~/types'
+import {Vector2} from 'three'
+import {isEqual} from "lodash";
+import {cache} from "./LineViewCache";
 
-export type LineViewStateValue = { fromPoint: Vector2 | null, toPoint: Vector2 | null } & LFSummary;
+export type LineViewStateValue = {
+  fromPoint: Vector2 | null,
+  toPoint: Vector2 | null
+} & LFSummary;
 
 type leafType = typedLeaf<LineViewStateValue>;
-
-/**
- * returns a value from the state's meta -- or generates it if it is no longer current
- * @param state {leafI}
- * @param key {string} the place to store the value
- * @param retriever {function} how to generate a new value
- * @param validator {function} whether the current value is valid
- */
-async function cache(state: leafI, key: string, retriever: () => Promise<any>, validator: (value: any) => boolean) {
-  const current = state.getMeta(key);
-  if (validator(current)) {
-    return current;
-  }
-  const newValue = await retriever();
-  state.setMeta(key, newValue, true);
-  return newValue;
-}
 
 const validator = (id) => (frame) => {
   if (!id) {
@@ -47,8 +35,10 @@ const LineViewState = (props, linkState) => {
   const $value: LineViewStateValue = {
     id: null,
     spriteDir: null,
+    mapPoint: null,
     targetId: null,
     targetSpriteDir: null,
+    targetMapPoint: null,
     fromPoint: null, toPoint: null
   };
   let element: HTMLDivElement | null = null;
@@ -59,20 +49,19 @@ const LineViewState = (props, linkState) => {
 
     selectors: {
       canDraw(state: leafType) {
-        const { id, spriteDir, targetId, targetSpriteDir } = state.value;
-        const out = !!(id && spriteDir && targetSpriteDir && targetId && element);
-        return out;
+        const {id, spriteDir, targetId, targetSpriteDir, targetMapPoint} = state.value;
+        return !!(id && spriteDir && (targetSpriteDir || targetMapPoint) && targetId && element);
       },
       async fromFrame(state: leafType) {
-        const { id } = linkState.value;
+        const {id} = linkState.value;
         return cache(state, 'fromFrame', retriever(id), validator(id));
       },
       async toFrame(state: leafType) {
-        const { id } = linkState.child('target')!.value;
+        const {id} = linkState.child('target')!.value;
         return cache(state, 'toFrame', retriever(id), validator(id));
       },
       async genFromPoint(state: leafType) {
-        const { spriteDir, id } = linkState.value;
+        const {spriteDir, id} = linkState.value;
         if (!(spriteDir && id)) {
           return null;
         }
@@ -80,12 +69,27 @@ const LineViewState = (props, linkState) => {
         return frame ? frameToPoint(frame, spriteDir) : null
       },
       async genToPoint(state: leafI) {
-        const { spriteDir, id } = linkState.child('target')!.value;
-        if (!(spriteDir && id)) {
+        const {spriteDir, id, mapPoint} = linkState.child('target')!.value;
+
+        if (!((spriteDir || mapPoint) && id)) {
           return null;
         }
-        const frame = await state.$.toFrame();
-        return frame ? frameToPoint(frame, spriteDir) : null
+        const frame = linkState.value.target.frame;
+        if (mapPoint) {
+          const point = await dataManager.do(async (db) => {
+            return db.map_points.fetch(mapPoint);
+          })
+          if (!point) return null;
+
+          const {x, y} = point;
+          const vector = frameToPoint(frame, {x: X_DIR.X_DIR_L, y: Y_DIR.Y_DIR_T})!
+          return vector.add(new Vector2(x, y)).round();
+
+        }
+        if (spriteDir) {
+          return frame ? frameToPoint(frame, spriteDir) : null
+        }
+        return null;
       }
     },
 
@@ -98,19 +102,32 @@ const LineViewState = (props, linkState) => {
       },
       init(state: leafType) {
         return linkState.select((summary) => {
-          state.value = { ...state.value, ...summary }
+          state.value = {...state.value, ...summary};
+
+          state.$.genFromPoint().then((p) => {
+            if (!isEqual(state.value.fromPoint, p)) {
+              state.do.set_fromPoint(p);
+            }
+          });
+
+          state.$.genToPoint().then((p) => {
+            if (!isEqual(state.value.toPoint, p)) {
+              state.do.set_toPoint(p);
+            }
+          });
+
         }, (value) => {
-          const { id, spriteDir, target } = value;
-          const { id: targetId, spriteDir: targetSpriteDir } = target;
-          return { id, spriteDir, targetSpriteDir, targetId }
+          const {id, spriteDir, target} = value;
+          const {id: targetId, spriteDir: targetSpriteDir, mapPoint: targetMapPoint} = target;
+          return {id, spriteDir, targetSpriteDir, targetId, targetMapPoint}
         })
       },
       setRef(state: leafType, e: HTMLDivElement) {
         element = e;
-        state.value = { ...state.value }
+        state.value = {...state.value}
       },
       async draw(state: leafType) {
-        const { fromPoint, toPoint } = state.value;
+        const {fromPoint, toPoint} = state.value;
         if (!(fromPoint && toPoint && element)) {
           return null;
         }
@@ -118,11 +135,11 @@ const LineViewState = (props, linkState) => {
 
         const draw = SVG().addTo(element!).size('100vw', '100vh');
         draw.line(
-          fromPoint.x,
-          fromPoint.y,
-          toPoint.x,
-          toPoint.y
-        ).stroke({ color: 'black', width: 4 });
+            fromPoint.x,
+            fromPoint.y,
+            toPoint.x,
+            toPoint.y
+        ).stroke({color: 'black', width: 4});
       }
     }
   };

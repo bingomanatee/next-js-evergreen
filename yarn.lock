@@ -2209,6 +2209,13 @@
   resolved "https://registry.npmjs.org/@wonderlandlabs/walrus/-/walrus-0.0.2.tgz"
   integrity sha512-1HNRIHp+MY3dVdAxcEFtiWaqC0EVlrzQSeqbHNTQKA4LYClQxcdol7+YoYzX+GA8UgblfIiufGn+3yfGPg09nQ==
 
+"@wonderlandlabs/walrus@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@wonderlandlabs/walrus/-/walrus-0.1.0.tgz#ea10e22f3a1aec0ddf91f6919c9fee14c7e223d0"
+  integrity sha512-6+a3ZaPEa7LNXEGwmcrr1j9uKbZl+Dpr3+/f8td8Z43rYDO0bWhjfIYM/yi6yM/ujYU+GxAyDGupxIzxxEf4ZQ==
+  dependencies:
+    lodash.isequal "^4.5.0"
+
 "@zag-js/element-size@0.3.2":
   version "0.3.2"
   resolved "https://registry.npmjs.org/@zag-js/element-size/-/element-size-0.3.2.tgz"

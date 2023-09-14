@@ -45,7 +45,7 @@ export function PlaceInfo(props: { state: leafI }) {
   const {interactive} = useForestFiltered(state, ['interactive']);
 
   return (
-      <VStack spacing={[1, 2, 2]} className={styles['map-container' + interactive ? '-interactive' : '']}>
+      <VStack spacing={[1, 2, 2]} className={styles['map-container' + (interactive ? '-interactive' : '')]}>
         <HStack justify="center" mt={2}>
           <Box flex={1}>
             <Text whiteSpace="nowrap" fontSize="xs" textStyle="info-sm" textAlign="center">

@@ -139,8 +139,5 @@ const stdMap = new Map();
   })
 
 export function stringToDir(name: string) {
-  if (!stdMap.has(name)) {
-    throw new Error('cannot find dir ' + name);
-  }
   return stdMap.get(name);
 }

@@ -1,22 +1,20 @@
-import { useState, useEffect, useCallback, useContext } from 'react';
+"use client"
+import { useContext } from 'react';
 import styles from './LinkView.module.scss';
 import stateFactory from './LinkView.state.ts';
 import useForest from '~/lib/useForest'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
-import useForestFiltered from '~/lib/useForestFiltered'
 
-type LinkViewProps = {}
+
+export type LinkViewProps = {over ?  : boolean}
 
 export default function LinkView(props: LinkViewProps) {
   const planEditorState = useContext(PlanEditorStateCtx);
-  const [value, state] = useForest([stateFactory, props, planEditorState],
+  const [_value, state] = useForest([stateFactory, props, planEditorState],
     (localState) => {
-      const sub = localState.do.init();
-      return () => sub.unsubscribe();
+      return localState.do.init();
     });
 
-  const {} = value;
-
-  return (<div className={styles.container} ref={state.$.setRef}>
+  return (<div className={styles.container} style={props.over ? {zIndex: 100000} : {}} ref={state.do.setRef}>
   </div>);
 }

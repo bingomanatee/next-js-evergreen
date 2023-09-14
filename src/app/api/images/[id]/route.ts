@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 
-export const config = {
+/*export const config = {
   api: {
     bodyParser: false
   }
-}
+}*/
 
 export async function GET(
   req, { params }

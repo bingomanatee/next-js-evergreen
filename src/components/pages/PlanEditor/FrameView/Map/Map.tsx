@@ -7,7 +7,7 @@ import ReactMapboxGl from 'react-mapbox-gl'
 import px, { vectorToStyle } from '~/lib/utils/px'
 import { Vector2 } from 'three'
 import { PlanEditorStateCtx } from '~/components/pages/PlanEditor/PlanEditor'
-import useForestFiltered from '~/lib/useForestFiltered'
+import {Box, Text} from "@chakra-ui/react";
 
 type MapProps = { frame: Frame }
 const Map = ReactMapboxGl({
@@ -19,7 +19,6 @@ const Map = ReactMapboxGl({
 export default function MapView(props: MapProps) {
   const { frame } = props;
   const planEditorState = useContext(PlanEditorStateCtx);
-  const { zoom } = useForestFiltered(planEditorState!, ['zoom'])
 
   const [value, state] = useForest([stateFactory, props, planEditorState],
     (localState) => {
@@ -28,7 +27,7 @@ export default function MapView(props: MapProps) {
 
   useEffect(() => {
     state.do.mergeFrame(frame);
-  }, [frame])
+  }, [frame, state])
 
   const {mapData} = value;
 
@@ -45,11 +44,12 @@ export default function MapView(props: MapProps) {
         mapRef.current.triggerRepaint();
       }, 100);
     }
-  }, [size])
+  }, [mapData.lat, mapData.lng, size])
 
   if (!(mapData.lng && mapData.lat)) return null;
   return (
-      <div style={{ width: px(size.x), height: px(size.y) }} ref={state.do.setRef}>
+      <div style={{ width: px(size.x), height: px(size.y), overflow: 'visible', position: 'relative' }}
+           ref={state.do.setRef}>
       </div>
   )
 }

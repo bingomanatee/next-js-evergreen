@@ -26,6 +26,16 @@ function migrationNoOp(oldDoc) {
   return oldDoc
 }
 
+function assertCreatedUpdated(oldDoc) {
+  if (!oldDoc.created){
+    oldDoc.created=Date.now();
+  }
+  if (!oldDoc.updated) {
+    oldDoc.updated = Date.now();
+  }
+  return oldDoc;
+}
+
 function assertUserId(oldDoc) {
   if (!oldDoc.user_id){
     oldDoc.user_id = userManager.$.currentUserId() || '';
@@ -67,26 +77,21 @@ export default function framesSchema(dataManager) {
         }
       },
       schema: {
-        version: 1,
+        version: 2,
         primaryKey: 'id',
         type: 'object',
         properties: {
           id: ID_PROP,
           name: STRING,
           user_id: STRING,
-          created: INT
+          created: INT,
+          updated: INT,
         },
-        required: ['id', 'name', 'user_id']
+        required: ['id', 'name', 'user_id', 'created', 'updated']
       },
       migrationStrategies: {
-        1: (oldDoc) => {
-          console.log('cloning pl 1', oldDoc);
-          if ('userId' in oldDoc) {
-            oldDoc.user_id = oldDoc.userId;
-            delete oldDoc.userId;
-          }
-          return oldDoc;
-        },
+        1: assertUserId,
+        2: assertCreatedUpdated
       }
     },
     settings: {
@@ -94,12 +99,13 @@ export default function framesSchema(dataManager) {
         1: migrationNoOp,
         2: migrationNoOp,
         3: assertUserId,
+        4: assertCreatedUpdated,
       },
       schema: {
-        version: 3,
+        version: 4,
         primaryKey: 'id',
         type: 'object',
-        required: ['id', 'name', 'plan_id'],
+        required: ['id', 'name', 'plan_id', 'created', 'updated'],
         properties: {
           id: ID_PROP,
           plan_id: ID_PROP,
@@ -108,6 +114,8 @@ export default function framesSchema(dataManager) {
           string: STRING,
           number: NUMBER,
           is_number: BOOLEAN,
+          created: INT,
+          updated: INT,
         }
       },
       statics: {
@@ -161,7 +169,7 @@ export default function framesSchema(dataManager) {
     },
     frames: {
       schema: {
-        version: 7,
+        version: 8,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -169,9 +177,8 @@ export default function framesSchema(dataManager) {
           name: STRING,
           user_id: ID_PROP,
           plan_id: STRING,
-          created: {
-            type: 'integer'
-          },
+          created: INT,
+          updated: INT,
           type: {
             ...STRING,
             defaultValue: 'markdown'
@@ -201,7 +208,7 @@ export default function framesSchema(dataManager) {
           },
           styles: STYLE
         },
-        required: ['id', 'plan_id', 'linkMode', 'top', 'left', 'width', 'order', 'height', 'user_id']
+        required: ['id', 'plan_id', 'linkMode', 'top', 'left', 'width', 'order', 'height', 'user_id', 'created', 'updated']
       },
       migrationStrategies: {
         1: (oldDoc) => {
@@ -239,6 +246,7 @@ export default function framesSchema(dataManager) {
           return oldDoc;
         },
         7: assertUserId,
+        8: assertCreatedUpdated,
       },
       statics: {
         async fetch(id: string) {
@@ -263,7 +271,7 @@ export default function framesSchema(dataManager) {
     },
     links: {
       schema: {
-        version: 4,
+        version: 7,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -280,15 +288,20 @@ export default function framesSchema(dataManager) {
           link_style: STRING,
           line_type: STRING,
           line_color: STRING,
+          created: INT,
+          updated: INT,
           line_size: INT
         },
-        required: ['id', 'plan_id', 'start_frame', 'end_frame'],
+        required: ['id', 'plan_id', 'start_frame', 'end_frame', 'created', 'updated'],
       },
       migrationStrategies: {
         1: projectIdToProject_id,
         2: projectIdToPanId,
         3: migrationNoOp,
-        4: migrationNoOp
+        4: migrationNoOp,
+        5: assertCreatedUpdated,
+        6: assertCreatedUpdated,
+        7: assertCreatedUpdated,
       },
       statics: {
         async addLink(params: LFSummary) {
@@ -296,10 +309,11 @@ export default function framesSchema(dataManager) {
           if (!planId) {
             console.log('---- cannot save link - no plan id');
           }
-          console.log('---------- addLink:', params);
           const newLink = {
             id: v4(),
             plan_id: planId,
+            created: params.created || Date.now(),
+            updated: Date.now(),
             start_frame: params.id,
             end_frame: params.targetId,
             start_at: dirToString(params.spriteDir),
@@ -338,7 +352,7 @@ export default function framesSchema(dataManager) {
     },
     frame_images: {
       schema: {
-        version: 2,
+        version: 3,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -347,18 +361,20 @@ export default function framesSchema(dataManager) {
           frame_id: ID_PROP,
           plan_id: ID_PROP,
           created: INT,
+          updated: INT,
           url: STRING,
           width: INT,
           height: INT,
           error: STRING,
           is_valid: BOOLEAN
         },
-        required: ['id', 'plan_id', 'frame_id'],
+        required: ['id', 'plan_id', 'frame_id', 'user_id', 'created', 'updated'],
 
       },
       migrationStrategies: {
         1: migrationNoOp,
         2: assertUserId,
+        3: assertCreatedUpdated
       },
       statics: {
         async updateImageData(frame_id, plan_id) {
@@ -478,7 +494,7 @@ export default function framesSchema(dataManager) {
      */
     style: {
       schema: {
-        version: 2,
+        version: 3,
         primaryKey: {
           // where should the composed string be stored
           key: 'id',
@@ -505,9 +521,11 @@ export default function framesSchema(dataManager) {
           },
           style: STRING,
           plan_id: ID_PROP,
-          user_id: ID_PROP
+          user_id: ID_PROP,
+          created: INT,
+          updated: INT,
         },
-        required: ['id', 'scope', 'tag', 'style', 'user_id']
+        required: ['id', 'scope', 'tag', 'style', 'user_id', 'created', 'updated']
       },
       migrationStrategies: {
         1: (data) => {
@@ -516,7 +534,8 @@ export default function framesSchema(dataManager) {
           }
           return data;
         },
-        2: assertUserId
+        2: assertUserId,
+        3: assertCreatedUpdated
       },
     },
 

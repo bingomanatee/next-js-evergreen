@@ -14,16 +14,17 @@ import {anonUserId, HOUR} from '~/constants'
 import {DataStreamItem, Frame, Link, Plan, Setting} from '~/types'
 import {sortBy} from 'lodash';
 import frameMover, {ShufflePos} from '~/lib/utils/frameMover'
+import {string} from "zod";
 
 addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBQueryBuilderPlugin);
 addRxPlugin(RxDBMigrationPlugin);
 
 const dbPromise: Promise<RxDatabase<any>> = createRxDatabase(
-  {
-    name: 'planboard3',
-    storage: wrappedValidateZSchemaStorage({ storage: getRxStorageDexie() })
-  });
+    {
+      name: 'planboard3',
+      storage: wrappedValidateZSchemaStorage({storage: getRxStorageDexie()})
+    });
 
 type ImageData = {
   url: string,
@@ -52,6 +53,7 @@ type DataManager = {
   fetchFrame(id: string): Promise<Frame | null>
   getFrame(frameId): Frame | null
   planId(): any;
+  loadRemoteData(db: RxDatabase<any>, planId: string): Promise<void>
 }
 
 type Action = (db: RxDatabase<any>) => Promise<any> | Promise<void>
@@ -62,14 +64,14 @@ const frames: Frame[] = [];
 const links: Link[] = [];
 
 const planStream: BehaviorSubject<DataStreamItem> = new BehaviorSubject(
-  {
-    plan: null,
-    planId: null,
-    framesMap,
-    frames: frames,
-    links: links,
-    settingsMap
-  });
+    {
+      plan: null,
+      planId: null,
+      framesMap,
+      frames: frames,
+      links: links,
+      settingsMap
+    });
 
 const dataManager: DataManager = {
   planId(): any {
@@ -92,17 +94,17 @@ const dataManager: DataManager = {
     }
   },
   async getImageUrl(id: string, noSave = false) {
-    const cutoff =  HOUR + Date.now();
+    const cutoff = HOUR + Date.now();
     try {
       const frame = await dataManager.fetchFrame(id);
       try {
         const currentData = JSON.parse(frame.value);
-        const { url, time, error } = currentData;
+        const {url, time, error} = currentData;
         if (url && time && (!error) && (time > cutoff)) {
           console.log('using current image data');
           return currentData
         } else {
-          console.log('time', time , '<', cutoff, 'reloading', currentData);
+          console.log('time', time, '<', cutoff, 'reloading', currentData);
         }
       } catch (err) {
         console.error('cannot parse', frame.value, err.message);
@@ -120,7 +122,7 @@ const dataManager: DataManager = {
   },
   moveFrame(frameId: string, direction: ShufflePos): any {
     dataManager.do(async (db) => {
-      const { frames, framesMap } = dataManager.planStream.value;
+      const {frames, framesMap} = dataManager.planStream.value;
       const frame = framesMap.get(frameId);
       if (!frame) {
         return;
@@ -131,7 +133,7 @@ const dataManager: DataManager = {
       newFrames.forEach(async (frame, index) => {
         if (frame.order !== index + 1) {
           const doc = await db.frames.fetch(frame.id);
-          await doc?.incrementalPatch({ order: index + 1 })
+          await doc?.incrementalPatch({order: index + 1})
         }
       })
     });
@@ -165,8 +167,8 @@ const dataManager: DataManager = {
   async deleteFrame(id) {
     return dataManager.do(async (db) => {
       const doc = await db.frames.findOne()
-        .where('id')
-        .eq(id).exec();
+          .where('id')
+          .eq(id).exec();
 
       return doc?.remove();
     })
@@ -222,41 +224,46 @@ const dataManager: DataManager = {
         planId,
         settings
       ])
-        .pipe(
-          // convert documents to POJO
-          map(([frames, links, plans, _planId, settings]) => {
-            const planJson = plans.get(planId)?.toJSON();
+          .pipe(
+              // convert documents to POJO
+              map(([frames, links, plans, _planId, settings]) => {
+                const planJson = plans.get(planId)?.toJSON();
 
-            const framesMap = new Map();
-            frames.forEach((frame: Frame) => {
-              framesMap.set(frame.id, frame);
-            })
-            const settingsMap: Map<string, string | number> = new Map();
-            settings.forEach((setting: Setting) => {
-              settingsMap.set(
-                setting.name,
-                setting.is_number ? setting.number : setting.string
-              )
-            });
-            const data: DataStreamItem = {
-              plan: planJson,
-              frames: asJson(frames as RxDocument[]) as Frame[],
-              framesMap,
-              links: asJson(links as RxDocument[]) as Link[],
-              planId,
-              settingsMap
+                const framesMap = new Map();
+                frames.forEach((frame: Frame) => {
+                  framesMap.set(frame.id, frame);
+                })
+                const settingsMap: Map<string, string | number> = new Map();
+                settings.forEach((setting: Setting) => {
+                  settingsMap.set(
+                      setting.name,
+                      setting.is_number ? setting.number : setting.string
+                  )
+                });
+                const data: DataStreamItem = {
+                  plan: planJson,
+                  frames: asJson(frames as RxDocument[]) as Frame[],
+                  framesMap,
+                  links: asJson(links as RxDocument[]) as Link[],
+                  planId,
+                  settingsMap
+                }
+                return (data)
+              }),
+          )
+          .subscribe(async (data) => {
+            if (data.plan?.user_id === userManager.$.currentUserId()) {
+              dataManager.planStream.next(data);
+            } else {
+              dataManager.endPoll();
             }
-            return (data)
-          }),
-        )
-        .subscribe(async (data) => {
-          if (data.plan?.user_id === userManager.$.currentUserId()) {
-            dataManager.planStream.next(data);
-          } else {
-            dataManager.endPoll();
-          }
-        });
-    })
+          });
+
+      dataManager.loadRemoteData(db, planId);
+    });
+  },
+  _connectionMaps : new Map<string, any>(),
+  async loadRemoteData(db, planId) {
 
   },
   planStream,
@@ -276,7 +283,7 @@ const dataManager: DataManager = {
   },
   async addCollection(name: string, colls: Record<string, any>) {
     return dataManager.do((db) => {
-      return db.addCollections({ [name]: colls })
+      return db.addCollections({[name]: colls})
     })
   },
   async addFrame(planId: string, bounds: Box2) {

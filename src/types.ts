@@ -154,7 +154,7 @@ export type LFSummary = {
   spriteDir: Direction | null,
   targetId: string | null,
   targetSpriteDir: Direction | null,
-  targetMapPoint: string | null,
+  targetMapPoint?: string | null,
 }
 
 export enum BlockMode {

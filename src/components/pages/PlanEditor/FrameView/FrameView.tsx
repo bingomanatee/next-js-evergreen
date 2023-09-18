@@ -76,7 +76,7 @@ export function FrameView(props: { frame: Frame }) {
       }
     }
     return "frameView";
-  }, [clicked, frame, hover, zoom, tooSmall]);
+  }, [clicked, frame, hover, tooSmall]);
 
   DetailView = resourceMap.get(frame.type ?? null) || NullView
 

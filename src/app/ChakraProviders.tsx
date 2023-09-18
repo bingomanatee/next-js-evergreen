@@ -489,6 +489,17 @@ const BUTTONS = {
       fontWeight: 800
     }
   },
+  'frame-list-button-icon': {
+    h: 'auto',
+    isRound: true,
+    p: 0,
+    backgroundColor: 'transparent',
+    textAlign: 'center',
+    _hover: {
+      backgroundColor: 'transparent',
+      fontWeight: 800
+    }
+  },
   "map-link-button": {
     textTransform: 'none',
     fontWeight: 500,

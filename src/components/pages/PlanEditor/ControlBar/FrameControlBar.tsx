@@ -10,6 +10,7 @@ import Image from 'next/image'
 import dataManager from '~/lib/managers/dataManager'
 import {ShufflePos} from '~/lib/utils/frameMover'
 import ControlBarItem from '~/components/pages/PlanEditor/ControlBar/ControlBarItem'
+import shortId from "~/lib/utils/shortId";
 
 const MOVE_ICON_SIZE = 18;
 
@@ -52,7 +53,7 @@ export function FrameControlBar({frame}) {
             w={40}
             noOfLines={1}>
           Frame&nbsp;
-          <b>{frame.name || frame.id}</b>
+          <b>{frame.name || shortId(frame.id)}</b>
         </Text>
         <ControlBarItem
             onClick={clearClicked}

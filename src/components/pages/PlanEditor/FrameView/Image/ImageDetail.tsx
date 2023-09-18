@@ -4,7 +4,7 @@ import useForest from '~/lib/useForest';
 import {Frame} from '~/types'
 import Image from 'next/image';
 import {useEffect, useMemo} from 'react'
-import {VStack, Text} from '@chakra-ui/react'
+import {VStack, Text, Spinner} from '@chakra-ui/react'
 
 type ImageProps = { frame: Frame }
 
@@ -24,16 +24,21 @@ export default function ImageDetail(props: ImageProps) {
           localState.do.load();
         }, 100);
       });
-  const {url, width, height} = value;
+  const {url, width, height, loaded} = value;
 
+  let content = <Spinner />
+
+  if (url || loaded) {
+    content = (url) ? <Image
+        alt={props.frame.name || props.frame.id}
+        src={url}
+        width={width}
+        height={height}
+    /> : <NoImage frame={frame} state={state}/>
+  }
   return (<div className={styles.container}>
     {
-      (url) ? <Image
-          alt={props.frame.name || props.frame.id}
-          src={url}
-          width={width}
-          height={height}
-      /> : <NoImage frame={frame} state={state}/>
+      content
     }
   </div>);
 }

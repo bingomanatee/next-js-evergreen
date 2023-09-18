@@ -18,11 +18,11 @@ export default function MapEditor(props: MapEditorProps) {
         return localState.do.init();
       });
 
-  const {description} = value;
+  const {lat, lng} = value;
 
   return (
       <Box>
-        {!description ? <PlaceSearch state={state}/> : <PlaceInfo state={state}/>}
+        {(!(lat || lng)) ? <PlaceSearch state={state}/> : <PlaceInfo state={state}/>}
       </Box>
   );
 }

@@ -24,6 +24,7 @@
 .active-frame {
   color: hsl(330, 100%, 60%) !important;
 }
+
 .frame-table {
   padding: 0;
   margin: 0;
@@ -46,7 +47,7 @@
     &.type-cell {
       width: 50px;
       color: white
-  }
+    }
 
     &.link-cell {
       width: 50px;
@@ -60,22 +61,50 @@
       padding: 0 4px;
     }
 
+    &.link-icon-cell {
+      width: 40px;
+    }
+
     &.edit-cell {
-      width: 60px;
+      width: 30px;
       text-align: right;
+      color: var(--chakra-colors-blackAlpha-50)
+
     }
 
     &.id-cell {
       width: 100px;
     }
 
-    &.link-cell-2{
+    &.link-cell-2 {
       width: 100px;
     }
   }
 
-  tr:hover td {
-    background-color: var(--chakra-colors-hover-row)
+  tr:hover {
+    td {
+      background-color: var(--chakra-colors-hover-row);
+
+      &:hover {
+        &.edit-cell {
+          color: var(--chakra-colors-accent)
+        }
+        button {
+          background-color: var(--chakra-colors-accent) !important;
+          color: black;
+        }
+      }
+    }
+
+    .edit-cell {
+      color: var(--chakra-colors-nav-dark)
+    }
+
+    button {
+      background-color: var(--chakra-colors-nav-dark) !important;
+      color: white;
+    }
+
   }
 }
 

@@ -24,6 +24,7 @@ const ImageState = (props) => {
     time: 0,
     height: 0,
     width: 0,
+    loaded: false,
   };
   return {
     name: "Image",
@@ -40,11 +41,10 @@ const ImageState = (props) => {
               .fetchImageData(frame.id, frame.plan_id);
           });
           if (imageFile) {
-            state.value = imageFile.toJSON();
+            state.value = {...imageFile.toJSON(), loaded: true}
           }
-          //@TODO: observe
         } catch(err) {
-          console.log('error getting image data:', err, 'for frame', frame.id);
+          console.error('error getting image data:', err, 'for frame', frame.id);
         }
 
         return () => sub?.unsubscribe();

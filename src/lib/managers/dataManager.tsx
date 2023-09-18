@@ -73,6 +73,7 @@ const planStream: BehaviorSubject<DataStreamItem> = new BehaviorSubject(
 
 const dataManager: DataManager = {
   planId(): any {
+    console.log('getting planId from ', this.planStream.value);
     return this.planStream.value.planId;
   },
   getFrame(frameId): Frame | null {

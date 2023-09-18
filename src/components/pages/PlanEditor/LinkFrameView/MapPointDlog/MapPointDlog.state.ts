@@ -3,6 +3,7 @@ import mapboxgl from "mapbox-gl";
 import mapPoints from "~/lib/stateFragments/mapPoints";
 import {v4} from "uuid";
 import dataManager from "~/lib/managers/dataManager";
+import {string} from "zod";
 
 export type MapPointDlogStateValue = {
   lat: number,
@@ -60,7 +61,7 @@ const MapPointDlogState = (props, linkState, planEditorState) => {
     selectors: {},
 
     actions: {
-      savePoint(state: leafType){
+      savePoint(state: leafType) {
         targetState.do.set_mapPoint(state.value.linkPoint || '');
         openLinkDlog.off();
       },
@@ -77,19 +78,21 @@ const MapPointDlogState = (props, linkState, planEditorState) => {
       },
       chooseListItem(state: leafType, e: MouseEvent) {
         const newId = e.target?.id || '';
-        if (newId && newId === state.value.linkPoint) return state.do.set_linkPoint('');
-        state.do.set_linkPoint(newId)
+        if (newId && newId === state.value.linkPoint) {
+          state.do.set_linkPoint('');
+        } else state.do.set_linkPoint(newId)
         state.do.refreshActiveIcon();
       },
       leaveListItem(state) {
         state.do.set_infoPoint('');
+        state.do.refreshActiveIcon();
       },
 
       refreshActiveIcon(state: leafType) {
         const {infoPoint, linkPoint} = state.value;
         const map = new Map();
         if (linkPoint) map.set(linkPoint, 'map-point-active');
-        if (infoPoint && linkPoint !== linkPoint) map.set(infoPoint, 'map-point-over');
+        if (infoPoint && linkPoint !== infoPoint) map.set(infoPoint, 'map-point-over');
 
         const mapPoints = state.child('mapPoints')!;
         mapPoints.do.set_pointIcons(map);

@@ -4,6 +4,7 @@ import dataManager from "~/lib/managers/dataManager";
 import {asJson} from "~/lib/utils/schemaUtils";
 import {typedLeaf} from "@wonderlandlabs/forest/lib/types";
 import {Vector2} from "three";
+import shortId from "~/lib/utils/shortId";
 
 export type MapPointsStateValue = {
   points: Map<string, MapPoint>,
@@ -45,7 +46,7 @@ export default function mapPoints(frameId, planEditorState) {
                 properties: {
                   ...point,
                   icon,
-                  point_label: `${point.label || point.id} (${point.x} ${point.y})`
+                  point_label: `${point.label || shortId(point.id)}`
                 }
               });
               return memo;
@@ -169,6 +170,7 @@ export default function mapPoints(frameId, planEditorState) {
         await Promise.all(
             [
               state.do.initImage('map-point', '/img/icons/map-point.png'),
+              state.do.initImage('map-point-over', '/img/icons/map-point-over.png'),
               state.do.initImage('map-point-active', '/img/icons/map-point-active.png'),
             ]
         )
@@ -176,10 +178,14 @@ export default function mapPoints(frameId, planEditorState) {
 
       async initSource(state: mapPointsLeafType) {
         if (state.value.pointsSourceLoaded) return;
-        const map = state.$.map();
+        let map = state.$.map();
         if (!map) return;
 
         await state.do.initPointIcon();
+        map = state.$.map();
+        if (!map) {
+          return;
+        }
         if (!map.getSource('points')) {
           const points = {
             'type': 'geojson',
@@ -206,9 +212,13 @@ export default function mapPoints(frameId, planEditorState) {
         state.do.set_pointsSourceLoaded(true);
       },
       updateSource(state: mapPointsLeafType) {
-        const map = state.$.map();
-        if (!map) return;
-        map.getSource('points')?.setData(state.$.pointsToFeatures());
+        try {
+          const map = state.$.map();
+          if (!map) return;
+          map.getSource('points')?.setData(state.$.pointsToFeatures());
+        } catch (err) {
+          console.error('error updating source:', err);
+        }
       },
 
       async refreshPoints(state: mapPointsLeafType) {

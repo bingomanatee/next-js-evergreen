@@ -1,15 +1,13 @@
-import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import {typedLeaf} from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
-import { Frame, LFSummary, Link, X_DIR, Y_DIR } from '~/types'
-import { throttle } from 'lodash'
-import { Vector2 } from 'three'
+import {BlockMode, Frame, LFSummary, Link, X_DIR, Y_DIR} from '~/types'
+import {Vector2} from 'three'
 
 // local
 import sortByOrder from '~/lib/utils/SortByOrder'
-import messageManager from '~/lib/managers/messageManager'
 
 // component
-import { FrameListProps } from './types'
+import {FrameListProps} from './types'
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 import blockManager from '~/lib/managers/blockManager'
 
@@ -49,12 +47,12 @@ const FrameListPanelState = (props: FrameListProps) => {
 
     selectors: {
       links(state: leafType, id: string) {
-        const { links } = state.value;
+        const {links} = state.value;
 
         return links.filter((link: Link) => link.start_frame === id || link.end_frame === id).length;
       },
       targetLinks(state: leafType) {
-        const { links, linkTarget } = state.value;
+        const {links, linkTarget} = state.value;
         if (!linkTarget) {
           return new Map();
         }
@@ -69,18 +67,18 @@ const FrameListPanelState = (props: FrameListProps) => {
         }, new Map());
       },
       count(state: leafType, index: number) {
-        const { offset } = state.value;
+        const {offset} = state.value;
 
         return index + (offset * MAX_FRAMES) + 1;
       },
       population(state: leafType) {
-        const { frames, search, linkTarget } = state.value;
+        const {frames, search, linkTarget} = state.value;
         let frameSet = frames.sort(sortByOrder).reverse();
         if (search || linkTarget) {
           const linkedTo = state.$.targetLinks();
           const searchStr = search.toLowerCase();
           return frameSet.filter((frame: Frame) => {
-            const { name, content, id } = frame;
+            const {name, content, id} = frame;
             if (linkTarget === id) {
               return false;
             }
@@ -95,18 +93,24 @@ const FrameListPanelState = (props: FrameListProps) => {
             return true;
           });
         }
+        if (linkTarget) {
+          const linkedTo = state.$.targetLinks();
+            return frameSet.filter((frame: Frame) => {
+              return linkedTo.has(frame.id);
+            });
+        }
         return frameSet
       },
       framesList(state: leafType) {
-        const { offset } = state.value;
+        const {offset} = state.value;
         return state.$.population().slice(offset * MAX_FRAMES, (offset + 1) * MAX_FRAMES);
       },
       atEnd(state: leafType) {
-        const { offset } = state.value;
+        const {offset} = state.value;
         return state.$.population().length <= (offset + 1) * MAX_FRAMES;
       },
       atStart(state: leafType) {
-        const { offset } = state.value;
+        const {offset} = state.value;
         return offset === 0;
       }
     },
@@ -116,32 +120,36 @@ const FrameListPanelState = (props: FrameListProps) => {
         state.do.set_search('');
       },
       addLink(state: leafType, id: string) {
-        const { linkTarget, frames } = state.value;
+        const {linkTarget, frames} = state.value;
         if (!(linkTarget && id && id !== linkTarget)) {
           return;
         }
         const config: LFSummary = {
           id: linkTarget,
           targetId: id,
-          spriteDir: { x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M },
-          targetSpriteDir: { x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M },
+          spriteDir: {x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M},
+          targetSpriteDir: {x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M},
         };
 
         const baseFrame = frames.find(fr => fr.id === id);
 
         dataManager.do((db) => {
-          return db.links.addLink(baseFrame.plan_id, config);
+          return db.links.addLink(config);
         })
       },
+      async unLink(state: leafType, id: string) {
+        const {linkTarget} = state.value;
+        return dataManager.do(db => db.links.unLink(linkTarget, id));
+      },
       next(state: leafType) {
-        const { offset } = state.value;
+        const {offset} = state.value;
         if (state.$.atEnd()) {
           return;
         }
         state.do.set_offset(offset + 1);
       },
       prev(state: leafType) {
-        const { offset } = state.value;
+        const {offset} = state.value;
         if (state.$.atStart()) {
           return;
         }
@@ -149,15 +157,19 @@ const FrameListPanelState = (props: FrameListProps) => {
       },
       editFrame(state: leafType, id: string, e: MouseEvent) {
         e.stopPropagation();
-        props.cancel();
-        frameListHoverManager.do.clear();
+        blockManager.do.finish();
 
         setTimeout(async () => {
-          messageManager.editFrame(id)
+          blockManager.do.block(BlockMode.EDIT_FRAME, {frameId: id})
         }, 500)
       },
+      selectFrame(state: leafType, id: string, e: MouseEvent) {
+        e.stopPropagation();
+        blockManager.do.finish();
+        frameListHoverManager.do.set_clicked(id);
+      },
       async moveFrame(state: leafType, fromId: string, toId: string) {
-        const { frames } = state.value;
+        const {frames} = state.value;
         const orderedFrames = frames.sort(sortByOrder)
         const frameFrom = frames.find((frame) => frame.id === fromId);
         if (!frameFrom) {
@@ -189,7 +201,7 @@ const FrameListPanelState = (props: FrameListProps) => {
           if (existingFrames.has(id)) {
             const existingFrame = existingFrames.get(id);
             if (existingFrame.order !== frame.order) {
-              existingFrame.incrementalPatch({ order: frame.order })
+              existingFrame.incrementalPatch({order: frame.order})
             }
           } else {
             console.warn('cannot reorder id ', id, 'not in ', existingFrames);
@@ -204,7 +216,7 @@ const FrameListPanelState = (props: FrameListProps) => {
         frameListHoverManager.do.set_hover(null);
       },
       init(state: leafType) {
-        const sub = dataManager.planStream.subscribe(({ plan, frames, links }) => {
+        const sub = dataManager.planStream.subscribe(({plan, frames, links}) => {
           state.do.set_frames(frames);
           state.do.set_links(links);
         });

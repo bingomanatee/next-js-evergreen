@@ -210,7 +210,7 @@ const MapEditorState = (props: { frameState: leafI }) => {
       },
       frameToState(state: leafType) {
         try {
-          const data = JSON.parse(frameState.value.frame);
+          const data = JSON.parse(frameState.value.frame.value);
           const {lat, lng, placeSearch} = data;
           if (lat) {
             state.do.set_lat(lat);
@@ -225,7 +225,6 @@ const MapEditorState = (props: { frameState: leafI }) => {
         }
       },
       observeSaving(state: leafType) {
-        console.log('--- observeSaving')
         const sub = frameState.parent.subscribe((value) => {
           if (value.saving) {
             state.child('mapPoints')!.do.save();
@@ -283,6 +282,7 @@ const MapEditorState = (props: { frameState: leafI }) => {
           scrollZoom: false,
           dragPan: false,
         });
+        map.on('style.load', state.child('mapPoints')!.do.initSource);
 
         map.on('dragend', state.do.onMapMove);
         map.on('zoomend', state.do.onMapZoom);

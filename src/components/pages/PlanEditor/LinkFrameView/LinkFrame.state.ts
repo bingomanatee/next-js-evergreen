@@ -17,7 +17,7 @@ type leafType = typedLeaf<LinkFrameStateValue>;
 const LinkFrameState = () => {
   const $value: LinkFrameStateValue = {
     ...dimensionValue(),
-    spriteDir: null,
+    spriteDir: {x: X_DIR.X_DIR_C, y: Y_DIR.Y_DIR_M},
     planId: ''
   };
   return {
@@ -46,15 +46,16 @@ const LinkFrameState = () => {
     actions: {
       async save(state: leafType, params: LFSummary) {
         const {id, spriteDir, targetId, targetSpriteDir, targetMapPoint} = params;
+
         if (id && spriteDir && (targetId || targetMapPoint) && targetSpriteDir) {
           await dataManager.do(async (db) => {
-            return db.links.addLink(state.value.planId, params);
+            console.log('saving map link:', params);
+            return db.links.addLink(params);
           });
         }
         blockManager.do.finish();
       },
       clearLock(state: leafType) {
-        console.log('--- clearing lock');
         state.child('target')!.do.updateId(null, false);
       },
       spriteClicked(state: leafType, dir: Direction, onEnd?: boolean) {
@@ -70,7 +71,6 @@ const LinkFrameState = () => {
         //@ts-ignore
         const targetId = e.target.dataset['frameContainer'];
         const target = state.child('target')!;
-        console.log('--- mouse entered frame with ', target.value);
 
         if (target.value.locked && target.value.id) {
           return;

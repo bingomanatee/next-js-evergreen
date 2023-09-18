@@ -26,6 +26,13 @@ function migrationNoOp(oldDoc) {
   return oldDoc
 }
 
+function assertUserId(oldDoc) {
+  if (!oldDoc.user_id){
+    oldDoc.user_id = userManager.$.currentUserId() || '';
+  }
+  return oldDoc;
+}
+
 export const NO_IMAGE_ERROR = 'no image saved';
 
 export default function framesSchema(dataManager) {
@@ -38,7 +45,7 @@ export default function framesSchema(dataManager) {
             id: v4(),
             name,
             created: Date.now(),
-            userId: userId || dataManager.anonUserId
+            user_id: userId || dataManager.anonUserId
           });
           //@TODO: open new record
         },
@@ -85,10 +92,11 @@ export default function framesSchema(dataManager) {
     settings: {
       migrationStrategies: {
         1: migrationNoOp,
-        2: migrationNoOp
+        2: migrationNoOp,
+        3: assertUserId,
       },
       schema: {
-        version: 2,
+        version: 3,
         primaryKey: 'id',
         type: 'object',
         required: ['id', 'name', 'plan_id'],
@@ -96,6 +104,7 @@ export default function framesSchema(dataManager) {
           id: ID_PROP,
           plan_id: ID_PROP,
           name: STRING,
+          user_id: STRING,
           string: STRING,
           number: NUMBER,
           is_number: BOOLEAN,
@@ -152,12 +161,13 @@ export default function framesSchema(dataManager) {
     },
     frames: {
       schema: {
-        version: 6,
+        version: 7,
         primaryKey: 'id',
         type: 'object',
         properties: {
           id: ID_PROP,
           name: STRING,
+          user_id: ID_PROP,
           plan_id: STRING,
           created: {
             type: 'integer'
@@ -191,7 +201,7 @@ export default function framesSchema(dataManager) {
           },
           styles: STYLE
         },
-        required: ['id', 'plan_id', 'linkMode', 'top', 'left', 'width', 'order', 'height']
+        required: ['id', 'plan_id', 'linkMode', 'top', 'left', 'width', 'order', 'height', 'user_id']
       },
       migrationStrategies: {
         1: (oldDoc) => {
@@ -227,7 +237,8 @@ export default function framesSchema(dataManager) {
           }
           delete oldDoc.content;
           return oldDoc;
-        }
+        },
+        7: assertUserId,
       },
       statics: {
         async fetch(id: string) {
@@ -280,28 +291,59 @@ export default function framesSchema(dataManager) {
         4: migrationNoOp
       },
       statics: {
-        async addLink(planId: string, params: LFSummary) {
+        async addLink(params: LFSummary) {
+          const planId = dataManager.planId();
+          if (!planId) {
+            console.log('---- cannot save link - no plan id');
+          }
+          console.log('---------- addLink:', params);
           const newLink = {
             id: v4(),
             plan_id: planId,
             start_frame: params.id,
             end_frame: params.targetId,
-            start_at:  dirToString(params.spriteDir),
+            start_at: dirToString(params.spriteDir),
             end_at: dirToString(params.targetSpriteDir, params.targetMapPoint),
           }
 
+          console.log('new link:', newLink);
           if (newLink.start_at && newLink.end_at)
             return this.incrementalUpsert(newLink);
+        },
+        async unLink(frameOne: string, frameTwo: string) {
+          const fromQuery = await this.find({
+            selector: {
+              start_frame: frameOne,
+              end_frame: frameTwo
+            }
+          }).exec();
+
+          const toQuery = await this.find({
+            selector: {
+                       start_frame: frameTwo,
+                       end_frame: frameOne
+                     }
+          }).exec();
+
+          const ids = [fromQuery, toQuery].flat()
+              .reduce((ids, item) => {
+                if (item?.id) {
+                  ids.push(item.id);
+                }
+                return ids;
+              }, []);
+          return this.bulkRemove(ids);
         }
       }
     },
     frame_images: {
       schema: {
-        version: 1,
+        version: 2,
         primaryKey: 'id',
         type: 'object',
         properties: {
           id: ID_PROP,
+          user_id: ID_PROP,
           frame_id: ID_PROP,
           plan_id: ID_PROP,
           created: INT,
@@ -316,6 +358,7 @@ export default function framesSchema(dataManager) {
       },
       migrationStrategies: {
         1: migrationNoOp,
+        2: assertUserId,
       },
       statics: {
         async updateImageData(frame_id, plan_id) {
@@ -435,7 +478,7 @@ export default function framesSchema(dataManager) {
      */
     style: {
       schema: {
-        version: 0,
+        version: 2,
         primaryKey: {
           // where should the composed string be stored
           key: 'id',
@@ -460,20 +503,32 @@ export default function framesSchema(dataManager) {
             ...STRING,
             maxLength: 50
           },
-          style: STRING
+          style: STRING,
+          plan_id: ID_PROP,
+          user_id: ID_PROP
         },
-        required: ['id', 'scope', 'tag', 'style']
-      }
+        required: ['id', 'scope', 'tag', 'style', 'user_id']
+      },
+      migrationStrategies: {
+        1: (data) => {
+          if (!data.plan_id) {
+            data.plan_id = '';
+          }
+          return data;
+        },
+        2: assertUserId
+      },
     },
 
-    map_points: {
+    map_points:  {
       schema: {
-        version: 1,
+        version: 2,
         primaryKey: 'id',
         type: 'object',
         properties: {
           id: ID_PROP,
           plan_id: ID_PROP,
+          user_id: ID_PROP,
           frame_id: ID_PROP,
           lat: NUMBER,
           lng: NUMBER,
@@ -481,15 +536,16 @@ export default function framesSchema(dataManager) {
           x: NUMBER,
           y: NUMBER
         },
-        required: ['id', 'frame_id', 'lat', 'lng', 'plan_id'],
+        required: ['id', 'frame_id', 'lat', 'lng', 'plan_id', 'user_id'],
       },
       migrationStrategies: {
-        1: (data) =>{
+        1: (data) => {
           if (!data.plan_id) {
             data.plan_id = '';
           }
           return data;
-        }
+        },
+        2: assertUserId
       },
       statics: {
         async fetch(id: string) {
@@ -508,26 +564,21 @@ export default function framesSchema(dataManager) {
                 points.map((p) => p.id)
             );
 
-            console.log('ids in points:', ids);
 
             const query = await this.forFrame(frame_id);
             let existing = await query.exec();
-            console.log('existing ids', existing.map(p => p.id));
 
             const deleteIds = existing
                 .map((point: MapPoint) => point.id
                 )
                 .filter((pointId) => {
                   if (!(ids.has(pointId))) {
-                    console.log('deleting ', pointId);
                     return true;
                   } else {
-                    console.log('not deleting ', pointId);
                     return false;
                   }
                 });
 
-            console.log('deleting ids:', deleteIds)
             await this.bulkRemove(deleteIds);
           }
 

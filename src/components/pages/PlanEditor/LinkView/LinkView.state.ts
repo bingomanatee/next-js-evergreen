@@ -29,7 +29,8 @@ const LinkViewState = (props: LinkViewProps, planEditorState: leafI) => {
             line.from.y,
             line.to.x,
             line.to.y
-        ).stroke({color: props.over ? 'rgba(0,0,0,0.125)' : 'black'}).css('stroke-width', px(400 / state.value.zoom, true))
+        ).stroke({color: props.over ? 'rgba(0,0,0,0.125)' : 'black'})
+            .css('stroke-width', px((props.over ? 150 : 300) / state.value.zoom, true))
       },
       draw(state) {
         const {lines} = state.value;

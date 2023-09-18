@@ -1,6 +1,6 @@
 "use client"
 
-import {BehaviorSubject, combineLatest, debounceTime, map, Observer} from "rxjs";
+import {BehaviorSubject, combineLatest, debounceTime, map, Observer, switchMap} from "rxjs";
 import dataManager from "~/lib/managers/dataManager";
 import {Vector2} from "three";
 import {DataStreamItem, Frame, isValidPoint, MapPoint, Plan} from "~/types";
@@ -8,6 +8,7 @@ import {frameToPoint} from "~/lib/utils/px";
 import {stringToDir} from "~/components/pages/PlanEditor/util";
 import {type} from "@wonderlandlabs/walrus";
 import {TypeEnum} from "@wonderlandlabs/walrus/dist/enums";
+import mapPoints from "~/lib/stateFragments/mapPoints";
 
 export type LineDefinition = {
   from: Vector2,
@@ -27,7 +28,9 @@ function directionToPoint(
     pointMap: Map<string, MapPoint>) {
   if (mapPointRE.test(spriteDirString)) {
     const [_, pointId] = mapPointRE.exec(spriteDirString);
+    console.log('map point id:', pointId);
     if (!pointMap.has(pointId)) {
+      console.error('cannot find map point ', pointId, 'in', pointMap);
       return null;
     }
     const point: MapPoint = pointMap.get(pointId);
@@ -47,17 +50,22 @@ export class LineManager {
 
   private async init() {
     const mapPointSubject = await dataManager.do(async (db) => {
-      const planId = dataManager.planId(); //
-      return db.map_points.find()
-          .where('plan_id')
-          .eq(planId)
-          .$.pipe(map((points: MapPoint[]) => {
-            const map = new Map();
-            points.forEach((point) => {
-              map.set(point.id, point);
-            });
-            return map;
-          }));
+      return dataManager.planStream.pipe(
+          map((value) => value.planId),
+          switchMap((planId) => {
+            return db.map_points.find()
+                .where('plan_id')
+                .eq(planId)
+                .$.pipe(map((points: MapPoint[]) => {
+                  const map = new Map();
+                  points.forEach((point) => {
+                    map.set(point.id, point);
+                  });
+                  return map;
+                }));
+          })
+      )
+
     })
 
     combineLatest(
@@ -75,11 +83,13 @@ export class LineManager {
     return links.map((link) => {
       const startFrame = framesMap.get(link.start_frame);
       const endFrame = framesMap.get(link.end_frame);
-      if (!startFrame && endFrame) return null;
-
+      if (!(startFrame && endFrame)) {
+        return null;
+      }
       const fromPoint = directionToPoint(link.start_at, startFrame, mapPoints);
       const toPoint = directionToPoint(link.end_at, endFrame, mapPoints);
       return {from: fromPoint, to: toPoint}
+
     }).filter((lineDef) => {
       return isValidLineDef(lineDef)
     });

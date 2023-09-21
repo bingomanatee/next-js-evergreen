@@ -5,16 +5,24 @@ import {RxDBDevModePlugin} from 'rxdb/plugins/dev-mode';
 import {RxDBQueryBuilderPlugin} from 'rxdb/plugins/query-builder';
 import {getRxStorageDexie} from 'rxdb/plugins/storage-dexie';
 import {RxDBMigrationPlugin} from 'rxdb/plugins/migration';
-import {BehaviorSubject, combineLatest, map, Subscription} from 'rxjs'
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  interval,
+  map,
+  Subject,
+  Subscription,
+  takeWhile
+} from 'rxjs'
 import {Box2} from 'three'
-import {v4} from 'uuid';
 import {asJson} from '~/lib/utils/schemaUtils'
 import {userManager} from '~/lib/managers/userManager'
-import {anonUserId, HOUR} from '~/constants'
-import {DataStreamItem, Frame, Link, Plan, Setting} from '~/types'
+import {anonUserId, HOUR, SECONDS} from '~/constants'
+import {DataStreamItem, Dateable, Frame, Link, Plan, Setting} from '~/types'
 import {sortBy} from 'lodash';
 import frameMover, {ShufflePos} from '~/lib/utils/frameMover'
-import {string} from "zod";
+import axios from 'axios';
 
 addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBQueryBuilderPlugin);
@@ -41,6 +49,7 @@ type DataManager = {
   anonUserId: any;
   addFrame(planId: string, bounds: Box2): Promise<void>;
   _productSub?: Subscription;
+  _remoteDataSub?: Subscription;
   endPoll(): void;
   poll(id: string): Promise<void>;
   plan: null;
@@ -53,7 +62,12 @@ type DataManager = {
   fetchFrame(id: string): Promise<Frame | null>
   getFrame(frameId): Frame | null
   planId(): any;
-  loadRemoteData(db: RxDatabase<any>, planId: string): Promise<void>
+  loadRemoteData(planId: string): void
+  rationalizeData(planId: string): Promise<void>
+  updateDataset(type: string, data: any[], exclusive?: boolean): Promise<void>
+  syncWithDb(type, data: any[], planId: string): Promise<void>
+  imageError(id: string, error?: Error): void
+  syncRecord(key: string, record: Dateable, document): Promise<void>
 }
 
 type Action = (db: RxDatabase<any>) => Promise<any> | Promise<void>
@@ -73,15 +87,40 @@ const planStream: BehaviorSubject<DataStreamItem> = new BehaviorSubject(
       settingsMap
     });
 
+function dateableToSQL(record: Dateable) {
+  return {
+    ...record,
+    created: new Date(record.created).toISOString(),
+    updated: Date.now(),
+    updated_from: new Date(record.updated).toISOString(),
+  }
+}
+
 const dataManager: DataManager = {
   planId(): any {
-    console.log('getting planId from ', this.planStream.value);
     return this.planStream.value.planId;
   },
   getFrame(frameId): Frame | null {
     // returns a frame from the planStream. Synchronous
     return dataManager.planStream.value.framesMap.get(frameId)?.toJSON()
   },
+
+  async syncRecord(collection: string, record: Dateable, doc: RxDocument) {
+    try {
+
+      const {data} = await axios.put('/api/' + collection + '/' + record.id, {record: dateableToSQL(record)});
+
+    } catch (err) {
+      console.error('error syncing ', record, 'in', collection)
+    }
+  },
+  syncWithDb(type, data: any[], planId: string): Promise<void> {
+    return Promise.resolve(undefined);
+  },
+  updateDataset(type: string, data: any[], exclusive?: boolean): Promise<void> {
+    return Promise.resolve(undefined);
+  },
+
   async imageError(id: string, error?: Error) {
     const frame = await dataManager.fetchFrame(id);
     if (frame) {
@@ -130,12 +169,13 @@ const dataManager: DataManager = {
       let sorted = sortBy(frames, 'order');
       let newFrames = frameMover(frameId, sorted, direction);
 
-      newFrames.forEach(async (frame, index) => {
-        if (frame.order !== index + 1) {
-          const doc = await db.frames.fetch(frame.id);
+      for (const frame1 of newFrames) {
+        const index = newFrames.indexOf(frame1);
+        if (frame1.order !== index + 1) {
+          const doc = await db.frames.fetch(frame1.id);
           await doc?.incrementalPatch({order: index + 1})
         }
-      })
+      }
     });
   },
   deleteState(scope: string, tagName: string) {
@@ -174,6 +214,7 @@ const dataManager: DataManager = {
     })
   },
   _productSub: undefined,
+  _productPublishSub: undefined,
   async initPlan(id: string) {
     if (!id) {
       throw new Error('initPlan: id must be nonempty string')
@@ -195,6 +236,8 @@ const dataManager: DataManager = {
   plan: null,
   endPoll() {
     dataManager._productSub?.unsubscribe();
+    dataManager._remoteDataSub?.unsubscribe();
+    // create new streams to allow old data to write without being interrupted by new information
   },
   async userOwnsPlan(id) {
     const db = await dataManager.db();
@@ -251,24 +294,62 @@ const dataManager: DataManager = {
                 return (data)
               }),
           )
-          .subscribe(async (data) => {
-            if (data.plan?.user_id === userManager.$.currentUserId()) {
-              dataManager.planStream.next(data);
-            } else {
-              dataManager.endPoll();
+          .subscribe({
+            next: async (data) => {
+              if (data.plan?.user_id === userManager.$.currentUserId()) {
+                dataManager.planStream.next(data);
+              } else {
+                dataManager.endPoll();
+              }
+            },
+            complete() {
+              frames.complete();
+              links.complete();
+              plans.complete();
+              settings.complete();
             }
           });
-
-      dataManager.loadRemoteData(db, planId);
+      dataManager.loadRemoteData(planId);
     });
   },
-  _connectionMaps : new Map<string, any>(),
-  async loadRemoteData(db, planId) {
-
+  async rationalizeData(planId) {
+    if (!(planId && planId === dataManager.planId())) {
+      return;
+    }
+    try {
+      const {data: frames} = await axios.get(`/api/frames/${planId}`);
+    } catch (err) {
+      console.log('error getting saved frames:', err);
+    }
+  },
+  async loadRemoteData(planId) {
+    const {data} = await axios.get('/api/plans/' + planId);
+    if (planId === dataManager.planId()) {
+      console.log('reconciling data from database:', data);
+ // @TODO: lock the planId to prevent sync/twitching
+      if (data.plan) {
+        dataManager.do(async (db) => {
+          const {frames, links, map_points, frame_images} = data.plan
+          console.log("frames are ", frames);
+          if (Array.isArray(frames)) {
+            db.frames.reconcileFromServer(frames, planId);
+          }
+          if (Array.isArray(links)) {
+            db.links.reconcileFromServer(links, planId);
+          }
+          if (Array.isArray(map_points)) {
+            db.map_points.reconcileFromServer(map_points, planId);
+          }
+          if (Array.isArray(frame_images)) {
+            db.frame_images.reconcileFromServer(frame_images, planId);
+          }
+        });
+      }
+    }
   },
   planStream,
   async db() {
-    return dbPromise;
+    return dbPromise
   },
   anonUserId,
   async addCollections(colls: Record<string, any>) {
@@ -304,6 +385,7 @@ const dataManager: DataManager = {
         order += 1;
       }
 
+      const created = Date.now();
       const newFrame = {
         id: v4(),
         plan_id: planId,
@@ -311,7 +393,9 @@ const dataManager: DataManager = {
         left: Math.min(bounds.min.x, bounds.max.x),
         width: Math.round(Math.abs(bounds.min.x - bounds.max.x)),
         height: Math.round(Math.abs(bounds.min.y - bounds.max.y)),
-        created: Date.now(),
+        created,
+        updated: created,
+        is_deleted: false,
         linkMode: 'center',
         order
       }

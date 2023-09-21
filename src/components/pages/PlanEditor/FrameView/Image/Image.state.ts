@@ -41,7 +41,10 @@ const ImageState = (props) => {
               .fetchImageData(frame.id, frame.plan_id);
           });
           if (imageFile) {
-            state.value = {...imageFile.toJSON(), loaded: true}
+            const j = imageFile.toJSON();
+            state.value = {...j, loaded: true}
+          } else {
+            console.warn('no image file for ', frame);
           }
         } catch(err) {
           console.error('error getting image data:', err, 'for frame', frame.id);

@@ -1,12 +1,14 @@
 import styles from './Image.module.scss';
-import stateFactory from './Image.state.ts';
+import stateFactory, {ImageStateValue} from './Image.state.ts';
 import useForest from '~/lib/useForest';
 import {Frame} from '~/types'
 import Image from 'next/image';
-import {useEffect, useMemo} from 'react'
+import {forwardRef, useEffect, useMemo} from 'react'
 import {VStack, Text, Spinner} from '@chakra-ui/react'
+import withForest from "~/lib/withForest";
+import {leafI} from "@wonderlandlabs/forest/lib/types";
 
-type ImageProps = { frame: Frame }
+type ImageProps = { frame: Frame, state?: leafI, value: ImageStateValue, witForest?(forest: leafI): void }
 
 function NoImage({state, frame}) {
   return <VStack w="100%" alignContent="center" py={12} px={4}>
@@ -16,17 +18,21 @@ function NoImage({state, frame}) {
 }
 
 
-export default function ImageDetail(props: ImageProps) {
-  const {frame} = props;
-  const [value, state] = useForest([stateFactory, props],
-      (localState) => {
-        setTimeout(() => {
-          localState.do.load();
-        }, 100);
-      });
+const ImageDetail = forwardRef(function ImageDetailBase(props: ImageProps, ref) {
+  const {frame, value, state, createForest} = props;
+
+  useEffect(() => {
+    state?.do.load();
+  }, [state]);
+
+  if (createForest) {
+    createForest(stateFactory(props));
+    return null;
+  }
+
   const {url, width, height, loaded} = value;
 
-  let content = <Spinner />
+  let content = <Spinner/>
 
   if (url || loaded) {
     content = (url) ? <Image
@@ -36,9 +42,9 @@ export default function ImageDetail(props: ImageProps) {
         height={height}
     /> : <NoImage frame={frame} state={state}/>
   }
-  return (<div className={styles.container}>
-    {
-      content
-    }
+  return (<div className={styles.container} ref={ref}>
+    {content}
   </div>);
-}
+})
+
+export default withForest(ImageDetail)

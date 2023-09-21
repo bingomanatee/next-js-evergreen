@@ -15,8 +15,6 @@ export class GridView extends SVGComponent {
       [ProjectSettings.GRID_SIZE]: 50,
       [ProjectSettings.GRID_SHOW]: true,
     };
-
-    this.watchSettings();
   }
 
   private sub: any;
@@ -96,6 +94,7 @@ export class GridView extends SVGComponent {
     super.componentDidMount();
     setTimeout(() => {
       this.drawGrid();
+      this.watchSettings();
     }, 100)
   }
 }

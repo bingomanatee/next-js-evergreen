@@ -1,49 +1,47 @@
 import {v4} from 'uuid'
 import {BehaviorSubject, switchMap} from 'rxjs'
-import {asJson, BOOLEAN, ID_PROP, INT, NUMBER, STRING, STYLE} from '~/lib/utils/schemaUtils'
+import {
+  assertCreatedUpdated,
+  assertDeleted, assertUpdatedFrom,
+  assertUserId,
+  BOOLEAN,
+  ID_PROP,
+  INT,
+  migrationNoOp,
+  NUMBER,
+  projectIdToPanId,
+  projectIdToProject_id,
+  STRING,
+  STYLE
+} from '~/lib/utils/schemaUtils'
 import {userManager} from '~/lib/managers/userManager'
-import {dirToString, LFSummary, MapPoint} from '~/types'
+import {Dateable, dirToString, LFSummary, MapPoint} from '~/types'
 import axios from 'axios';
 import {HOUR} from '~/constants'
-
-function projectIdToPanId(oldDoc) {
-  if ('project_id' in oldDoc) {
-    oldDoc.plan_id = oldDoc.project_id;
-    delete oldDoc.project_id;
-  }
-  return oldDoc;
-}
-
-function projectIdToProject_id(oldDoc) {
-  if (!('project_id' in oldDoc)) {
-    oldDoc.projectId = v4();
-    delete oldDoc.project_id;
-  }
-  return oldDoc;
-}
-
-function migrationNoOp(oldDoc) {
-  return oldDoc
-}
-
-function assertCreatedUpdated(oldDoc) {
-  if (!oldDoc.created){
-    oldDoc.created=Date.now();
-  }
-  if (!oldDoc.updated) {
-    oldDoc.updated = Date.now();
-  }
-  return oldDoc;
-}
-
-function assertUserId(oldDoc) {
-  if (!oldDoc.user_id){
-    oldDoc.user_id = userManager.$.currentUserId() || '';
-  }
-  return oldDoc;
-}
+import dayjs from "dayjs";
 
 export const NO_IMAGE_ERROR = 'no image saved';
+
+function mapSqlData(records: Dateable[]) {
+
+  return mapRecords(records.map((record: Dateable) => {
+    const created = dayjs(record.created).toDate().getTime();
+    const updated = dayjs(record.updated).toDate().getTime();
+    return {
+      ...record,
+      created,
+      updated,
+      updated_from: updated
+    }
+  }))
+}
+
+function mapRecords(records: Dateable[]) {
+  return records.reduce((map: Map<string, Dateable>, record: Dateable) =>  {
+    map.set(record.id, record);
+    return map;
+  }, new Map());
+}
 
 export default function framesSchema(dataManager) {
   return {
@@ -74,10 +72,13 @@ export default function framesSchema(dataManager) {
           } catch (err) {
             console.log('cup error:', err);
           }
-        }
+        },
+        async reconcileFromServer(records, planId) {
+
+        },
       },
       schema: {
-        version: 2,
+        version: 3,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -86,12 +87,14 @@ export default function framesSchema(dataManager) {
           user_id: STRING,
           created: INT,
           updated: INT,
+          updated_from: INT,
         },
-        required: ['id', 'name', 'user_id', 'created', 'updated']
+        required: ['id', 'name', 'user_id', 'created', 'updated', 'updated_from']
       },
       migrationStrategies: {
         1: assertUserId,
-        2: assertCreatedUpdated
+        2: assertCreatedUpdated,
+        3: assertUpdatedFrom
       }
     },
     settings: {
@@ -100,9 +103,11 @@ export default function framesSchema(dataManager) {
         2: migrationNoOp,
         3: assertUserId,
         4: assertCreatedUpdated,
+        5: assertDeleted,
+        6: assertUpdatedFrom
       },
       schema: {
-        version: 4,
+        version: 6,
         primaryKey: 'id',
         type: 'object',
         required: ['id', 'name', 'plan_id', 'created', 'updated'],
@@ -116,9 +121,30 @@ export default function framesSchema(dataManager) {
           is_number: BOOLEAN,
           created: INT,
           updated: INT,
+          is_deleted: BOOLEAN,
+          updated_from: INT,
         }
       },
       statics: {
+        async reconcileFromServer(records, planId) {
+          const localRecords = await this.find().where('plan_id').eq(planId).exec();
+          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
+          const recordUpdates = [];
+          mapSqlData(records).forEach((record: Dateable, id) => {
+            if (localMap.has(id)) {
+              const local = localMap.get(id);
+              if (local.updated_from >= record.updated && local.updated > record.updated) {
+                /**
+                 * There is a local record which was based on the database data
+                 * and is more recent than it. Do not overwrite.
+                 */
+                return;
+              }
+            }
+            recordUpdates.push(record);
+          });
+          this.bulkInsert(recordUpdates);
+        },
         async assertSetting(planId: string, name: string, value:
             string | number, isNumber: boolean = true
         ) {
@@ -169,7 +195,7 @@ export default function framesSchema(dataManager) {
     },
     frames: {
       schema: {
-        version: 8,
+        version: 11,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -179,6 +205,8 @@ export default function framesSchema(dataManager) {
           plan_id: STRING,
           created: INT,
           updated: INT,
+          updated_from: INT,
+          is_deleted: BOOLEAN,
           type: {
             ...STRING,
             defaultValue: 'markdown'
@@ -208,7 +236,8 @@ export default function framesSchema(dataManager) {
           },
           styles: STYLE
         },
-        required: ['id', 'plan_id', 'linkMode', 'top', 'left', 'width', 'order', 'height', 'user_id', 'created', 'updated']
+        required: ['id', 'plan_id', 'linkMode', 'top', 'left', 'width',
+          'order', 'height', 'user_id', 'created', 'updated', 'updated_from']
       },
       migrationStrategies: {
         1: (oldDoc) => {
@@ -247,6 +276,9 @@ export default function framesSchema(dataManager) {
         },
         7: assertUserId,
         8: assertCreatedUpdated,
+        9: assertDeleted,
+        10: assertUpdatedFrom,
+        11: assertUpdatedFrom
       },
       statics: {
         async fetch(id: string) {
@@ -266,12 +298,35 @@ export default function framesSchema(dataManager) {
             return 1;
           }
         },
+        async reconcileFromServer(records, planId) {
+          const localRecords = await this.find().where('plan_id').eq(planId).exec();
+          console.log('local frames = ', localRecords, 'for plan_id', planId);
+
+          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
+          const recordUpdates = [];
+          mapSqlData(records).forEach((record: Dateable, id) => {
+            if (localMap.has(id)) {
+              const local = localMap.get(id);
+              if (local.updated_from >= record.updated && local.updated > record.updated) {
+                /**
+                 * There is a local record which was based on the database data
+                 * and is more recent than it. Do not overwrite.
+                 */
+                return;
+              }
+            }
+            recordUpdates.push(record);
+          });
+          console.log('record updates are ', recordUpdates, 'from', records);
+          const result = await this.bulkInsert(recordUpdates);
+          console.log('result of update:', result);
+        },
       },
       methods: {}
     },
     links: {
       schema: {
-        version: 7,
+        version: 9,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -290,9 +345,11 @@ export default function framesSchema(dataManager) {
           line_color: STRING,
           created: INT,
           updated: INT,
-          line_size: INT
+          line_size: INT,
+          is_deleted: BOOLEAN,
+          updated_from: INT
         },
-        required: ['id', 'plan_id', 'start_frame', 'end_frame', 'created', 'updated'],
+        required: ['id', 'plan_id', 'start_frame', 'end_frame', 'created', 'updated', 'updated_from'],
       },
       migrationStrategies: {
         1: projectIdToProject_id,
@@ -302,6 +359,8 @@ export default function framesSchema(dataManager) {
         5: assertCreatedUpdated,
         6: assertCreatedUpdated,
         7: assertCreatedUpdated,
+        8: assertDeleted,
+        9: assertUpdatedFrom
       },
       statics: {
         async addLink(params: LFSummary) {
@@ -320,9 +379,9 @@ export default function framesSchema(dataManager) {
             end_at: dirToString(params.targetSpriteDir, params.targetMapPoint),
           }
 
-          console.log('new link:', newLink);
-          if (newLink.start_at && newLink.end_at)
+          if (newLink.start_at && newLink.end_at) {
             return this.incrementalUpsert(newLink);
+          }
         },
         async unLink(frameOne: string, frameTwo: string) {
           const fromQuery = await this.find({
@@ -334,9 +393,9 @@ export default function framesSchema(dataManager) {
 
           const toQuery = await this.find({
             selector: {
-                       start_frame: frameTwo,
-                       end_frame: frameOne
-                     }
+              start_frame: frameTwo,
+              end_frame: frameOne
+            }
           }).exec();
 
           const ids = [fromQuery, toQuery].flat()
@@ -347,12 +406,31 @@ export default function framesSchema(dataManager) {
                 return ids;
               }, []);
           return this.bulkRemove(ids);
-        }
+        },
+        async reconcileFromServer(records, planId) {
+          const localRecords = await this.find().where('plan_id').eq(planId).exec();
+          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
+          const recordUpdates = [];
+          mapSqlData(records).forEach((record: Dateable, id) => {
+            if (localMap.has(id)) {
+              const local = localMap.get(id);
+              if (local.updated_from >= record.updated && local.updated > record.updated) {
+                /**
+                 * There is a local record which was based on the database data
+                 * and is more recent than it. Do not overwrite.
+                 */
+                return;
+              }
+            }
+            recordUpdates.push(record);
+          });
+          this.bulkInsert(recordUpdates);
+        },
       }
     },
     frame_images: {
       schema: {
-        version: 3,
+        version: 5,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -362,19 +440,23 @@ export default function framesSchema(dataManager) {
           plan_id: ID_PROP,
           created: INT,
           updated: INT,
+          updated_from: INT,
           url: STRING,
           width: INT,
           height: INT,
           error: STRING,
-          is_valid: BOOLEAN
+          is_valid: BOOLEAN,
+          is_deleted: BOOLEAN
         },
-        required: ['id', 'plan_id', 'frame_id', 'user_id', 'created', 'updated'],
+        required: ['id', 'plan_id', 'frame_id', 'user_id', 'created', 'updated', 'updated_from'],
 
       },
       migrationStrategies: {
         1: migrationNoOp,
         2: assertUserId,
-        3: assertCreatedUpdated
+        3: assertCreatedUpdated,
+        4: assertDeleted,
+        5: assertUpdatedFrom
       },
       statics: {
         async updateImageData(frame_id, plan_id) {
@@ -442,7 +524,26 @@ export default function framesSchema(dataManager) {
             })
           }
           return frameImage;
-        }
+        },
+        async reconcileFromServer(records, planId) {
+          const localRecords = await this.find().where('plan_id').eq(planId).exec();
+          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
+          const recordUpdates = [];
+          mapSqlData(records).forEach((record: Dateable, id) => {
+            if (localMap.has(id)) {
+              const local = localMap.get(id);
+              if (local.updated_from >= record.updated && local.updated > record.updated) {
+                /**
+                 * There is a local record which was based on the database data
+                 * and is more recent than it. Do not overwrite.
+                 */
+                return;
+              }
+            }
+            recordUpdates.push(record);
+          });
+          this.bulkInsert(recordUpdates);
+        },
       },
       methods: {
         onImageError(err: string) {
@@ -494,7 +595,7 @@ export default function framesSchema(dataManager) {
      */
     style: {
       schema: {
-        version: 3,
+        version: 5,
         primaryKey: {
           // where should the composed string be stored
           key: 'id',
@@ -524,8 +625,10 @@ export default function framesSchema(dataManager) {
           user_id: ID_PROP,
           created: INT,
           updated: INT,
+          updated_from: INT,
+          is_deleted: BOOLEAN
         },
-        required: ['id', 'scope', 'tag', 'style', 'user_id', 'created', 'updated']
+        required: ['id', 'scope', 'tag', 'style', 'user_id', 'created', 'updated', 'updated_from']
       },
       migrationStrategies: {
         1: (data) => {
@@ -535,13 +638,36 @@ export default function framesSchema(dataManager) {
           return data;
         },
         2: assertUserId,
-        3: assertCreatedUpdated
+        3: assertCreatedUpdated,
+        4: assertDeleted,
+        5: assertUpdatedFrom
       },
+      statics: {
+        async reconcileFromServer(records, planId) {
+          const localRecords = await this.find().where('plan_id').eq(planId).exec();
+          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
+          const recordUpdates = [];
+          mapSqlData(records).forEach((record: Dateable, id) => {
+            if (localMap.has(id)) {
+              const local = localMap.get(id);
+              if (local.updated_from >= record.updated && local.updated > record.updated) {
+                /**
+                 * There is a local record which was based on the database data
+                 * and is more recent than it. Do not overwrite.
+                 */
+                return;
+              }
+            }
+            recordUpdates.push(record);
+          });
+          this.bulkInsert(recordUpdates);
+        },
+      }
     },
 
-    map_points:  {
+    map_points: {
       schema: {
-        version: 2,
+        version: 4,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -553,9 +679,13 @@ export default function framesSchema(dataManager) {
           lng: NUMBER,
           label: STRING,
           x: NUMBER,
-          y: NUMBER
+          y: NUMBER,
+          created: INT,
+          updated: INT,
+          updated_from: INT,
+          is_deleted: BOOLEAN
         },
-        required: ['id', 'frame_id', 'lat', 'lng', 'plan_id', 'user_id'],
+        required: ['id', 'frame_id', 'lat', 'lng', 'plan_id', 'user_id', 'created', 'updated', 'updated_from'],
       },
       migrationStrategies: {
         1: (data) => {
@@ -564,7 +694,9 @@ export default function framesSchema(dataManager) {
           }
           return data;
         },
-        2: assertUserId
+        2: assertUserId,
+        3: assertCreatedUpdated,
+        4: assertUpdatedFrom
       },
       statics: {
         async fetch(id: string) {
@@ -575,6 +707,29 @@ export default function framesSchema(dataManager) {
         async forFrame(frame_id: string) {
           return this.find()
               .where('frame_id').eq(frame_id)
+        },
+        async reconcileFromServer(records, planId) {
+          const localRecords = await this.find().where('plan_id').eq(planId).exec();
+          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
+          const recordUpdates = [];
+          const remoteMap = mapSqlData(records);
+
+          remoteMap.forEach((record: Dateable, id) => {
+            console.log('sql frame is ', record);
+            if (localMap.has(id)) {
+              const local = localMap.get(id);
+              if (local.updated_from >= record.updated && local.updated > record.updated) {
+                /**
+                 * There is a local record which was based on the database data
+                 * and is more recent than it. Do not overwrite.
+                 */
+                return;
+              }
+            }
+            recordUpdates.push(record);
+          });
+          console.log('bulk inserting ', recordUpdates, 'frames');
+          this.bulkInsert(recordUpdates);
         },
         async updatePoints(frame_id: string, points: MapPoint[], exclusive = false) {
 

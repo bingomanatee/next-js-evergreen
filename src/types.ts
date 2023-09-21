@@ -7,9 +7,14 @@ import * as walrus from '@wonderlandlabs/walrus';
 import {NumberEnum} from "@wonderlandlabs/walrus/dist/enums";
 import {TypeEnum} from "@wonderlandlabs/walrus/dist/enums";
 
-console.log('----walrus', walrus, NumberEnum, TypeEnum);
 const {type} = walrus;
-// const {TypeEnum, NumberEnum} = walrus.enums;
+
+export type Dateable = {
+  id: string,
+  created: number | string,
+  updated: number | string,
+  is_deleted: boolean;
+}
 
 export type Orientation = HORIZ | VERT
 export type FrameType = 'markdown' | 'image' | 'map';
@@ -23,8 +28,9 @@ export type Frame = {
   height: number,
   order: number,
   type: FrameType,
-  value: string
-}
+  value: string,
+  user_id?: string,
+} & Dateable
 
 export type Setting = {
   name: string,

@@ -36,6 +36,7 @@ const ControlBarState = (props, planEditorState) => {
         const id = v4();
         dataManager.do(async (db) => {
           const order = await db.frames.nextFrameOrder(planId);
+          const created = Date.now();
           const newFrame = {
             id,
             plan_id: planId,
@@ -43,7 +44,9 @@ const ControlBarState = (props, planEditorState) => {
             left: 100 + (Math.floor(Math.random() * 6) * 10),
             width: 300,
             height: 400,
-            created: Date.now(),
+            created,
+            updated: created,
+            is_deleted: false,
             linkMode: 'center',
             type,
             order

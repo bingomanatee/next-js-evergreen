@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import {createServerActionClient} from '@supabase/auth-helpers-nextjs'
 
 /*export const config = {
   api: {
@@ -11,7 +11,7 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 export async function GET(
   req, { params }
 ) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = createServerActionClient({cookies});
   const { data: sessionData, error: authError } = await supabase.auth.getSession()
 
   if (authError) {
@@ -44,7 +44,7 @@ export async function GET(
 }
 
 export async function POST(req, { params }) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = createServerActionClient({cookies});
   const { data: sessionData, error: authError } = await supabase.auth.getSession()
 
   if (authError) {

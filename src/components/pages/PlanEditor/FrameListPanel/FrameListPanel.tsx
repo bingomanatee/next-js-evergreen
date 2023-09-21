@@ -13,10 +13,10 @@ import {
   Input,
   InputGroup,
   InputLeftAddon,
-  InputRightAddon, Td,
+  InputRightAddon, Menu, MenuButton, MenuItem, MenuItemOption, MenuList, MenuOptionGroup, Td,
   Text
 } from '@chakra-ui/react'
-import {useRef} from 'react';
+import {memo, useRef} from 'react';
 import Image from 'next/image';
 
 // ---- libs
@@ -38,12 +38,24 @@ import {LinkTarget} from "~/components/pages/PlanEditor/FrameListPanel/LinkTarge
 import shortId from "~/lib/utils/shortId";
 import EditIcon from "~/components/icons/EditIcon";
 import SelectIcon from "~/components/icons/SelectIcon";
+import {ChevronDownIcon} from "@chakra-ui/icons";
+import {util} from "protobufjs";
+import ucFirst = util.ucFirst;
+import useForestFiltered from "~/lib/useForestFiltered";
+import dayjs from "dayjs";
+
+function FieldButton(props: {name: string}) {
+  const {name, active} = props;
+  const title = ucFirst(name);
+  return <MenuItemOption value={name}>{title}</MenuItemOption>
+}
 
 function Search(props: {
   state: leafI
 }) {
   const {state} = props;
   const [search, setSearch] = useForestInput(state, 'search');
+  const {fields} = useForestFiltered(state, ['fields']);
 
   return <HStack>
     <InputGroup size="sm">
@@ -53,7 +65,28 @@ function Search(props: {
         <CloseButton size="sm" boxSize="10pt" onClick={() => state.do.clearSearch()}/>
       </InputRightAddon>
     </InputGroup>
+    <Menu strategy="fixed" closeOnSelect={false}>
+      <MenuButton size="sm" as={Button} rightIcon={<ChevronDownIcon />}>
+        Fields
+      </MenuButton>
+      <MenuList>
+        <MenuOptionGroup value={state.$.visibleFields()} onChange={state.do.updateFields} type="checkbox">
+          <MenuItemOption value="id">Id</MenuItemOption>
+          <MenuItemOption value="type">Type</MenuItemOption>
+          <MenuItemOption value="name">Name</MenuItemOption>
+          <MenuItemOption value="order">Order</MenuItemOption>
+          <MenuItemOption value="created">Created</MenuItemOption>
+          <MenuItemOption value="updated">Updated</MenuItemOption>
+        </MenuOptionGroup>
+      </MenuList>
+    </Menu>
   </HStack>
+}
+
+function timeToDate(created: number) {
+  const d = dayjs(created);
+  if (!d.isValid()) return '--';
+  return d.format('HH:mm a DD.MM.YY')
 }
 
 export default function FrameListPanel(props: FrameListProps) {
@@ -63,7 +96,7 @@ export default function FrameListPanel(props: FrameListProps) {
       (localState) => {
         localState.do.init();
       });
-  const {activeId, linkTarget} = value;
+  const {activeId, fields, linkTarget} = value;
 
   const targetLinks = linkTarget ? state.$.targetLinks() : new Map();
   return (
@@ -87,15 +120,24 @@ export default function FrameListPanel(props: FrameListProps) {
                 {linkTarget ? (<th className={styles['link-icon-cell']}>
                   &nbsp;
                 </th>) : null}
-                <th className={styles['id-cell']}>
+                { fields.get('id') ? (<th className={styles['id-cell']}>
                   <Text noOfLines={1} data-id="header" textStyle="frames-list-head">ID</Text>
-                </th>
-                <th className={styles['type-cell']}>
+                </th>) : null}
+                { fields.get('type') ? (<th className={styles['type-cell']}>
                   <Text noOfLines={1} data-id="header" textStyle="frames-list-head">Type</Text>
-                </th>
-                <th>
+                </th>) : null}
+                { fields.get('name') ? ( <th className={styles['name-cell']}>
                   <Text noOfLines={1} data-id="header" textStyle="frames-list-head">Name</Text>
-                </th>
+                </th>) : null}
+                { fields.get('order') ? ( <th className={styles['order-cell']}>
+                  <Text noOfLines={1} data-id="header" textStyle="frames-list-head">Order</Text>
+                </th>) : null}
+                { fields.get('created') ? ( <th className={styles['time-cell']}>
+                  <Text noOfLines={1} data-id="header" textStyle="frames-list-head">Created</Text>
+                </th>) : null}
+                { fields.get('updated') ? ( <th className={styles['time-cell']}>
+                  <Text noOfLines={1} data-id="header" textStyle="frames-list-head">Updated</Text>
+                </th>) : null}
                 {
                   linkTarget ? (
                      null
@@ -134,7 +176,7 @@ export default function FrameListPanel(props: FrameListProps) {
                       )
                   : null}
 
-                  <td className={styles['id-cell']}>
+                  { fields.get('id') ? ( <td className={styles['id-cell']}>
                     <Text
                         data-id={id}
                         noOfLines={1}
@@ -144,14 +186,14 @@ export default function FrameListPanel(props: FrameListProps) {
                     >
                       {activeId === id ? `*${shortId(frame.id)}` : shortId(frame.id)}
                     </Text>
-                  </td>
+                  </td>) : null}
 
-                  <td className={styles['type-cell']}>
+                  { fields.get('type') ? ( <td className={styles['type-cell']}>
                     <Box justifyContent="center" h={6} w={6}>
                       <FrameIcon active={true} color="white" type={frame.type} size={16}/>
                     </Box>
-                  </td>
-                  <td>
+                  </td>) : null}
+                  { fields.get('name') ? (  <td>
                     <Text
                         data-id={frame.id}
                         noOfLines={1}
@@ -160,7 +202,39 @@ export default function FrameListPanel(props: FrameListProps) {
                     >
                       {frame.name}
                     </Text>
-                  </td>
+                  </td>) : null}
+                  { fields.get('order') ? (  <td>
+                    <Text
+                        data-id={frame.id}
+                        noOfLines={1}
+                        textStyle={'frame-list-item'}
+                        className={activeId === id ? styles['active-frame'] : null}
+                    >
+                      {frame.order}
+                    </Text>
+                  </td>) : null}
+                  { fields.get('created') ? (  <td className={styles['time-cell']}>
+                    <Text
+                        data-id={frame.id}
+                        noOfLines={1}
+                        textStyle={'frame-list-item'}
+                        className={activeId === id ? styles['active-frame'] : null}
+                    >
+                      {timeToDate(frame.created)}
+                    </Text>
+                  </td>) : null}
+
+                  { fields.get('updated') ? (  <td className={styles['time-cell']}>
+                    <Text
+                        data-id={frame.id}
+                        noOfLines={1}
+                        textStyle={'frame-list-item'}
+                        className={activeId === id ? styles['active-frame'] : null}
+                    >
+                      {timeToDate(frame.updated)}
+                    </Text>
+                  </td>) : null}
+
                   {linkTarget ? null : (<>
                     <td className={styles['link-cell']}>
                       <Button

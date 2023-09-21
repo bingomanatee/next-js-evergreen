@@ -9,5 +9,6 @@ export const frameTypeNames = [
   FrameTypes.image,
   FrameTypes.map
 ]
-export const HOUR = 60 * 60 * 1000;
+export const SECONDS = 1000;
+export const HOUR = 60 * 60 * SECONDS;
 export const TO_RAD = Math.PI / 180;

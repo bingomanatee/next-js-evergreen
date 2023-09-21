@@ -10,6 +10,7 @@ import sortByOrder from '~/lib/utils/SortByOrder'
 import {FrameListProps} from './types'
 import frameListHoverManager from '~/lib/managers/frameListHoverManager'
 import blockManager from '~/lib/managers/blockManager'
+import {c} from "@wonderlandlabs/collect";
 
 export type FrameListStateValue = {
   frames: Frame[],
@@ -20,7 +21,8 @@ export type FrameListStateValue = {
   clickedId: string | null,
   search: string,
   offset: 0,
-  linkTarget: string | null
+  linkTarget: string | null,
+  fields: Map<string, boolean>
 };
 type leafType = typedLeaf<FrameListStateValue>;
 
@@ -40,12 +42,26 @@ const FrameListPanelState = (props: FrameListProps) => {
     clickedId: null,
     offset: 0,
     search: '',
+    fields: new Map([
+        ['id',  true],
+        ['type', true],
+        ['name', true],
+        ['order', false],
+        ['created', false],
+        ['updated', false]
+    ])
   };
   return {
     name: "FrameList",
     $value,
 
     selectors: {
+      visibleFields(state: leafType) {
+        return c(state.value.fields).getReduce((memo, active, name) => {
+          if (active) memo.push(name);
+          return memo;
+        }, []);
+      },
       links(state: leafType, id: string) {
         const {links} = state.value;
 
@@ -118,6 +134,15 @@ const FrameListPanelState = (props: FrameListProps) => {
     actions: {
       clearSearch(state: leafType) {
         state.do.set_search('');
+      },
+      updateFields(state: leafType, fields: string[]) {
+        const map = new Map(state.value.fields);
+        console.log('updating fields ', fields, 'in', map);
+        map.forEach((_checked, name) => {
+          map.set(name, fields.includes(name));
+        });
+        console.log('updating fields ', fields, 'to', map);
+        state.do.set_fields(map);
       },
       addLink(state: leafType, id: string) {
         const {linkTarget, frames} = state.value;

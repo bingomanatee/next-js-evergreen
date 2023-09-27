@@ -31,7 +31,7 @@ export function scopeForestFactory(scope: string, frameDetailState): leafConfig 
           const value = new Map(state.value);
           value.delete(tagName);
           // @TODO: delay deletion of store
-          dataManager.deleteState(scope, tagName)
+          dataManager.deleteStyleScope(scope, tagName)
           state.value = value;
         },
         addStyles(state: leafI, styles: any[]) {

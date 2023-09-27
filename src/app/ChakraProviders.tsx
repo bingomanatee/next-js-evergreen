@@ -55,236 +55,249 @@ const LIST_ITEM = {
   }
 }
 const LAYER_STYLES = {
-      'control-panel-item':
-      CONTROL_PANEL_ITEM
-      ,
-      'grid-view-box': {
-        position: 'absolute',
-        w: '100vw',
-        h: '100vh',
-        left: 0,
-        top: 0
-      },
-      'input-group-item-wrapper': {
-        w: '100%',
-        borderWidth: 1,
-        borderRightColor: 'blackAlpha.200',
-        borderTopColor: 'blackAlpha.200',
-        borderBottomColor: 'blackAlpha.200',
-        borderLeftColor: 'transparent',
-        alignContent: 'center'
-      },
-      'input-label': {
-        minWidth: '50px',
-        flex: 0,
-        textAlign: 'right',
-        justifyContent: 'flex-end',
-        backgroundColor: 'blackAlpha.50',
-      },
-      'input-label-sm': {
-        minWidth: '40px',
-        textAlign: 'right',
-        flex: 0,
-        justifyContent: 'flex-end',
-        backgroundColor: 'blackAlpha.50',
-      },
-      'control-panel-item-hover': {
-        ...CONTROL_PANEL_ITEM,
-        borderColor: 'accent',
-        backgroundColor: 'blackAlpha.50'
-      },
-      'frame-placeholder-text': {
-        px: 2,
-        py: 2,
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        whiteSpace: 'nowrap',
-        textAlign: 'center',
-      },
-      'frame-control-checkbox': {
-        backgroundColor: 'white',
-        mx: 3,
-        my: 2,
-      },
-      'outline': {
-        borderWidth: '1px',
-        borderColor: 'blackAlpha.300',
-        px: [1, 2, 2],
-        py: 0,
-        borderRadius: 2
-      },
-      'control-bar': {
-        position: 'fixed',
-        bottom: 0,
-        right: 0,
-        left: 0,
-        width: '100%',
-        backgroundColor: 'white',
-        shadow: 'base',
-        zIndex: 10000000,
-        py: 1,
-        px: 3,
-        Button: {
-          textTransform: 'none',
-          fontSize: '10pt',
-          backgroundColor: 'transparent',
-          _hover: {
-            fontWeight: 600,
-          }
-        }
-      },
-      'popup-item': {
-        w: '100%',
-        px: 2,
-        py: 1,
-        _hover: {
-          backgroundColor: 'hover-row',
-        },
-        _active: {
-          backgroundColor: 'accent',
-        }
-      },
-      'link-frame-target-locked': {
-        ...LINK_FRAME,
-        borderColor: 'nav-dark',
-        backgroundColor: 'nav-alpha-lt',
-        pointerEvents: 'all',
-      }, 'link-frame-target': {
-        ...LINK_FRAME,
-        borderColor: 'nav',
-        pointerEvents: 'none',
-      },
-      'line-view-button': {
-        position: 'absolute',
-        zIndex: 1000002000,
-      },
-      'line-view-flex': {
-        pointerEvents: 'all',
-        p: 4,
-        backgroundColor: 'whiteAlpha.500'
-      },
-      'image-preview': {
-        height: '250px',
-        justifyContent: "center",
-        align: 'center',
-        width: '100%',
-        backgroundImage: `url('/img/image-background.png')`,
-        objectPosition: 'center'
-      },
-      'drop-target': {
-        my: 2,
-        borderStyle: 'dashed',
-        borderWidth: '2px',
-        borderColor: 'nav',
-        backgroundColor: 'nav-x-light',
-        p: 2
-      },
-      'nav-frame': {
-        direction: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        pb: 0,
-        pt: 2,
-        px: 4,
-        h: 8,
-        w: "100%",
-        as: "header",
-        zIndex: 100000,
-        backgroundColor: 'whiteAlpha.600',
-        position: 'fixed',
-        l: 0,
-        r: 0,
-        t: 0
-      },
-      'text-document': {
-        px: 16,
-        py: 10,
-        h: '100%',
-        overflowY: 'auto'
-      },
-      'move-outline': {
-        position: 'absolute',
-        borderColor: 'magenta',
-        borderWidth: '1px',
-        borderStyle: 'solid',
-        zIndex: 100000
-      },
-      frameView: FRAME_VIEW,
-      'frameView-tooSmall': {
-        ...FRAME_VIEW,
-        backgroundColor: 'frame-placeholder',
-        overflow: 'visible',
-        flexWrap: 'nowrap',
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignContent: 'center',
-        borderRadius: '50%',
-        display: 'flex',
-      },
-      'frameView-hover': {
-        ...FRAME_VIEW,
-        borderColor: "frame-view-hover-border",
-      },
-      'frameView-clicked': {
-        ...FRAME_VIEW,
-        borderColor: "frame-view-clicked-border",
-        boxSizing: 'border-box',
-      },
-      'frameView-clicked-hover': {
-        ...FRAME_VIEW,
-        borderColor: "frame-view-clicked-hover-border",
-      },
-      'frame-detail-wrapper': {
-        display: "block",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden"
-      },
-      markdownOuter: {
-        display: "block",
-        as: 'div',
-        width: "100%",
-        height: "100%",
-        overflow: "hidden"
-      },
-      label: {
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        px: 2,
-        py: 0.5
-      },
-      keyHintRow: {
-        alignItems: 'baseline',
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        px: 3,
-        py: 2
-      },
-      newFrame: {
-        position: "absolute",
-        zIndex: "50",
-        background: "black", color: "white",
-        pad: 2,
-        overflow: "hidden",
-      },
-      keyHint: {
-        px: '3px',
-        py: '2px',
-        borderRadius: '0.333em',
-        borderColor: 'gray.500',
-        borderWidth: '1px',
-        mr: 4,
-        backgroundColor: 'white',
-        width: 10,
-        justifyContent: 'center',
-        flexDirection: 'row',
-      },
-
-      'list-item': {
-        ...LIST_ITEM
-      },
-      'list-item-active': {
-        ...LIST_ITEM,
-        borderColor: 'black'
+  'control-panel-item':
+  CONTROL_PANEL_ITEM,
+  'confirm-dialog': {
+    position: 'absolute',
+    bottom: 14,
+    display: 'flex',
+    justifyContent: 'center',
+    width: '100%',
+    pointerEvents: 'none',
+    zIndex: 10000000,
+  },
+  'confirm-dialog-inner': {
+    backgroundColor: 'whiteAlpha.600',
+    p: 4,
+    pointerEvents: 'all'
+  },
+  'grid-view-box': {
+    position: 'absolute',
+    w: '100vw',
+    h: '100vh',
+    left: 0,
+    top: 0
+  },
+  'input-group-item-wrapper': {
+    w: '100%',
+    borderWidth: 1,
+    borderRightColor: 'blackAlpha.200',
+    borderTopColor: 'blackAlpha.200',
+    borderBottomColor: 'blackAlpha.200',
+    borderLeftColor: 'transparent',
+    alignContent: 'center'
+  },
+  'input-label': {
+    minWidth: '50px',
+    flex: 0,
+    textAlign: 'right',
+    justifyContent: 'flex-end',
+    backgroundColor: 'blackAlpha.50',
+  },
+  'input-label-sm': {
+    minWidth: '40px',
+    textAlign: 'right',
+    flex: 0,
+    justifyContent: 'flex-end',
+    backgroundColor: 'blackAlpha.50',
+  },
+  'control-panel-item-hover': {
+    ...CONTROL_PANEL_ITEM,
+    borderColor: 'accent',
+    backgroundColor: 'blackAlpha.50'
+  },
+  'frame-placeholder-text': {
+    px: 2,
+    py: 2,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    whiteSpace: 'nowrap',
+    textAlign: 'center',
+  },
+  'frame-control-checkbox': {
+    backgroundColor: 'white',
+    mx: 3,
+    my: 2,
+  },
+  'outline': {
+    borderWidth: '1px',
+    borderColor: 'blackAlpha.300',
+    px: [1, 2, 2],
+    py: 0,
+    borderRadius: 2
+  },
+  'control-bar': {
+    position: 'fixed',
+    bottom: 0,
+    right: 0,
+    left: 0,
+    width: '100%',
+    backgroundColor: 'white',
+    shadow: 'base',
+    zIndex: 10000000,
+    py: 1,
+    px: 3,
+    Button: {
+      textTransform: 'none',
+      fontSize: '10pt',
+      backgroundColor: 'transparent',
+      _hover: {
+        fontWeight: 600,
       }
-    };
+    }
+  },
+  'popup-item': {
+    w: '100%',
+    px: 2,
+    py: 1,
+    _hover: {
+      backgroundColor: 'hover-row',
+    },
+    _active: {
+      backgroundColor: 'accent',
+    }
+  },
+  'link-frame-target-locked': {
+    ...LINK_FRAME,
+    borderColor: 'nav-dark',
+    backgroundColor: 'nav-alpha-lt',
+    pointerEvents: 'all',
+  }, 'link-frame-target': {
+    ...LINK_FRAME,
+    borderColor: 'nav',
+    pointerEvents: 'none',
+  },
+  'line-view-button': {
+    position: 'absolute',
+    zIndex: 1000002000,
+  },
+  'line-view-flex': {
+    pointerEvents: 'all',
+    p: 4,
+    backgroundColor: 'whiteAlpha.500'
+  },
+  'image-preview': {
+    height: '250px',
+    justifyContent: "center",
+    align: 'center',
+    width: '100%',
+    backgroundImage: `url('/img/image-background.png')`,
+    objectPosition: 'center'
+  },
+  'drop-target': {
+    my: 2,
+    borderStyle: 'dashed',
+    borderWidth: '2px',
+    borderColor: 'nav',
+    backgroundColor: 'nav-x-light',
+    p: 2
+  },
+  'nav-frame': {
+    direction: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    pb: 0,
+    pt: 2,
+    px: 4,
+    h: 8,
+    w: "100%",
+    as: "header",
+    zIndex: 100000,
+    backgroundColor: 'whiteAlpha.600',
+    position: 'fixed',
+    l: 0,
+    r: 0,
+    t: 0
+  },
+  'text-document': {
+    px: 16,
+    py: 10,
+    h: '100%',
+    overflowY: 'auto'
+  },
+  'move-outline': {
+    position: 'absolute',
+    borderColor: 'magenta',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    zIndex: 100000
+  },
+  frameView: FRAME_VIEW,
+  'frameView-tooSmall': {
+    ...FRAME_VIEW,
+    backgroundColor: 'frame-placeholder',
+    overflow: 'visible',
+    flexWrap: 'nowrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    borderRadius: '50%',
+    display: 'flex',
+  },
+  'frameView-hover': {
+    ...FRAME_VIEW,
+    borderColor: "frame-view-hover-border",
+  },
+  'frameView-clicked': {
+    ...FRAME_VIEW,
+    borderColor: "frame-view-clicked-border",
+    boxSizing: 'border-box',
+  },
+  'frameView-clicked-hover': {
+    ...FRAME_VIEW,
+    borderColor: "frame-view-clicked-hover-border",
+  },
+  'frame-detail-wrapper': {
+    display: "block",
+    width: "100%",
+    height: "100%",
+    overflow: "hidden"
+  },
+  markdownOuter: {
+    display: "block",
+    as: 'div',
+    width: "100%",
+    height: "100%",
+    overflow: "hidden"
+  },
+  label: {
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    px: 2,
+    py: 0.5
+  },
+  keyHintRow: {
+    alignItems: 'baseline',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    px: 3,
+    py: 2
+  },
+  newFrame: {
+    position: "absolute",
+    zIndex: "50",
+    background: "black", color: "white",
+    pad: 2,
+    overflow: "hidden",
+  },
+  keyHint: {
+    px: '3px',
+    py: '2px',
+    borderRadius: '0.333em',
+    borderColor: 'gray.500',
+    borderWidth: '1px',
+    mr: 4,
+    backgroundColor: 'white',
+    width: 10,
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+
+  'list-item': {
+    ...LIST_ITEM
+  },
+  'list-item-active': {
+    ...LIST_ITEM,
+    borderColor: 'black'
+  }
+};
 
 const COLORS = {
   accent: 'hsl(30,100%,50%)',

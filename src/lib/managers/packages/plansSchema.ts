@@ -1,12 +1,16 @@
 import {v4} from 'uuid'
 import {BehaviorSubject, switchMap} from 'rxjs'
 import {
+  asJson,
   assertCreatedUpdated,
-  assertDeleted, assertUpdatedFrom,
+  assertDeleted,
+  assertStringDates,
+  assertUpdatedFrom,
   assertUserId,
   BOOLEAN,
   ID_PROP,
   INT,
+  mapRecords,
   migrationNoOp,
   NUMBER,
   projectIdToPanId,
@@ -15,35 +19,38 @@ import {
   STYLE
 } from '~/lib/utils/schemaUtils'
 import {userManager} from '~/lib/managers/userManager'
-import {Dateable, dirToString, LFSummary, MapPoint} from '~/types'
+import {Dateable, DateableSQL, dirToString, LFSummary, MapPoint} from '~/types'
 import axios from 'axios';
 import {HOUR} from '~/constants'
-import dayjs from "dayjs";
+import {assertNoop} from "@babel/types";
+import {newDateable} from "~/lib/utils/toTime";
+import {RxCollection} from "rxdb";
+import {RecordMerger} from "~/lib/utils/RecordMerger";
 
 export const NO_IMAGE_ERROR = 'no image saved';
 
-function mapSqlData(records: Dateable[]) {
-
-  return mapRecords(records.map((record: Dateable) => {
-    const created = dayjs(record.created).toDate().getTime();
-    const updated = dayjs(record.updated).toDate().getTime();
-    return {
-      ...record,
-      created,
-      updated,
-      updated_from: updated
+async function mergeServerRecords(collection: RxCollection, serverRecords: DateableSQL[], plan_id?: string) {
+  let records = await collection.find().where('plan_id').eq(plan_id).exec();
+  const merger = new RecordMerger(asJson(records) as Dateable[], serverRecords, plan_id ? {plan_id} : {});
+  const mergeResult = merger.merge();
+  const {new_db, db_records, local_records} = mergeResult;
+/*  if (collection.name === 'links') {
+    console.log('---- links records for ', plan_id, records,'merge result:',  mergeResult);
+  }*/
+  if (new_db.length) {
+    await collection.bulkInsert(new_db);
+    const newRecordMap = mapRecords(new_db);
+    const updates = db_records.filter((dbRecord) => !newRecordMap.has(dbRecord.id))
+    for (const data of updates) {
+      collection.incrementalUpsert(data);
     }
-  }))
+  }
+  if (local_records.length) {
+    axios.patch('/api/' + collection.name, {records: local_records, plan_id});
+  }
 }
 
-function mapRecords(records: Dateable[]) {
-  return records.reduce((map: Map<string, Dateable>, record: Dateable) =>  {
-    map.set(record.id, record);
-    return map;
-  }, new Map());
-}
-
-export default function framesSchema(dataManager) {
+export default function plansSchema(dataManager) {
   return {
     plans: {
       statics: {
@@ -73,7 +80,7 @@ export default function framesSchema(dataManager) {
             console.log('cup error:', err);
           }
         },
-        async reconcileFromServer(records, planId) {
+        async syncWithServer(records, planId) {
 
         },
       },
@@ -126,24 +133,8 @@ export default function framesSchema(dataManager) {
         }
       },
       statics: {
-        async reconcileFromServer(records, planId) {
-          const localRecords = await this.find().where('plan_id').eq(planId).exec();
-          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
-          const recordUpdates = [];
-          mapSqlData(records).forEach((record: Dateable, id) => {
-            if (localMap.has(id)) {
-              const local = localMap.get(id);
-              if (local.updated_from >= record.updated && local.updated > record.updated) {
-                /**
-                 * There is a local record which was based on the database data
-                 * and is more recent than it. Do not overwrite.
-                 */
-                return;
-              }
-            }
-            recordUpdates.push(record);
-          });
-          this.bulkInsert(recordUpdates);
+        async syncWithServer(serverRecords: DateableSQL[]) {
+          return mergeServerRecords(this as RxCollection, serverRecords);
         },
         async assertSetting(planId: string, name: string, value:
             string | number, isNumber: boolean = true
@@ -195,7 +186,7 @@ export default function framesSchema(dataManager) {
     },
     frames: {
       schema: {
-        version: 11,
+        version: 10,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -203,9 +194,9 @@ export default function framesSchema(dataManager) {
           name: STRING,
           user_id: ID_PROP,
           plan_id: STRING,
-          created: INT,
-          updated: INT,
-          updated_from: INT,
+          created: STRING,
+          updated: STRING,
+          updated_from: STRING,
           is_deleted: BOOLEAN,
           type: {
             ...STRING,
@@ -240,17 +231,9 @@ export default function framesSchema(dataManager) {
           'order', 'height', 'user_id', 'created', 'updated', 'updated_from']
       },
       migrationStrategies: {
-        1: (oldDoc) => {
-          console.log('cloning f 1', oldDoc);
-          if (!(oldDoc.created && typeof oldDoc.created === 'number')) {
-            oldDoc.created = Date.now();
-          }
-          return oldDoc;
-        },
+        1: assertCreatedUpdated,
         2: projectIdToProject_id,
-        3: (oldDoc) => {
-          return oldDoc;
-        },
+        3: migrationNoOp,
         4: projectIdToPanId,
         5: (oldDoc) => {
           if (!oldDoc.content) {
@@ -261,24 +244,11 @@ export default function framesSchema(dataManager) {
           }
           return oldDoc;
         },
-        6: (oldDoc) => {
-          if (oldDoc.content?.type) {
-            oldDoc.type = oldDoc.content.type;
-          }
-          if (oldDoc.content?.markdown) {
-            oldDoc.value = oldDoc.content.markdown;
-          }
-          if (!oldDoc.type) {
-            oldDoc.type = 'markdown';
-          }
-          delete oldDoc.content;
-          return oldDoc;
-        },
+        6: assertNoop,
         7: assertUserId,
         8: assertCreatedUpdated,
         9: assertDeleted,
-        10: assertUpdatedFrom,
-        11: assertUpdatedFrom
+        10: assertStringDates,
       },
       statics: {
         async fetch(id: string) {
@@ -298,41 +268,24 @@ export default function framesSchema(dataManager) {
             return 1;
           }
         },
-        async reconcileFromServer(records, planId) {
-          const localRecords = await this.find().where('plan_id').eq(planId).exec();
-          console.log('local frames = ', localRecords, 'for plan_id', planId);
-
-          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
-          const recordUpdates = [];
-          mapSqlData(records).forEach((record: Dateable, id) => {
-            if (localMap.has(id)) {
-              const local = localMap.get(id);
-              if (local.updated_from >= record.updated && local.updated > record.updated) {
-                /**
-                 * There is a local record which was based on the database data
-                 * and is more recent than it. Do not overwrite.
-                 */
-                return;
-              }
-            }
-            recordUpdates.push(record);
-          });
-          console.log('record updates are ', recordUpdates, 'from', records);
-          const result = await this.bulkInsert(recordUpdates);
-          console.log('result of update:', result);
+        async syncWithServer(serverRecords: Dateable[], planId: string) {
+          return mergeServerRecords(this as RxCollection, serverRecords, planId);
         },
       },
       methods: {}
     },
     links: {
       schema: {
-        version: 9,
+        version: 12,
         primaryKey: 'id',
         type: 'object',
         properties: {
           id: ID_PROP,
           name: STRING,
           plan_id: ID_PROP,
+          user_id: ID_PROP,
+          updated_from: STRING,
+          is_deleted: BOOLEAN,
           start_frame: ID_PROP,
           end_frame: ID_PROP,
           start_at: STRING,
@@ -343,13 +296,11 @@ export default function framesSchema(dataManager) {
           link_style: STRING,
           line_type: STRING,
           line_color: STRING,
-          created: INT,
-          updated: INT,
+          created: STRING,
+          updated: STRING,
           line_size: INT,
-          is_deleted: BOOLEAN,
-          updated_from: INT
         },
-        required: ['id', 'plan_id', 'start_frame', 'end_frame', 'created', 'updated', 'updated_from'],
+        required: ['id', 'plan_id', 'user_id', 'start_frame', 'end_frame', 'created', 'updated', 'updated_from'],
       },
       migrationStrategies: {
         1: projectIdToProject_id,
@@ -360,19 +311,27 @@ export default function framesSchema(dataManager) {
         6: assertCreatedUpdated,
         7: assertCreatedUpdated,
         8: assertDeleted,
-        9: assertUpdatedFrom
+        9: assertUpdatedFrom,
+        10: assertUserId,
+        11: assertCreatedUpdated,
+        12: assertCreatedUpdated,
       },
       statics: {
         async addLink(params: LFSummary) {
           const planId = dataManager.planId();
-          if (!planId) {
-            console.log('---- cannot save link - no plan id');
+          const userId = userManager.$.currentUserId();
+          if (!(planId && userId)) {
+            console.error('---- cannot save link - no plan id/userid', planId, userId);
           }
+          const now = new Date().toISOString();
+
           const newLink = {
             id: v4(),
             plan_id: planId,
-            created: params.created || Date.now(),
-            updated: Date.now(),
+            user_id: userId,
+            created: now,
+            updated: now,
+            updated_from: now,
             start_frame: params.id,
             end_frame: params.targetId,
             start_at: dirToString(params.spriteDir),
@@ -407,30 +366,14 @@ export default function framesSchema(dataManager) {
               }, []);
           return this.bulkRemove(ids);
         },
-        async reconcileFromServer(records, planId) {
-          const localRecords = await this.find().where('plan_id').eq(planId).exec();
-          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
-          const recordUpdates = [];
-          mapSqlData(records).forEach((record: Dateable, id) => {
-            if (localMap.has(id)) {
-              const local = localMap.get(id);
-              if (local.updated_from >= record.updated && local.updated > record.updated) {
-                /**
-                 * There is a local record which was based on the database data
-                 * and is more recent than it. Do not overwrite.
-                 */
-                return;
-              }
-            }
-            recordUpdates.push(record);
-          });
-          this.bulkInsert(recordUpdates);
+        async syncWithServer(serverRecords: DateableSQL[], planId: string) {
+          return mergeServerRecords(this as RxCollection, serverRecords, planId);
         },
       }
     },
     frame_images: {
       schema: {
-        version: 5,
+        version: 6,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -438,9 +381,9 @@ export default function framesSchema(dataManager) {
           user_id: ID_PROP,
           frame_id: ID_PROP,
           plan_id: ID_PROP,
-          created: INT,
-          updated: INT,
-          updated_from: INT,
+          created: STRING,
+          updated: STRING,
+          updated_from: STRING,
           url: STRING,
           width: INT,
           height: INT,
@@ -456,7 +399,8 @@ export default function framesSchema(dataManager) {
         2: assertUserId,
         3: assertCreatedUpdated,
         4: assertDeleted,
-        5: assertUpdatedFrom
+        5: assertUpdatedFrom,
+        6: assertStringDates,
       },
       statics: {
         async updateImageData(frame_id, plan_id) {
@@ -502,15 +446,15 @@ export default function framesSchema(dataManager) {
 
           const {data} = await axios.get('/api/images/' + frame_id);
           let url = data?.url || '';
-
+          const userId = userManager.$.currentUserId();
           if (url) {
-            frameImage = await this.incrementalUpsert({
+            frameImage = await this.incrementalUpsert(newDateable({
               id: v4(),
               url,
               plan_id,
+              user_id: userId,
               frame_id,
-              created: Date.now(),
-            });
+            }));
             return await frameImage?.validate();
           } else {
             frameImage = this.incrementalUpsert({
@@ -525,24 +469,8 @@ export default function framesSchema(dataManager) {
           }
           return frameImage;
         },
-        async reconcileFromServer(records, planId) {
-          const localRecords = await this.find().where('plan_id').eq(planId).exec();
-          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
-          const recordUpdates = [];
-          mapSqlData(records).forEach((record: Dateable, id) => {
-            if (localMap.has(id)) {
-              const local = localMap.get(id);
-              if (local.updated_from >= record.updated && local.updated > record.updated) {
-                /**
-                 * There is a local record which was based on the database data
-                 * and is more recent than it. Do not overwrite.
-                 */
-                return;
-              }
-            }
-            recordUpdates.push(record);
-          });
-          this.bulkInsert(recordUpdates);
+        async syncWithServer(serverRecords: DateableSQL[], planId: string) {
+          return mergeServerRecords(this as RxCollection, serverRecords, planId);
         },
       },
       methods: {
@@ -643,31 +571,15 @@ export default function framesSchema(dataManager) {
         5: assertUpdatedFrom
       },
       statics: {
-        async reconcileFromServer(records, planId) {
-          const localRecords = await this.find().where('plan_id').eq(planId).exec();
-          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
-          const recordUpdates = [];
-          mapSqlData(records).forEach((record: Dateable, id) => {
-            if (localMap.has(id)) {
-              const local = localMap.get(id);
-              if (local.updated_from >= record.updated && local.updated > record.updated) {
-                /**
-                 * There is a local record which was based on the database data
-                 * and is more recent than it. Do not overwrite.
-                 */
-                return;
-              }
-            }
-            recordUpdates.push(record);
-          });
-          this.bulkInsert(recordUpdates);
+        async syncWithServer(serverRecords: DateableSQL[], planId: string) {
+          await mergeServerRecords(this as RxCollection, serverRecords, planId);
         },
       }
     },
 
     map_points: {
       schema: {
-        version: 4,
+        version: 5,
         primaryKey: 'id',
         type: 'object',
         properties: {
@@ -680,9 +592,9 @@ export default function framesSchema(dataManager) {
           label: STRING,
           x: NUMBER,
           y: NUMBER,
-          created: INT,
-          updated: INT,
-          updated_from: INT,
+          created: STRING,
+          updated: STRING,
+          updated_from: STRING,
           is_deleted: BOOLEAN
         },
         required: ['id', 'frame_id', 'lat', 'lng', 'plan_id', 'user_id', 'created', 'updated', 'updated_from'],
@@ -696,7 +608,8 @@ export default function framesSchema(dataManager) {
         },
         2: assertUserId,
         3: assertCreatedUpdated,
-        4: assertUpdatedFrom
+        4: assertUpdatedFrom,
+        5: assertCreatedUpdated,
       },
       statics: {
         async fetch(id: string) {
@@ -708,28 +621,8 @@ export default function framesSchema(dataManager) {
           return this.find()
               .where('frame_id').eq(frame_id)
         },
-        async reconcileFromServer(records, planId) {
-          const localRecords = await this.find().where('plan_id').eq(planId).exec();
-          const localMap =  Array.isArray(localRecords) ? mapRecords(localRecords) : new Map();
-          const recordUpdates = [];
-          const remoteMap = mapSqlData(records);
-
-          remoteMap.forEach((record: Dateable, id) => {
-            console.log('sql frame is ', record);
-            if (localMap.has(id)) {
-              const local = localMap.get(id);
-              if (local.updated_from >= record.updated && local.updated > record.updated) {
-                /**
-                 * There is a local record which was based on the database data
-                 * and is more recent than it. Do not overwrite.
-                 */
-                return;
-              }
-            }
-            recordUpdates.push(record);
-          });
-          console.log('bulk inserting ', recordUpdates, 'frames');
-          this.bulkInsert(recordUpdates);
+        async syncWithServer(serverRecords: DateableSQL[], planId: string) {
+          return mergeServerRecords(this as RxCollection, serverRecords, planId);
         },
         async updatePoints(frame_id: string, points: MapPoint[], exclusive = false) {
 
@@ -753,6 +646,7 @@ export default function framesSchema(dataManager) {
                   }
                 });
 
+            //@TODO: change to server friendly -- also use is_deleted
             await this.bulkRemove(deleteIds);
           }
 

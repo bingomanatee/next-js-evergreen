@@ -7,7 +7,7 @@ import { useContext, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
 import PlanEditor from '~/components/pages/PlanEditor/PlanEditor'
-import framesPackage from '~/lib/managers/packages/framesPackage'
+import plansPackage from '~/lib/managers/packages/plansPackage'
 import { userManager } from '~/lib/managers/userManager'
 import dataManager from '~/lib/managers/dataManager'
 import navManager from '~/lib/managers/navManager'
@@ -31,15 +31,15 @@ const PlanEditorPage: NextPageWithLayout = (props: { params: { planId: string } 
       navManager.do.set_subTitle(`plan "${planId}"`)
     }
     if (schemaLoaded) {
-      dataManager.initPlan(planId)
+      dataManager.poll(planId)
         .catch(err => {
           console.error('cannot init project', planId, err);
           router.push('/');
         })
     } else {
-      framesPackage().then(async () => {
+      plansPackage().then(async () => {
         setSchemaLoaded.on();
-        await dataManager.initPlan(planId).catch(err => {
+        await dataManager.poll(planId).catch(err => {
           console.error('cannot init project', planId, err);
           router.push('/');
         })

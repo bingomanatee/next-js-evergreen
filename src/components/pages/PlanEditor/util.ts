@@ -5,12 +5,13 @@ import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/
 import { DimensionValue, Direction, dirToString, Frame, isDirection, ProjectSettings, X_DIR, Y_DIR } from '~/types'
 
 export const DIMENSION_ACTIONS = {
-  async updateId(state: leafI, id: string) {
+  updateId(state: leafI, id: string) {
     state.do.set_id(id);
-    await state.do.readFrame(id);
+    state.do.readFrame(id);
     state.do.set_loaded(!!id);
   },
   fromFrame(state: leafI, frame: Frame) {
+    state.do.set_frame(frame);
     state.do.set_left(frame.left);
     state.do.set_top(frame.top);
     state.do.set_right(frame.left + frame.width);
@@ -19,11 +20,11 @@ export const DIMENSION_ACTIONS = {
     state.do.set_loaded(true);
   },
 
-  async readFrame(state: leafI, id: string | null) {
+  readFrame(state: leafI, id: string | null) {
     if (id === null) {
       return;
     }
-    const frame = await state.$.frame();
+    const frame = state.$.frame();
     if (frame && (state.value.id === frame.id)) {
       // has not been synchronously changed
       state.do.fromFrame(frame);
@@ -42,12 +43,9 @@ function snap(value) {
 }
 
 export const DIMENSION_SELECTORS = {
-  async frame(state: leafI) {
+  frame(state: leafI) {
     const { id } = state.value;
-    if (!id) {
-      return null;
-    }
-    return await dataManager.do((db) => db.frames.fetch(id));
+    return id ? dataManager.planStream.value.framesMap.get(id) : null;
   },
   centerX(state: leafType) {
     return Math.round((state.$.left() + state.$.right()) / 2);
@@ -115,6 +113,7 @@ export function dimensionValue(): DimensionValue {
     right: 0,
     id: '',
     type: '',
+    frame: null,
     deltas: new Map(),
     loaded: false
   }

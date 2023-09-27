@@ -1,10 +1,9 @@
-import { distinctUntilChanged, map, Subject, takeUntil, takeWhile, } from 'rxjs'
+import {distinctUntilChanged, distinctUntilKeyChanged, EMPTY, map, filter, takeWhile,} from 'rxjs'
 import { genFn, typedLeaf } from '@wonderlandlabs/forest/lib/types'
 import { leafType } from '~/components/pages/PlanEditor/FrameDetail/StyleEditor/types'
 import { Forest } from '@wonderlandlabs/forest'
 import { v4 as uuidV4 } from 'uuid'
 import { historyStream } from '~/lib/managers/historyStream'
-import { string } from 'zod'
 
 /**
  * the BlockManager allows one activity to run until it completes (or errors);
@@ -91,6 +90,17 @@ const blockManager = new Forest({
   selectors: {
     isBlocked(state: leafTType) {
       return !!state.value.id;
+    },
+    watchCurrentBlock(state: leafType) { // returns an observable that completes when the id is changed/cleared
+      const {id} = state.value;
+      if (!id) return EMPTY;
+
+      return state.observable.pipe(
+          map(({id}) => id),
+          distinctUntilChanged(),
+          filter(() => false),
+          takeWhile((currentId) => currentId === id)
+      );
     }
   }
 });

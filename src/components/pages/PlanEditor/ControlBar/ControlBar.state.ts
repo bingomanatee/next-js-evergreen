@@ -7,6 +7,8 @@ import blockManager from '~/lib/managers/blockManager'
 import keyManager from '~/lib/managers/keyManager'
 import { Vector2 } from 'three'
 import swallowEvent from '~/lib/swallowEvent'
+import {userManager} from "~/lib/managers/userManager";
+import frameListHoverManager from "~/lib/managers/frameListHoverManager";
 
 export type ControlBarStateValue = { panPosition: Vector2 };
 
@@ -29,23 +31,29 @@ const ControlBarState = (props, planEditorState) => {
       async addFrame(state: leafType, type: string) {
         const { newFrame } = state.value;
         const planId = dataManager.planStream.value.plan?.id;
+        const userId = userManager.$.currentUserId();
         if (!planId) {
           return messageManager.notify('New Frame', 'Cannot identify plan', 'error');
+        }
+        if (!userId) {
+          return messageManager.notify('New Frame', 'Cannot identify current user', 'error');
         }
 
         const id = v4();
         dataManager.do(async (db) => {
           const order = await db.frames.nextFrameOrder(planId);
-          const created = Date.now();
+          const created = new Date().toISOString();
           const newFrame = {
             id,
             plan_id: planId,
+            user_id: userId,
             top: 100 + (Math.floor(Math.random() * 6) * 10),
             left: 100 + (Math.floor(Math.random() * 6) * 10),
             width: 300,
             height: 400,
             created,
             updated: created,
+            updated_from: created,
             is_deleted: false,
             linkMode: 'center',
             type,
@@ -53,7 +61,10 @@ const ControlBarState = (props, planEditorState) => {
           }
           await db.frames.incrementalUpsert(newFrame);
           messageManager.notify('New Frame', `Created new ${type} ${id} `)
-          blockManager.do.block(BlockMode.EDIT_FRAME, {frameId: id})
+          setTimeout(() => {
+            frameListHoverManager.do.set_clicked(id);
+            blockManager.do.block(BlockMode.EDIT_FRAME, {frameId: id})
+          }, 100)
         })
       },
       init(state: leafType) {

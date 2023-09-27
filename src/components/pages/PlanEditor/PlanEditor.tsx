@@ -20,7 +20,7 @@ import styles from './PlanEditor.module.scss';
 import LinkView from '~/components/pages/PlanEditor/LinkView/LinkView'
 import ControlBar from '~/components/pages/PlanEditor/ControlBar/ControlBar'
 import BlockerSwitch from '~/components/pages/PlanEditor/BlockerSwitch/BlockerSwitch'
-import {UnZoom} from "~/components/pages/UnZoom";
+import ConfirmDialog from "~/components/pages/PlanEditor/ConfirmDialog/ConfirmDialog";
 
 type PlanEditorProps = { id: string, managers: ManagerMap }
 export const PlanEditorStateCtx = createContext<leafI | null>(null);
@@ -79,6 +79,7 @@ function PlanEditor(props: PlanEditorProps) {
     <BlockerSwitch role="non-inline-block-switch"/>
     <NewFrame box={newFrame}/>
     <HelpPrompt/>
+    <ConfirmDialog />
     <KeyFeedback keys={keys}/>
   </main>);
 }

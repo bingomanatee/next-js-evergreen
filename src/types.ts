@@ -6,14 +6,54 @@ import {Vector2} from "three";
 import * as walrus from '@wonderlandlabs/walrus';
 import {NumberEnum} from "@wonderlandlabs/walrus/dist/enums";
 import {TypeEnum} from "@wonderlandlabs/walrus/dist/enums";
+import arg from "arg";
+import {boolean, string} from "zod";
 
 const {type} = walrus;
 
-export type Dateable = {
+export type StringId = {
   id: string,
-  created: number | string,
-  updated: number | string,
-  is_deleted: boolean;
+  is_deleted: boolean,
+  plan_id?: string,
+  user_id: string,
+}
+
+export type DateableSQL = {
+  created: string,
+  updated: string,
+} & StringId
+
+export type Dateable = {
+  updated_from?: string
+} & DateableSQL & StringId;
+
+function isDatelike(created: any) {
+  // not using regex as they are slow
+  return created && typeof created === 'string'
+      && created.length >= 7
+      && ['19', '20', '21'].includes(created.substring(0, 2));
+}
+
+function isStringId(arg: any): arg is StringId {
+  if (!(type.describe(arg, true) === TypeEnum.object)) {
+    return false;
+  }
+  return (
+      (!('plan_id' in arg))
+      || (arg.plan_id && (typeof arg.plan_id === 'string'))
+  )
+}
+
+export function isDateable(arg: any): arg is Dateable {
+  if (!isStringId(arg)) {
+    return false;
+  }
+  const {created, updated, updated_from} = arg;
+  return isDatelike(created) && isDatelike(updated) && isDatelike(updated_from);
+}
+
+export function isDateableSQL(arg: any): arg is Dateable {
+  return isDateable(arg) && isDatelike(arg.updated_from)
 }
 
 export type Orientation = HORIZ | VERT
@@ -81,6 +121,7 @@ export type DialogView = {
 }
 
 export type DimensionValue = {
+  frame: Frame | null,
   left: number,
   top: number,
   right: number,
@@ -148,9 +189,15 @@ export function isY_DIR(arg: unknown): arg is X_DIR {
 }
 
 export function dirToString(dir?: Direction | null, mapPoint?: string | null) {
-  if (!(dir || mapPoint)) return ''
-  if (mapPoint) return `map-point:${mapPoint}`;
-  if (dir) return `${dir.x}-${dir.y}`;
+  if (!(dir || mapPoint)) {
+    return ''
+  }
+  if (mapPoint) {
+    return `map-point:${mapPoint}`;
+  }
+  if (dir) {
+    return `${dir.x}-${dir.y}`;
+  }
   return '';
 }
 

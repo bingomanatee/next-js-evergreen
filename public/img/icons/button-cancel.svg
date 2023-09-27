@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 25 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect id="button-cancel" x="0.973" y="0" width="24" height="24" style="fill:none;"/>
+    <clipPath id="_clip1">
+        <rect x="0.973" y="0" width="24" height="24"/>
+    </clipPath>
+    <g clip-path="url(#_clip1)">
+        <path d="M5.419,21.322C7.483,22.996 10.112,24 12.973,24C19.596,24 24.973,18.623 24.973,12C24.973,9.138 23.969,6.509 22.295,4.446L5.419,21.322ZM20.527,2.678C18.464,1.004 15.835,0 12.973,0C6.35,0 0.973,5.377 0.973,12C0.973,14.862 1.977,17.491 3.652,19.554L20.527,2.678Z" style="fill:#f40;"/>
+    </g>
+</svg>

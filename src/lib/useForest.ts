@@ -1,6 +1,6 @@
   "use client"
 
-  import { useEffect, useMemo, useRef, useState } from 'react'
+  import { useRef, useState } from 'react'
   import { Forest } from '@wonderlandlabs/forest'
   import { leafConfig, leafI } from '@wonderlandlabs/forest/lib/types'
   import { useConst } from '@chakra-ui/hooks'

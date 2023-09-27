@@ -24,8 +24,16 @@ export default function LinkFrameView() {
     localState.do.init(planEditorState);
     });
   const { loaded, id, target, type } = value;
+  const {locked, id: targetId} = target;
 
-  const {locked} = target;
+  useEffect(() => {
+    if (state.$.canDraw() && locked) {
+      state.do.enableSaveQuery();
+    } else {
+      state.do.disableSaveQuery();
+    }
+
+  }, [id, targetId, locked, state])
 
   useEffect(() => {
     const elements = window.document.querySelectorAll('[data-frame-container]')

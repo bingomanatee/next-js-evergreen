@@ -27,6 +27,7 @@ export default function ControlBarItem(
 
   const action = useCallback((e) => {
     stopPropagation(e);
+    if (!onClick) return;
     if (allowBlockedClick || (!blockManager.$.isBlocked())) {
       onClick(e);
     }

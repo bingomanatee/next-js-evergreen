@@ -156,7 +156,7 @@ const MapPointDlogState = (props, linkState, planEditorState) => {
         if ((state.value.mapMode !== 'click') || !map) {
           return;
         }
-        const info = {id: v4(), ...data.lngLat, plan_id: dataManager.planId(), label: ''};
+        const info = {id: v4(), ...data.lngLat, plan_id: dataManager.polledPlanId(), label: ''};
         const mapPoints = state.child('mapPoints')!
         mapPoints.do.addPoint(info, true);
       },

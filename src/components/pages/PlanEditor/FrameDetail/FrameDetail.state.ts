@@ -41,7 +41,7 @@ const FrameDetailState = (id: string) => {
 
       async initData(state: leafType) {
         const {data} = blockManager.value;
-        const frame = dataManager.getFrame(data.frameId);
+        const frame = dataManager.getPollFrame(data.frameId);
         if (!frame) {
           console.error('cannot get frame', data.frameId);
           blockManager.do.finish();

@@ -12,3 +12,17 @@ position: absolute;
     overflow: visible
   }
 }
+
+.save-panel-container {
+  position: absolute;
+  z-index: 1000000;
+  bottom: 0;
+  width: 100%;
+  padding-bottom: 40px;
+  pointer-events: none;
+  * {
+    pointer-events: all;
+  }
+  display: flex;
+  justify-content: center;
+}

@@ -8,7 +8,7 @@ import { useContext, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
 import Plans from '~/components/pages/Plans/Plans'
-import framesPackage from '~/lib/managers/packages/framesPackage'
+import plansPackage from '~/lib/managers/packages/plansPackage'
 import { userManager } from '~/lib/managers/userManager'
 
 const Home: NextPageWithLayout = () => {
@@ -25,7 +25,7 @@ const Home: NextPageWithLayout = () => {
   }, [user, router, supabaseClient])
 
   useEffect(() => {
-    framesPackage().then(() => setLoaded.on())
+    plansPackage().then(() => setLoaded.on())
   }, [])
   return loaded ? <NavLayout><Plans/></NavLayout> : <Spinner size="xl" pad={8}/>
 }

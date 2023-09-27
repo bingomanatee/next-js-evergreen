@@ -6,6 +6,7 @@ import dataManager from '~/lib/managers/dataManager'
 import {Vector2} from 'three'
 import {frameToPoint} from '~/lib/utils/px'
 import stopPropagation from "~/lib/utils/stopPropagation";
+import confirmManager from "~/lib/managers/confirmManager";
 
 export type LinkFrameStateValue = {
   spriteDir: Direction | null,
@@ -26,7 +27,12 @@ const LinkFrameState = () => {
 
     selectors: {
       ...DIMENSION_SELECTORS,
+      canDraw(state: leafType) {
+        const {id, spriteDir, target} = state.value;
+        const {spriteDir: targetSpriteDir, mapPoint: targetMapPoint, id: targetId} = target;
 
+        return !!(id && spriteDir && (targetSpriteDir || targetMapPoint) && targetId);
+      },
       style(state: leafType, dir: Direction, offset: Vector2, isEnd: boolean, zoom = 100) {
 
         if (isEnd) {
@@ -44,19 +50,67 @@ const LinkFrameState = () => {
     },
 
     actions: {
-      async save(state: leafType, params: LFSummary) {
-        const {id, spriteDir, targetId, targetSpriteDir, targetMapPoint} = params;
+
+      enableSaveQuery(state: leafType) {
+        if (state.getMeta('savingId')) return;
+
+        const [newSavingId, observable] = confirmManager.do.query('Save Current line',
+            {frameId: state.value.id});
+
+        console.log('enabled saving query for ', newSavingId, 'with observable', observable);
+        let obsSub = observable.subscribe({
+          next(response) {
+            if (response === false) {
+              state.do.clearLock();
+            }
+            if (response === true) {
+              state.do.save();
+            }
+          },
+          complete() {
+            state.do.disableSaveQuery();
+          }
+        });
+
+        let blockSub = blockManager.$.watchCurrentBlock().subscribe({
+          complete (){
+            state.do.disableSaveQuery();
+          }
+        });
+
+        state.setMeta('confirmBlockSub', blockSub, true);
+        state.setMeta('confirmSub', obsSub, true);
+        state.setMeta('savingId', newSavingId, true);
+      },
+      disableSaveQuery(state: leafType) {
+        state.getMeta('obsSub')?.unsubscribe();
+        state.getMeta('confirmBlockSub')?.unsubscribe();
+
+        state.setMeta('confirmBlockSub', null, true);
+        state.setMeta('obsSub', null, true);
+        state.setMeta('savingId', null, true);
+        confirmManager.do.finish();
+      },
+      async save(state: leafType) {
+        const {id, spriteDir, target} = state.value;
+        const {id: targetId, spriteDir: targetSpriteDir, mapPoint: targetMapPoint} = target;
+        state.do.disableSaveQuery();
+        blockManager.do.finish();
 
         if (id && spriteDir && (targetId || targetMapPoint) && targetSpriteDir) {
           await dataManager.do(async (db) => {
-            console.log('saving map link:', params);
-            return db.links.addLink(params);
+            return db.links.addLink({
+              id,
+              targetId,
+              spriteDir,
+              targetSpriteDir,
+              targetMapPoint
+            });
           });
         }
-        blockManager.do.finish();
       },
       clearLock(state: leafType) {
-        state.child('target')!.do.updateId(null, false);
+        state.child('target')!.do.set_locked(false);
       },
       spriteClicked(state: leafType, dir: Direction, onEnd?: boolean) {
         if (onEnd) {

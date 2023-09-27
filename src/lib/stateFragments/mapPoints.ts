@@ -5,6 +5,7 @@ import {asJson} from "~/lib/utils/schemaUtils";
 import {typedLeaf} from "@wonderlandlabs/forest/lib/types";
 import {Vector2} from "three";
 import shortId from "~/lib/utils/shortId";
+import {userManager} from "~/lib/managers/userManager";
 
 export type MapPointsStateValue = {
   points: Map<string, MapPoint>,
@@ -73,7 +74,7 @@ export default function mapPoints(frameId, planEditorState) {
             const vector = new Vector2(location.x, location.y).round();
 
             if (vector.x !== x || vector.y !== y) {
-              let newPoint = {...point, plan_id: dataManager.planId(), x: vector.x, y: vector.y};
+              let newPoint = {...point, plan_id: dataManager.polledPlanId(), x: vector.x, y: vector.y};
               await db.map_points.incrementalUpsert(newPoint);
             }
           }
@@ -108,9 +109,16 @@ export default function mapPoints(frameId, planEditorState) {
         }
       },
       addPoint(state: mapPointsLeafType, point: MapPoint, save = false) {
-        if (!point.plan_id) point.plan_id = dataManager.planId();
+        let now = new Date().toISOString();
+
+        const newPoint = {...point,
+          plan_id:  dataManager.polledPlanId(),
+          user_id: userManager.$.currentUserId(),
+          created: now, updated: now, updated_from: now
+        };
+
         const points = new Map(state.value.points);
-        points.set(point.id, point);
+        points.set(point.id, newPoint);
         state.do.set_points(points);
         state.do.refreshPoints();
         if (save) state.do.save();

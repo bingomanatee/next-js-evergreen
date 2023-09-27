@@ -1,11 +1,11 @@
-import { typedLeaf } from '@wonderlandlabs/forest/lib/types'
+import {typedLeaf} from '@wonderlandlabs/forest/lib/types'
 import dataManager from '~/lib/managers/dataManager'
 import blockManager from '~/lib/managers/blockManager'
-import { Box2, Vector2 } from 'three'
-import { userManager } from '~/lib/managers/userManager'
+import {Box2, Vector2} from 'three'
+import {userManager} from '~/lib/managers/userManager'
 import messageManager from '~/lib/managers/messageManager'
 import keyManager from '~/lib/managers/keyManager'
-import { BlockMode, Direction } from '~/types'
+import {BlockMode, Direction} from '~/types'
 import swallowEvent from '~/lib/swallowEvent'
 
 export type PlanEditorStateValue = {
@@ -54,9 +54,9 @@ const PlanEditorState = (id, planContainerRef) => {
       async markdownStyleSub() {
         return dataManager.do(async (db) => {
           return db.style.find()
-            .where('scope')
-            .eq('global')
-            .$;
+              .where('scope')
+              .eq('global')
+              .$;
         })
       },
       initContainer(state: leafType) {
@@ -93,11 +93,11 @@ const PlanEditorState = (id, planContainerRef) => {
         const subject = await state.$.markdownStyleSub();
         return subject.subscribe((styles) => {
           const styleString = styles.map(
-            ({
-               tag,
-               style
-             }) => `.markdown-frame ${tag === '.markdown-frame' ? '' : tag} { ${style} }`)
-            .join("\n")
+              ({
+                 tag,
+                 style
+               }) => `.markdown-frame ${tag === '.markdown-frame' ? '' : tag} { ${style} }`)
+              .join("\n")
           state.do.set_markdownStyles(styleString);
         });
       },
@@ -133,7 +133,7 @@ const PlanEditorState = (id, planContainerRef) => {
           } else {
             blockManager.do.finish();
             messageManager.notify('New Frame',
-              'frame is too small - no frame created Frame width and height must be at least 150 pixels');
+                'frame is too small - no frame created Frame width and height must be at least 150 pixels');
           }
         }
       },
@@ -148,17 +148,17 @@ const PlanEditorState = (id, planContainerRef) => {
               keySub.unsubscribe();
             }
           });
-          blockManager.do.block(BlockMode.LINKING_FRAME, { frameId: id })[1]
-            .subscribe({
-              error(err) {
-                keySub.unsubscribe();
-                console.error('error in blockSub:', err);
-              },
-              complete() {
-                keySub.unsubscribe();
-                state.do.clearMode();
-              }
-            })
+          blockManager.do.block(BlockMode.LINKING_FRAME, {frameId: id})[1]
+              .subscribe({
+                error(err) {
+                  keySub.unsubscribe();
+                  console.error('error in blockSub:', err);
+                },
+                complete() {
+                  keySub.unsubscribe();
+                  state.do.clearMode();
+                }
+              })
           state.do.initMode(BlockMode.LINKING_FRAME, id);
           //@TODO: migrate 100% to blockManager
         } catch (_err) {
@@ -177,17 +177,17 @@ const PlanEditorState = (id, planContainerRef) => {
 
         if (!frame) {
           messageManager.notify(
-            'Resize Frame',
-            'frame data cannot be found for id ' + id
+              'Resize Frame',
+              'frame data cannot be found for id ' + id
           );
           return;
         }
 
         if (frame.type === 'image') {
           messageManager.notify(
-            'Resize Frame',
-            'You cannot resize image frames; You CAN move the frame.',
-            'warning'
+              'Resize Frame',
+              'You cannot resize image frames; You CAN move the frame.',
+              'warning'
           );
         }
 
@@ -199,17 +199,17 @@ const PlanEditorState = (id, planContainerRef) => {
               keySub.unsubscribe();
             }
           });
-          blockManager.do.block(BlockMode.MOVING_FRAME, { frameId: id })[1]
-            .subscribe({
-              error(err) {
-                keySub.unsubscribe();
-                console.error('error in blockSub:', err);
-              },
-              complete() {
-                keySub.unsubscribe();
-                state.do.clearMode();
-              }
-            })
+          blockManager.do.block(BlockMode.MOVING_FRAME, {frameId: id})[1]
+              .subscribe({
+                error(err) {
+                  keySub.unsubscribe();
+                  console.error('error in blockSub:', err);
+                },
+                complete() {
+                  keySub.unsubscribe();
+                  state.do.clearMode();
+                }
+              })
           state.do.initMode(BlockMode.MOVING_FRAME, id);
           //@TODO: migrate 100% to blockManager
         } catch (_err) {
@@ -275,36 +275,34 @@ const PlanEditorState = (id, planContainerRef) => {
             state.do.createFrame(start, end);
           }
           blockManager.do.finish();
-        }, { once: true })
+        }, {once: true})
         state.do.initMode(BlockMode.ADDING_FRAME) //deprecate
       },
 
       async init(state: leafType) {
         state.$.initContainer();
-        let sub;
-        dataManager.initPlan(id)
-          .then(() => {
-            state.do.set_loaded(true);
-            sub = dataManager.planStream.subscribe(({ plan, frames, links }) => {
-              state.do.set_frames(frames);
-              state.do.set_links(links);
-            })
+        try {
+          await dataManager.poll(id);
+          state.do.set_loaded(true);
+          const sub = dataManager.planStream.subscribe(({plan, frames, links}) => {
+            // @TODO: don't duplicate frames / links; use direct dataManager subs / pipes
+            state.do.set_frames(frames);
+            state.do.set_links(links);
           })
-          .catch(err => {
-            console.error('cannot init project', id, err);
-            userManager.getMeta('router')?.push('/');
-          })
-        state.do.loadMarkdownStyles();
-
-        state.do.watchWheel();
-        return sub;
+          state.do.loadMarkdownStyles();
+          state.do.watchWheel();
+          return sub;
+        } catch (err) {
+          console.error('cannot init project', id, err);
+          userManager.getMeta('router')?.push('/');
+        }
       },
 
       zoomOut(state: leafType, e) {
         if (e) {
           swallowEvent(e);
         }
-        const { zoom } = state.value;
+        const {zoom} = state.value;
         const nextZoom = Math.floor(zoom / 10) + 1;
         console.log('zooming out from ', zoom, 'to', nextZoom * 10)
         if (nextZoom < 20) {
@@ -315,7 +313,7 @@ const PlanEditorState = (id, planContainerRef) => {
         if (e) {
           swallowEvent(e);
         }
-        const { zoom } = state.value;
+        const {zoom} = state.value;
         const nextZoom = Math.floor(zoom / 10) - 1;
         console.log('zooming in from ', zoom, 'to', nextZoom * 10)
         if (nextZoom >= 1) {
@@ -327,7 +325,7 @@ const PlanEditorState = (id, planContainerRef) => {
           return;
         }
 
-        let { zoom } = state.value;
+        let {zoom} = state.value;
         zoom += event.deltaY * -0.1;
         // Restrict scale
         state.do.set_zoom(Math.round(Math.min(Math.max(12.5, zoom), 400)))

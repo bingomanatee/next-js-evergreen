@@ -39,7 +39,8 @@ const LineViewState = (props, linkState) => {
     targetId: null,
     targetSpriteDir: null,
     targetMapPoint: null,
-    fromPoint: null, toPoint: null
+    fromPoint: null,
+    toPoint: null,
   };
   let element: HTMLDivElement | null = null;
 
@@ -97,12 +98,15 @@ const LineViewState = (props, linkState) => {
       save(state: leafType) {
         linkState.do.save(state.value);
       },
-      cancel(state: leafType) {
-        linkState.do.cancel(state.value);
+      cancel() {
+        linkState.do.clearLock();
       },
       init(state: leafType) {
-        return linkState.select((summary) => {
-          state.value = {...state.value, ...summary};
+        return linkState.subscribe((value) => {
+
+          const {id, spriteDir, target} = value;
+          const {id: targetId, spriteDir: targetSpriteDir, mapPoint: targetMapPoint} = target;
+          state.value = {...state.value, ...{id, spriteDir, targetSpriteDir, targetId, targetMapPoint} };
 
           state.$.genFromPoint().then((p) => {
             if (!isEqual(state.value.fromPoint, p)) {
@@ -116,10 +120,6 @@ const LineViewState = (props, linkState) => {
             }
           });
 
-        }, (value) => {
-          const {id, spriteDir, target} = value;
-          const {id: targetId, spriteDir: targetSpriteDir, mapPoint: targetMapPoint} = target;
-          return {id, spriteDir, targetSpriteDir, targetId, targetMapPoint}
         })
       },
       setRef(state: leafType, e: HTMLDivElement) {

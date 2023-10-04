@@ -318,7 +318,7 @@ export default function plansSchema(dataManager) {
       },
       statics: {
         async addLink(params: LFSummary) {
-          const planId = dataManager.planId();
+          const planId = dataManager.polledPlanId();
           const userId = userManager.$.currentUserId();
           if (!(planId && userId)) {
             console.error('---- cannot save link - no plan id/userid', planId, userId);

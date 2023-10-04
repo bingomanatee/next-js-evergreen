@@ -91,6 +91,9 @@ const MapPointDlogState = (props, linkState, planEditorState) => {
       refreshActiveIcon(state: leafType) {
         const {infoPoint, linkPoint} = state.value;
         const map = new Map();
+
+        console.log('active points:', linkPoint, infoPoint);
+
         if (linkPoint) map.set(linkPoint, 'map-point-active');
         if (infoPoint && linkPoint !== infoPoint) map.set(infoPoint, 'map-point-over');
 
@@ -141,17 +144,28 @@ const MapPointDlogState = (props, linkState, planEditorState) => {
           dragPan: true,
         });
 
-        //  map.on('dragend', state.do.onMapMove);
-        //  map.on('zoomend', state.do.onMapZoom);
-        //  map.on('click', state.do.onMapClick);
         map.addControl(new mapboxgl.NavigationControl({showCompass: false}));
         map.on('style.load', state.child('mapPoints')!.do.initSource);
         map.on('click', state.do.onMapClick);
+        map.on('click', 'point-labels', state.do.onSymbolClick);
+
         state.setMeta('map', map);
         state.do.set_mapLoaded(true);
       },
 
+      onSymbolClick(state: leafType, e) {
+        console.log('symbol clicked:', e.lngLat);
+        const nearPoint = state.child('mapPoints')!.$.mapPointNearest(e.lngLat);
+        if (nearPoint) {
+          state.do.set_linkPoint(nearPoint.id);
+          state.do.refreshActiveIcon();
+        }
+        console.log('clicked near', nearPoint);
+        e.preventDefault();
+      },
+
       onMapClick(state: leafType, data) {
+        data.preventDefault();
         const map = state.getMeta('map');
         if ((state.value.mapMode !== 'click') || !map) {
           return;

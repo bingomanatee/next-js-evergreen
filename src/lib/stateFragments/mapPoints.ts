@@ -6,6 +6,7 @@ import {typedLeaf} from "@wonderlandlabs/forest/lib/types";
 import {Vector2} from "three";
 import shortId from "~/lib/utils/shortId";
 import {userManager} from "~/lib/managers/userManager";
+import {LngLat} from "mapbox-gl";
 
 export type MapPointsStateValue = {
   points: Map<string, MapPoint>,
@@ -32,6 +33,24 @@ export default function mapPoints(frameId, planEditorState) {
       },
       asList(state: mapPointsLeafType) {
         return Array.from(state.value.points.values());
+      },
+      mapPointNearest(state: mapPointsLeafType, location: LngLat) {
+        const point = new Vector2(location.lng, location.lat);
+        return c(state.value.points).getReduce((memo: MapPoint | null, pt: MapPoint) => {
+          if (!memo) {
+            return pt;
+          }
+
+          const memoPoint = new Vector2(memo.lng, memo.lat);
+          const candidatePoint = new Vector2(pt.lng, pt.lat);
+          if (point.distanceToSquared(candidatePoint) < point.distanceToSquared(memoPoint)) {
+            console.log('point ', candidatePoint, 'near to ', point);
+            return pt;
+          }
+
+          console.log('point', candidatePoint, 'farther than ', memoPoint, 'from', location);
+          return memo;
+        }, null);
       },
       pointsToFeatures(state: mapPointsLeafType) {
         const features = c(state.value.points)
@@ -63,9 +82,13 @@ export default function mapPoints(frameId, planEditorState) {
     actions: {
       refreshPointCoordinates(state: mapPointsLeafType) {
         const {points} = state.value;
-        if (!points.size) return;
+        if (!points.size) {
+          return;
+        }
         const map: mapboxgl.Map | null = state.$.map();
-        if (!map) return;
+        if (!map) {
+          return;
+        }
 
         dataManager.do(async (db) => {
           for (const point of state.$.asList()) {
@@ -111,8 +134,9 @@ export default function mapPoints(frameId, planEditorState) {
       addPoint(state: mapPointsLeafType, point: MapPoint, save = false) {
         let now = new Date().toISOString();
 
-        const newPoint = {...point,
-          plan_id:  dataManager.polledPlanId(),
+        const newPoint = {
+          ...point,
+          plan_id: dataManager.polledPlanId(),
           user_id: userManager.$.currentUserId(),
           created: now, updated: now, updated_from: now
         };
@@ -121,7 +145,9 @@ export default function mapPoints(frameId, planEditorState) {
         points.set(point.id, newPoint);
         state.do.set_points(points);
         state.do.refreshPoints();
-        if (save) state.do.save();
+        if (save) {
+          state.do.save();
+        }
       },
       save(state: mapPointsLeafType) {
         console.log('mapEditor save')
@@ -157,14 +183,18 @@ export default function mapPoints(frameId, planEditorState) {
 
       async initImage(state: mapPointsLeafType, name, url) {
         const map = state.$.map();
-        if (!map) return; // should never happen;
+        if (!map) {
+          return;
+        } // should never happen;
         if (map.hasImage(name)) {
           return;
         }
         return new Promise((done, fail) => {
           map.loadImage(url,
               (error, image) => {
-                if (error) return fail(error);
+                if (error) {
+                  return fail(error);
+                }
 
                 if (!map.hasImage(name)) {
                   map.addImage(name, image);
@@ -185,9 +215,13 @@ export default function mapPoints(frameId, planEditorState) {
       },
 
       async initSource(state: mapPointsLeafType) {
-        if (state.value.pointsSourceLoaded) return;
+        if (state.value.pointsSourceLoaded) {
+          return;
+        }
         let map = state.$.map();
-        if (!map) return;
+        if (!map) {
+          return;
+        }
 
         await state.do.initPointIcon();
         map = state.$.map();
@@ -222,7 +256,9 @@ export default function mapPoints(frameId, planEditorState) {
       updateSource(state: mapPointsLeafType) {
         try {
           const map = state.$.map();
-          if (!map) return;
+          if (!map) {
+            return;
+          }
           map.getSource('points')?.setData(state.$.pointsToFeatures());
         } catch (err) {
           console.error('error updating source:', err);
